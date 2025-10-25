@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil e Disponibilidade de {{ palestrante.nome_completo }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; max-width: 900px; margin: 0 auto; }
+        .btn-voltar { background-color: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin-bottom: 20px; }
+        .btn-voltar:hover { background-color: #5a6268; }
+        .card-perfil { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        .btn-solicitar { background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin-top: 20px; font-weight: bold; }
+        .btn-solicitar:hover { background-color: #45a049; }
+        h1, h2 { color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        thead { background-color: #007bff; color: white; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        tbody tr:hover { background-color: #f5f5f5; }
+        .empty-message { background-color: #fff; padding: 30px; text-align: center; color: #666; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('gerenciar_solicitacoes.listar_palestrantes') }}" class="btn-voltar">
+        ← Voltar à Busca
+    </a>
+
+    <div class="card-perfil">
+        <h1>Perfil do Palestrante: {{ palestrante.nome_completo }}</h1>
+        <p><strong>Ramo de Atividade:</strong> {{ palestrante.ramo_atividade }}</p>
+        <p><strong>Experiência:</strong> {{ palestrante.anos_experiencia }} anos</p>
+        <p><strong>Email:</strong> {{ palestrante.email }}</p>
+        <p><strong>Telefone:</strong> {{ palestrante.telefone }}</p>
+       <p>
+                <strong>Currículo:</strong> 
+                <a href="{{ url_for('gerenciar_solicitacoes.download_curriculo', palestrante_id=palestrante.id) }}" target="_blank" class="link-curriculo">
+                    Visualizar/Baixar Currículo (PDF)
+                </a>
+            </p>
+        <hr>
+        
+        <a href="{{ url_for('gerenciar_solicitacoes.solicitar_palestra', palestrante_id=palestrante.id) }}" class="btn-solicitar">
+            Solicitar Palestra para {{ palestrante.nome_completo }}
+        </a>
+    </div>
+
+    <h2>Disponibilidades Cadastradas (Horários Livres)</h2>
+
+    {% if disponibilidades %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Horário de Início</th>
+                    <th>Horário de Fim</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for disponibilidade in disponibilidades%}
+                    <tr>
+                    <td>
+            <a href="{{ url_for('gerenciar_solicitacoes.solicitar_palestra', 
+                 palestrante_id=palestrante.id,
+                 data=disponibilidade.data.strftime('%Y-%m-%d'), 
+                 horario_inicio=disponibilidade.horario_inicio,
+                 horario_fim=disponibilidade.horario_fim) }}"
+                 style="text-decoration: none; font-weight: bold; color: #007bff;">
+                 
+                {{ disponibilidade.data.strftime('%d/%m/%Y') }}
+            </a>
+        </td> 
+        
+        <td>{{ disponibilidade.horario_inicio }}</td> 
+        <td>{{ disponibilidade.horario_fim }}</td>
+    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty-message">
+            <p>Este palestrante não registrou nenhuma disponibilidade futura no momento.</p>
+        </div>
+    {% endif %}
+
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Recuperação de Senha - Palestrante</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Recuperação de Senha</h2>
+    {% if mensagem_sucesso %}
+        <div class="sucesso">{{ mensagem_sucesso }}</div>
+    {% endif %}
+    
+    {% if mensagem_erro %}
+        <div class="erro">{{ mensagem_erro }}</div>
+    {% endif %}
+
+    <p>Digite seu e-mail cadastrado para receber o link de recuperação de senha.</p>
+    
+    <form method="POST">
+        <label for="email">Email:</label>
+        <input type="email" name="email" id="email" required placeholder="Digite seu E-mail">
+
+        <button type="submit">Enviar Link de Recuperação</button>
+    </form>
+    
+    <a href="{{ url_for('login_palestrante.login_palestrante') }}">Voltar para Login</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,4 @@
+Flask
+mysql-connector-python
+
+#ativar a máquina virtual - venv\Scripts\activate

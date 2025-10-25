@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Solicitar Palestra</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #333;
+        }
+        .palestrante-info {
+            background-color: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .palestrante-info strong {
+            color: #004085;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="date"],
+        input[type="time"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .button-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        button, .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        button[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+        }
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <h1>Solicitar Palestra</h1>
+
+    <div class="palestrante-info">
+        <strong>Palestrante:</strong> {{ palestrante.nome_completo }}
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('gerenciar_solicitacoes.solicitar_palestra', palestrante_id=palestrante.id) }}">
+        <label for="titulo">Título da Palestra: *</label>
+        <input type="text" id="titulo" name="titulo" placeholder="Ex: Inovação e Empreendedorismo" required>
+
+        <label for="descricao">Descrição:</label>
+        <textarea id="descricao" name="descricao" placeholder="Descreva brevemente o tema ou objetivo da palestra..."></textarea>
+
+        <label for="endereco_palestra">Endereco da Palestra:</label>
+        <textarea id="endereco_palestra" name="endereco_palestra" placeholder="Digite o endereço onde a palestra será realizada"></textarea>
+
+      <label for="data_proposta">Data Proposta: *</label>
+        <input type="date" id="data_proposta" name="data_proposta" 
+               value="{{ data_pre or '' }}" 
+               {% if data_pre %} readonly style="background-color: #eee;" {% endif %} 
+               required>
+
+        <label for="horario_proposta">Horário de Início Proposto: *</label>
+        <input type="time" id="horario_proposta" name="horario_proposta" 
+               value="{{ horario_inicio_pre or '' }}" 
+               {% if horario_inicio_pre %} readonly style="background-color: #eee;" {% endif %} 
+               required>
+        
+        {% if horario_fim_pre %}
+        <label for="horario_fim_proposta">Horário de Fim da Palestra:</label>
+        <input type="time" id="horario_fim_proposta" name="horario_fim_proposta" 
+               value="{{ horario_fim_pre }}"
+        readonly style="background-color: #eee;">
+        {% endif %}
+        <div class="button-group">
+            <button type="submit">Enviar Solicitação</button>
+            <a href="{{ url_for('gerenciar_solicitacoes.perfil_palestrante', palestrante_id=palestrante.id) }}" class="btn btn-secondary">
+                Cancelar
+            </a>
+        </div>
+    </form>
+</body>
+</html>

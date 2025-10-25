@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel Palestrante</title>
+</head>
+<body>
+    <h2>Bem-vindo, Palestrante {{ usuario['nome_completo'] }}</h2>
+
+    <a href="{{ url_for('login_palestrante.logout_palestrante') }}">Sair</a>
+    <li><a href="{{ url_for('gerenciar_disponibilidades.listar_disponibilidades') }}">Minhas Disponibilidades</a></li>
+    <li><a href="{{ url_for('gerenciar_solicitacoes.solicitacoes_recebidas') }}">Solicitações Recebidas</a></li>
+    
+
+</body>
+</html>

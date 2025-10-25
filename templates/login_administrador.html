@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Administrador</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login - Administrador</h2>
+
+        {% if mensagem_erro %}
+            <div class="erro">{{ mensagem_erro }}</div>
+        {% endif %}
+
+        <form method="POST">
+            <label for="cpf">CPF:</label>
+            <input type="text" name="cpf" id="cpf" maxlength="11" required placeholder="Digite seu CPF">
+            <label for="senha">Senha:</label>
+            <input type="password" name="senha" id="senha" required placeholder="Digite sua senha">
+
+            <button type="submit">Entrar</button>
+        </form>
+
+        <a href="{{ url_for('login_administrador.esqueci_senha_administrador') }}">Esqueceu a senha?</a>
+    </div>
+</body>
+</html>

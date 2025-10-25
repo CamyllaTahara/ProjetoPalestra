@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel do Administrador</title>
+</head>
+<body>
+    <!-- Exemplo de estilo para melhor visualização -->
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
+        h1 { color: #333; }
+        nav { background-color: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        ul { list-style: none; padding: 0; margin: 0; display: flex; gap: 20px; }
+        a { text-decoration: none; color: #007bff; font-weight: bold; transition: color 0.3s; }
+        a:hover { color: #0056b3; }
+        /* Destaque para o botão Sair */
+        a[href*="logout"] { color: #dc3545; }
+        a[href*="logout"]:hover { color: #a00; }
+    </style>
+
+    <h1>Bem-vindo(a), {{ usuario['nome_completo'] | capitalize }}</h1>
+
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('gerenciar_instituicoes.listar_instituicoes') }}">Gerenciar Instituições</a></li>
+            <li><a href="{{ url_for('gerenciar_palestrantes.listar_palestrantes') }}">Gerenciar Palestrantes</a></li>
+            <li><a href="#">Financeiro</a></li>
+            <li><a href="#">Suporte/Qualidade</a></li>
+            <!-- CORREÇÃO CRÍTICA: O endpoint 'logout_administrador' está no blueprint 'login_administrador' -->
+            <li><a href="{{ url_for('login_administrador.logout_administrador') }}">Sair</a></li>
+        </ul>
+    </nav>
+</body>
+</html>

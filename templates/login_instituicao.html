@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Instituição</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login - Instituição</h2>
+
+        {% if mensagem_erro %}
+            <div class="erro">{{ mensagem_erro }}</div>
+        {% endif %}
+
+        <form method="POST">
+            <label for="cnpj">CNPJ:</label>
+            <input type="text" name="cnpj" id="cnpj" maxlength="14" required placeholder="Digite seu CNPJ">
+            <label for="senha">Senha:</label>
+            <input type="password" name="senha" id="senha" required placeholder="Digite sua senha">
+
+            <button type="submit">Entrar</button>
+        </form>
+
+        <a href="{{ url_for('login_instituicao.esqueci_senha_instituicao') }}">Esqueceu a senha?</a>
+    </div>
+</body>
+</html>

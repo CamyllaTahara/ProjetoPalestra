@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Buscar Palestrantes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .btn-voltar {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        .btn-voltar:hover {
+            background-color: #5a6268;
+        }
+        .palestrantes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .card-palestrante {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .card-palestrante:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .card-palestrante h3 {
+            color: #4CAF50;
+            margin: 0 0 10px 0;
+        }
+        .info-item {
+            margin: 8px 0;
+            color: #555;
+            font-size: 14px;
+        }
+        .info-item strong {
+            color: #333;
+        }
+        .btn-ver-perfil {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 15px;
+            width: 100%;
+            text-align: center;
+        }
+        .btn-ver-perfil:hover {
+            background-color: #45a049;
+        }
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .empty-message {
+            background-color: #fff;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('login_instituicao.painel_instituicao') }}" class="btn-voltar">← Voltar ao Painel</a>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <h1>Palestrantes Disponíveis</h1>
+
+    {% if palestrantes %}
+        <div class="palestrantes-grid">
+            {% for palestrante in palestrantes %}
+                <div class="card-palestrante">
+                    <h3>{{ palestrante.nome_completo }}</h3>
+                    <div class="info-item">
+                        <strong>Ramo:</strong> {{ palestrante.ramo_atividade }}
+                    </div>
+                    <div class="info-item">
+                        <strong>Experiência:</strong> {{ palestrante.anos_experiencia }} anos
+                    </div>
+                    <div class="info-item">
+                        <strong>Email:</strong> {{ palestrante.email }}
+                    </div>
+                    <div class="info-item">
+                        <strong>Telefone:</strong> {{ palestrante.telefone }}
+                    </div>
+                    <a href="{{ url_for('gerenciar_solicitacoes.perfil_palestrante', palestrante_id=palestrante.id) }}" class="btn-ver-perfil">
+                        Ver Perfil e Disponibilidades
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-message">
+            <p>Nenhum palestrante cadastrado no momento.</p>
+        </div>
+    {% endif %}
+</body>
+</html>

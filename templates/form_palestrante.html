@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if instituicao %}Editar{% else %}Nova{% endif %} Instituição</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .button-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        button, .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        button[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+        }
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>{% if palestrante %}Editar Palestrante{% else %}Novo Palestrante{% endif %}</h1>
+
+    <!-- Mensagens de erro/sucesso -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <label for="nome">Nome do Palestrante: *</label>
+        <input type="text" id="nome_completo" name="nome_completo" 
+               value="{{ palestrante.nome_completo if palestrante else '' }}" 
+               required>
+
+
+        <label for="email">E-mail: *</label>
+        <input type="email" id="email" name="email" 
+               value="{{ palestrante.email if palestrante else '' }}" 
+               required>
+
+        <label for="telefone">Telefone:</label>
+        <input type="tel" id="telefone" name="telefone" 
+               value="{{ palestrante.telefone if palestrante else '' }}"
+               placeholder="(00) 00000-0000">
+
+        <div class="button-group">
+            <button type="submit">
+                {% if palestrante %}Salvar Alterações{% else %}Cadastrar{% endif %}
+            </button>
+            <a href="{{ url_for('gerenciar_palestrantes.listar_palestrantes') }}" class="btn btn-secondary">
+                Cancelar
+            </a>
+        </div>
+    </form>
+</body>
+</html>

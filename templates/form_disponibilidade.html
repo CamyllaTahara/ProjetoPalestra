@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if disponibilidade %}Editar{% else %}Nova{% endif %} Disponibilidade</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="date"],
+        input[type="time"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .button-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        button, .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        button[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+        }
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .info-box {
+            background-color: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #004085;
+        }
+    </style>
+</head>
+<body>
+    <h1>{% if disponibilidade %}Editar Disponibilidade{% else %}Nova Disponibilidade{% endif %}</h1>
+
+    <!-- Mensagens de erro/sucesso -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if disponibilidade %}
+        <!-- Formulário de Edição -->
+        <form method="POST" action="{{ url_for('gerenciar_disponibilidades.editar_disponibilidade', id=disponibilidade.id) }}">
+    {% else %}
+        <!-- Formulário de Criação -->
+        <form method="POST" action="{{ url_for('gerenciar_disponibilidades.criar_disponibilidade') }}">
+    {% endif %}
+        
+        <label for="data">Data: *</label>
+        <input type="date" id="data" name="data" 
+               value="{% if disponibilidade %}{{ disponibilidade.data }}{% endif %}" 
+               required>
+
+        <label for="horario_inicio">Horário de Início: *</label>
+        <input type="time" id="horario_inicio" name="horario_inicio" 
+               value="{% if disponibilidade %}{{ disponibilidade.horario_inicio if disponibilidade.horario_inicio else '' }}{% endif %}" 
+               required>
+
+        <label for="horario_fim">Horário de Fim: *</label>
+        <input type="time" id="horario_fim" name="horario_fim" 
+               value="{% if disponibilidade %}{{ disponibilidade.horario_fim if disponibilidade.horario_fim else '' }}{% endif %}" 
+               required>
+
+        <div class="info-box">
+            Informe os horários em que você está disponível para palestrar. O horário de início deve ser menor que o horário de fim.
+        </div>
+
+        <div class="button-group">
+            <button type="submit">
+                {% if disponibilidade %}Salvar Alterações{% else %}Adicionar Disponibilidade{% endif %}
+            </button>
+            <a href="{{ url_for('gerenciar_disponibilidades.listar_disponibilidades') }}" class="btn btn-secondary">
+                Cancelar
+            </a>
+        </div>
+    </form>
+</body>
+</html>

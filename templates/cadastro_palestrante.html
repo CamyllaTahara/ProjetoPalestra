@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro Palestrante</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        form {
+            width: 60%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .form-group div {
+            width: 48%;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 12px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #senha-checklist {
+            margin-top: 10px;
+        }
+
+        #senha-checklist ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #senha-checklist li {
+            color: #888;
+        }
+
+        #senha-checklist li.valid {
+            color: green;
+        }
+
+        #senha-checklist li.invalid {
+            color: red;
+        }
+    </style>
+    <script src="https://unpkg.com/imask"></script>
+</head>
+<body>
+
+    <h1>Cadastro do Palestrante</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+        <div>
+            <label for="nome">Nome Completo:</label>
+            <input type="text" id="nome" name="nome" value="{{ dados_form.nome }}" required>
+        </div>
+
+        <div>
+            <label for="cpf">CPF:</label>
+            <input type="text" id="cpf" name="cpf" value="{{ dados_form.cpf }}" required>
+            {% if mensagem_erro_cpf %}
+            <p class="error-message">{{ mensagem_erro_cpf }}</p>
+            {% endif %}
+        </div>
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="{{ dados_form.email}}" required>
+            {% if mensagem_erro_email%}
+            <p class="error-message">{{ mensagem_erro_email }}</p>
+            {% endif %}
+        </div>
+        <div>
+            <label for="telefone">Telefone:</label>
+            <input type="text" id="telefone" name="telefone" value="{{ dados_form.telefone }}" required>
+            {% if mensagem_erro_telefone %}
+            <p class="error-message">{{ mensagem_erro_telefone }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="anos_experiencia">Anos de Experiência</label>
+            <input type="text" id="anos_experiencia" name="anos_experiencia" value="{{ dados_form.anos_experiencia }}" required>
+        </div>
+
+        <div>
+            <label for="ramo_atividade">Ramo de atividade:</label>
+            <input type="text" id="ramo_atividade" name="ramo_atividade" value="{{ dados_form.ramo_atividade }}" required>
+        </div>
+
+        <div>
+            <label for="curriculo">Anexe seu currículo aqui (PDF):</label>
+            <input type="file" id="curriculo" name="curriculo" accept=".pdf">
+            {% if mensagem_erro_curriculo %}
+            <p class="error-message">{{ mensagem_erro_curriculo }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="senha">Senha:</label>
+            <input type="password" id="senha" name="senha" required onkeyup="validarSenha()">
+
+            <div id="senha-checklist">
+                <ul>
+                    <li id="comprimento">Pelo menos 8 caracteres</li>
+                    <li id="maiuscula">Pelo menos uma letra maiúscula</li>
+                    <li id="minuscula">Pelo menos uma letra minúscula</li>
+                    <li id="numeroSenha">Pelo menos um número</li>
+                    <li id="especial">Pelo menos um caractere especial (!@#$%&*)</li>
+                </ul>
+            </div>
+
+            {% if mensagem_erro_senha %}
+            <p class="error-message">{{ mensagem_erro_senha }}</p>
+            {% endif %}
+        </div>
+
+        <button type="submit">Cadastrar</button>
+    </form>
+
+    <script>
+        // Máscara para telefone
+        var telefoneInput = document.getElementById('telefone');
+        if (telefoneInput) {
+            IMask(telefoneInput, {
+                mask: '(00) 00000-0000',
+                mask: '(00) 0000-0000'
+            });
+        }
+
+        // Máscara para CPF
+        var cpfInput = document.getElementById('cpf');
+        if (cpfInput) {
+            IMask(cpfInput, {
+                mask: '000.000.000-00'
+            });
+        }
+
+        // Função para validar a senha
+        function validarSenha() {
+            var senha = document.getElementById("senha").value;
+            var comprimento = document.getElementById("comprimento");
+            var maiuscula = document.getElementById("maiuscula");
+            var minuscula = document.getElementById("minuscula");
+            var numeroSenha = document.getElementById("numeroSenha");
+            var especial = document.getElementById("especial");
+
+            comprimento.classList.toggle("valid", senha.length >= 8);
+            comprimento.classList.toggle("invalid", senha.length < 8);
+
+            maiuscula.classList.toggle("valid", /[A-Z]/.test(senha));
+            maiuscula.classList.toggle("invalid", !/[A-Z]/.test(senha));
+
+            minuscula.classList.toggle("valid", /[a-z]/.test(senha));
+            minuscula.classList.toggle("invalid", !/[a-z]/.test(senha));
+
+            numeroSenha.classList.toggle("valid", /\d/.test(senha));
+            numeroSenha.classList.toggle("invalid", !/\d/.test(senha));
+
+            especial.classList.toggle("valid", /[!@#$%&*]/.test(senha));
+            especial.classList.toggle("invalid", !/[!@#$%&*]/.test(senha));
+        }
+    </script>
+
+</body>
+</html>

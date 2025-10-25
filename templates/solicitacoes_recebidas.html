@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Solicitações Recebidas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .btn-voltar {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        .btn-voltar:hover {
+            background-color: #5a6268;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        thead {
+            background-color: #4CAF50;
+            color: white;
+        }
+        th {
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .status-pendente {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-aceita {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-recusada {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .acoes {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-aceitar, .btn-recusar {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+        }
+        .btn-aceitar {
+            background-color: #28a745;
+        }
+        .btn-aceitar:hover {
+            background-color: #218838;
+        }
+        .btn-recusar {
+            background-color: #dc3545;
+        }
+        .btn-recusar:hover {
+            background-color: #c82333;
+        }
+        .empty-message {
+            background-color: #fff;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .descricao-cell {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('login_palestrante.painel_palestrante') }}" class="btn-voltar">← Voltar ao Painel</a>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <h1>Solicitações de Palestras Recebidas</h1>
+
+    {% if solicitacoes %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Instituição</th>
+                    <th>Título</th>
+                    <th>Descrição</th>
+                    <th>Data</th>
+                    <th>Horário</th>
+                    <th>Endereco Palestra</th>
+                    <th>Status</th>
+                    <th>Recebida em</th>
+                    <th>Prazo para resposta</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for solicitacao in solicitacoes %}
+                    <tr> 
+                        <td>{{ solicitacao.nome }}</td>
+                        <td>{{ solicitacao.titulo }}</td>
+                        <td class="descricao-cell" title="{{ solicitacao.descricao if solicitacao.descricao else 'Sem descrição' }}">
+                            {{ solicitacao.descricao if solicitacao.descricao else '-' }}
+                        </td>
+                        <td>{{ solicitacao.data_proposta if solicitacao.data_proposta else '-' }}</td>
+                        <td>{{ solicitacao.horario_proposta if solicitacao.horario_proposta else '-' }}</td>
+                        <td>{{ solicitacao.endereco_palestra if solicitacao.endereco_palestra else '-' }}</td>
+                        <td>
+                            <span class="status status-{{ solicitacao.status }}">
+                                {{ solicitacao.status|upper }}
+                            </span>
+                        </td>
+                        
+                        <td>{{ solicitacao.criada_em if solicitacao.criada_em else '-' }}</td>
+                        <td>
+                            {% if solicitacao.prazo_expiracao %}
+                            {{ solicitacao.prazo_expiracao.strftime('%d/%m/%Y') }}
+                            {% else %}
+                             -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if solicitacao.status == 'pendente' %}
+                                <div class="acoes">
+                                    <form method="POST" action="{{ url_for('gerenciar_solicitacoes.responder_solicitacao', solicitacao_id=solicitacao.id, resposta='aceita') }}" style="display:inline;">
+                                        <button type="submit" class="btn-aceitar" onclick="return confirm('Tem certeza que deseja aceitar esta palestra?');">
+                                            ✓ Aceitar
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('gerenciar_solicitacoes.responder_solicitacao', solicitacao_id=solicitacao.id, resposta='recusada') }}" style="display:inline;">
+                                        <button type="submit" class="btn-recusar" onclick="return confirm('Tem certeza que deseja recusar esta palestra?');">
+                                            ✗ Recusar
+                                        </button>
+                                    </form>
+                                </div>
+                            {% else %}
+                                <span style="color: #999;">{{ 'Aceita' if solicitacao.status == 'aceita' else 'Recusada' }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty-message">
+            <p>Você não tem nenhuma solicitação de palestra no momento.</p>
+        </div>
+    {% endif %}
+</body>
+</html>
