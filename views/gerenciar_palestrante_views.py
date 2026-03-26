@@ -20,7 +20,7 @@ def listar_palestrantes():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM palestrantes ORDER BY nome_completo")
+        cursor.execute("SELECT id, nome_completo, cpf, email, telefone, status FROM palestrantes ORDER BY nome_completo")
         palestrantes = cursor.fetchall()
         cursor.close()
         conn.close()
@@ -151,3 +151,19 @@ def remover_palestrante(id):
         flash(f"Erro ao remover palestrante: {e}", "danger")
     
     return redirect(url_for('gerenciar_palestrantes.listar_palestrantes'))
+
+@gerenciar_palestrantes_bp.route("/gerenciar_palestrantes/<int:id>/reativar", methods=["POST"])
+@login_required("administrador")
+def reativar_palestrante(id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE palestrantes SET status = 'ativo' WHERE id = %s", (id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        flash("Palestrante reativado com sucesso!", "success")
+    except Exception as e:
+        flash(f"Erro ao reativar: {e}", "danger")
+    return redirect(url_for('gerenciar_palestrantes.listar_palestrantes'))
+

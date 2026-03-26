@@ -55,7 +55,7 @@ def enviar_email_recuperacao(email, token):
         remetente_senha = "miqr fggg v unn iwnl"
         
         # O link agora usa o endpoint completo: 'login_instituicao.reset_senha'
-        link_recuperacao = url_for('login_instituicao.reset_senha', 
+        link_recuperacao = url_for('login_instituicao.reset_senha_instituicao', 
                                    token=token, 
                                    _external=True)
         
@@ -103,9 +103,11 @@ def enviar_email_recuperacao(email, token):
         servidor.starttls()
         servidor.login(remetente_email, remetente_senha)
         
-        texto = mensagem.as_string()
-        servidor.sendmail(remetente_email, email, texto)
+        
+        servidor.sendmail(remetente_email, email,  mensagem.as_bytes())
         servidor.quit()
+
+
         
         return True
     except Exception as e:
@@ -119,7 +121,6 @@ def login_instituicao():
     mensagem_sucesso = request.args.get('mensagem_sucesso')
     
     if request.method == 'POST':
-        # Corrigido: Lendo 'cnpj' do formulário
         cnpj = request.form.get('cnpj') 
         senha = request.form.get('senha')
         
@@ -131,19 +132,23 @@ def login_instituicao():
             conexao = conectar_bd()
             cursor = conexao.cursor(dictionary=True)
             
-            # Corrigido: Buscando o usuário pelo CNPJ
-            cursor.execute("SELECT id, nome, senha FROM instituicoes WHERE cnpj = %s", (cnpj,))
+            # ✅ Adicionado 'status' no SELECT
+            cursor.execute("SELECT id, nome, senha, status FROM instituicoes WHERE cnpj = %s", (cnpj,))
             usuario = cursor.fetchone()
             
             if usuario and check_password_hash(usuario['senha'], senha):
-                # Autenticação bem-sucedida
-                session['logged_in'] = True
-                session['user_id'] = usuario['id']
-                session['user_type'] = "instituicao"
-                print(f"Login de Instituição BEM-SUCEDIDO para o ID: {usuario['id']}")
-                flash(f"Bem-vindo(a), {usuario['nome']}!", "success")
-                
-                return redirect(url_for('login_instituicao.painel_instituicao'))
+                # ✅ Verificar se está suspenso ou banido
+                if usuario.get('status') == 'suspenso':
+                    mensagem_erro = "Sua conta está suspensa. Entre em contato com a administração."
+                elif usuario.get('status') == 'banido':
+                    mensagem_erro = "Sua conta foi banida permanentemente da plataforma."
+                else:
+                    session['logged_in'] = True
+                    session['user_id'] = usuario['id']
+                    session['user_type'] = "instituicao"
+                    print(f"Login de Instituição BEM-SUCEDIDO para o ID: {usuario['id']}")
+                    flash(f"Bem-vindo(a), {usuario['nome']}!", "success")
+                    return redirect(url_for('login_instituicao.painel_instituicao'))
             else:
                 mensagem_erro = "CNPJ ou senha incorretos."
         
@@ -158,7 +163,6 @@ def login_instituicao():
     return render_template('login_instituicao.html', 
                            mensagem_erro=mensagem_erro,
                            mensagem_sucesso=mensagem_sucesso)
-
 # ROTA DE CADASTRO
 @login_instituicao_bp.route('/cadastro_instituicao', methods=['GET', 'POST'])
 def cadastro_instituicao():
@@ -321,8 +325,8 @@ def esqueci_senha_instituicao():
                             mensagem_sucesso=mensagem_sucesso)
 
 # ROTA DE RESET DE SENHA
-@login_instituicao_bp.route('/reset_senha/<token>', methods=['GET', 'POST'])
-def reset_senha(token):
+@login_instituicao_bp.route('/reset_senha_instituicao/<token>', methods=['GET', 'POST'])
+def reset_senha_instituicao(token):
     mensagem_erro = None
     token_valido = False
     
@@ -380,7 +384,7 @@ def reset_senha(token):
             cursor.close()
             conexao.close()
     
-    return render_template('reset_senha.html', 
+    return render_template('reset_senha_instituicao.html', 
                             token=token,
                             token_valido=token_valido,
                             mensagem_erro=mensagem_erro)

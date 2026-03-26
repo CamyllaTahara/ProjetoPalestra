@@ -152,3 +152,19 @@ def remover_instituicao(id):
         flash(f"Erro ao remover instituição: {e}", "danger")
     
     return redirect(url_for('gerenciar_instituicoes.listar_instituicoes'))
+
+# REATIVAR instituição
+@gerenciar_instituicoes_bp.route("/gerenciar_instituicoes/<int:id>/reativar", methods=["POST"])
+@login_required("administrador")
+def reativar_instituicao(id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE instituicoes SET status = 'ativo' WHERE id = %s", (id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        flash("Instituição reativada com sucesso!", "success")
+    except Exception as e:
+        flash(f"Erro ao reativar instituição: {e}", "danger")
+    return redirect(url_for('gerenciar_instituicoes.listar_instituicoes'))

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Feed</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; }
+        .container { max-width: 700px; margin: 0 auto; }
+        .topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .topo h1 { color: #333; }
+        .acoes-topo { display: flex; align-items: center; gap: 15px; }
+        .btn-voltar { background: #6c757d; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; font-size: 13px; }
+        .btn-novo-post { background: #4CAF50; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; font-size: 13px; }
+        .sino { position: relative; text-decoration: none; font-size: 24px; }
+        .badge-notif {
+            display: none; position: absolute; top: -5px; right: -8px;
+            background: #dc3545; color: white; border-radius: 50%;
+            width: 18px; height: 18px; font-size: 11px;
+            align-items: center; justify-content: center;
+        }
+        .badge-notif.ativo { display: flex; }
+        .post { background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 25px; overflow: hidden; }
+        .post-header { padding: 15px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #f0f0f0; }
+        .avatar { width: 42px; height: 42px; border-radius: 50%; background: #4CAF50; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px; flex-shrink: 0; }
+        .post-autor { font-weight: bold; font-size: 14px; color: #333; }
+        .post-tipo { font-size: 12px; color: #888; }
+        .post-data { font-size: 12px; color: #aaa; margin-left: auto; }
+        .post-descricao { padding: 15px; font-size: 14px; color: #444; line-height: 1.6; }
+        .post-localizacao { font-size: 12px; color: #888; margin-top: 8px; }
+        .post-fotos { display: grid; gap: 2px; }
+        .post-fotos.uma { grid-template-columns: 1fr; }
+        .post-fotos.duas { grid-template-columns: 1fr 1fr; }
+        .post-fotos.tres { grid-template-columns: 1fr 1fr; }
+        .post-fotos.tres .foto:first-child { grid-column: span 2; }
+        .post-fotos.muitas { grid-template-columns: 1fr 1fr; }
+        .foto img { width: 100%; height: 250px; object-fit: cover; display: block; cursor: pointer; transition: opacity 0.2s; }
+        .foto img:hover { opacity: 0.9; }
+        .post-acoes { padding: 10px 15px; display: flex; gap: 10px; border-top: 1px solid #f0f0f0; align-items: center; flex-wrap: wrap; }
+        .btn-acao { background: none; border: none; cursor: pointer; font-size: 14px; color: #666; display: flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 4px; transition: background 0.2s; text-decoration: none; }
+        .btn-acao:hover { background: #f0f0f0; }
+        .btn-acao.curtido { color: #e74c3c; }
+        .btn-deletar { margin-left: auto; background: none; border: none; color: #dc3545; cursor: pointer; font-size: 13px; }
+        .btn-deletar:hover { text-decoration: underline; }
+        .ver-post { font-size: 13px; color: #4CAF50; text-decoration: none; }
+        .ver-post:hover { text-decoration: underline; }
+        .alert { padding: 12px 15px; border-radius: 4px; margin-bottom: 20px; }
+        .alert-success { background: #d4edda; color: #155724; }
+        .alert-danger { background: #f8d7da; color: #721c24; }
+        .sem-posts { text-align: center; padding: 50px; color: #999; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        /* Modal foto */
+        .modal-foto { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-foto.ativo { display: flex; }
+        .modal-foto img { max-width: 90%; max-height: 90vh; border-radius: 4px; }
+        .modal-fechar { position: fixed; top: 20px; right: 30px; color: white; font-size: 30px; cursor: pointer; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- TOPO -->
+    <div class="topo">
+        <div>
+            {% if user_type == 'palestrante' %}
+                <a href="{{ url_for('login_palestrante.painel_palestrante') }}" class="btn-voltar">← Voltar</a>
+            {% elif user_type == 'instituicao' %}
+                <a href="{{ url_for('login_instituicao.painel_instituicao') }}" class="btn-voltar">← Voltar</a>
+            {% endif %}
+            {% if user_type in ('palestrante', 'instituicao') %}
+                <a href="{{ url_for('feed.novo_post') }}" class="btn-novo-post" style="margin-left:10px;">+ Nova Postagem</a>
+            {% endif %}
+        </div>
+        <div class="acoes-topo">
+            <h1>📸 Feed</h1>
+            {% if user_type in ('palestrante', 'instituicao') %}
+            <a href="{{ url_for('feed.notificacoes') }}" class="sino" id="sino">
+                🔔
+                <span class="badge-notif {{ 'ativo' if notificacoes_nao_lidas > 0 }}" id="badge-notif">
+                    {{ notificacoes_nao_lidas }}
+                </span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ALERTAS -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- POSTS -->
+    {% if posts %}
+        {% for post in posts %}
+        <div class="post" id="post-{{ post.id }}">
+
+            <!-- Header -->
+            <div class="post-header">
+                <div class="avatar">{{ post.autor_nome[0] | upper }}</div>
+                <div>
+                    <div class="post-autor">{{ post.autor_nome }}</div>
+                    <div class="post-tipo">{{ '👤 Palestrante' if post.autor_tipo == 'palestrante' else '🏢 Instituição' }}</div>
+                </div>
+                <div class="post-data">{{ post.criado_em.strftime('%d/%m/%Y %H:%M') }}</div>
+            </div>
+
+            <!-- Descrição -->
+            <div class="post-descricao">
+                {{ post.descricao | mencoes | safe }}
+                {% if post.localizacao %}
+                    <div class="post-localizacao">📍 {{ post.localizacao }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Fotos -->
+            {% if post.fotos %}
+                {% set n = post.fotos | length %}
+                <div class="post-fotos {{ 'uma' if n == 1 else 'duas' if n == 2 else 'tres' if n == 3 else 'muitas' }}">
+                    {% for foto in post.fotos %}
+                    <div class="foto">
+                        <img src="{{ url_for('uploads_feed', filename=foto.caminho) }}"
+                             onclick="abrirFoto(this.src)" alt="Foto da palestra">
+                    </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Ações -->
+            <div class="post-acoes">
+                {% if user_type in ('palestrante', 'instituicao') %}
+                    <form method="POST" action="{{ url_for('feed.curtir_post', post_id=post.id) }}" style="display:inline;">
+                        <button type="submit" class="btn-acao {{ 'curtido' if post.ja_curtiu }}">
+                            {{ '❤️' if post.ja_curtiu else '🤍' }} {{ post.total_curtidas }}
+                        </button>
+                    </form>
+                {% else %}
+                    <span class="btn-acao">🤍 {{ post.total_curtidas }}</span>
+                {% endif %}
+
+                <a href="{{ url_for('feed.ver_post', post_id=post.id) }}" class="btn-acao">
+                    💬 {{ post.total_comentarios }}
+                </a>
+
+                <a href="{{ url_for('feed.ver_post', post_id=post.id) }}" class="ver-post">Ver post →</a>
+
+                {% if user_id == post.autor_id and user_type == post.autor_tipo %}
+                    <form method="POST" action="{{ url_for('feed.deletar_post', post_id=post.id) }}"
+                          style="display:inline; margin-left:auto;"
+                          onsubmit="return confirm('Deletar este post?');">
+                        <button type="submit" class="btn-deletar">🗑️</button>
+                    </form>
+                {% endif %}
+            </div>
+
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="sem-posts">
+            <p style="font-size:40px;">📸</p>
+            <p style="margin-top:10px;">Nenhuma postagem ainda. Seja o primeiro!</p>
+        </div>
+    {% endif %}
+
+</div>
+
+<!-- Modal foto -->
+<div id="notif-config" 
+     data-url="{{ url_for('feed.contar_notificacoes') }}"
+     data-user-type="{{ user_type }}">
+</div>
+
+<script>
+    
+    const config = document.getElementById('notif-config');
+    const url = config.getAttribute('data-url');
+    const userType = config.getAttribute('data-user-type');
+
+    if (userType === 'palestrante' || userType === 'instituicao') {
+        setInterval(() => {
+            fetch(url)
+                .then(r => r.json())
+                .then(data => {
+                    const badge = document.getElementById('badge-notif');
+                    if (data.count > 0) {
+                        badge.textContent = data.count;
+                        badge.classList.add('ativo');
+                    } else {
+                        badge.classList.remove('ativo');
+                    }
+                })
+                .catch(e => console.error("Erro:", e));
+        }, 15000);
+    }
+    
+    function abrirFoto(src) {
+        document.getElementById('modalFotoImg').src = src;
+        document.getElementById('modalFoto').classList.add('ativo');
+    }
+    function fecharFoto() {
+        document.getElementById('modalFoto').classList.remove('ativo');
+    }
+</script>
+</body>
+</html>

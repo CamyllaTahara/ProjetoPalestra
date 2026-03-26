@@ -11,6 +11,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import urllib.parse # Para codificar o token na URL
 from utils.security import login_required
+from utils.mail import send_notification_email
 #from utils.auth import login_required, logout_user
 
 # Criação do Blueprint para as rotas de login e cadastro de palestrante
@@ -84,10 +85,11 @@ def enviar_email_recuperacao(email, token):
         mensagem = MIMEMultipart()
         mensagem['From'] = remetente_email
         mensagem['To'] = email
-        mensagem['Subject'] = "Recuperação de Senha - Sistema de Palestras"
+        from email.header import Header
+        mensagem['Subject'] =Header ( "Recuperação de Senha - Sistema de Palestras","utf-8")
         
         # Link com o token para redefinir a senha
-        link_recuperacao = url_for('login_palestrante.reset_senha', 
+        link_recuperacao = url_for('login_palestrante.reset_senha_palestrante', 
                                    token=token, 
                                    _external=True)
         
@@ -109,8 +111,8 @@ def enviar_email_recuperacao(email, token):
                 </div>
                 <div class="content">
                     <p>Olá,</p>
-                    <p>Recebemos uma solicitação para redefinir sua senha. Se você não fez esta solicitação, ignore este e-mail.</p>
-                    <p>Para redefinir sua senha, clique no botão abaixo:</p>
+                    <p>Recebemos uma solicitacao para redefinir sua senha. Se você não fez esta solicitacao, ignore este e-mail.</p>
+                    <p>Para redefinir sua senha, clique no botao abaixo:</p>
                     <p style="text-align: center;">
                         <a href="{link_recuperacao}" class="button">Redefinir Senha</a>
                     </p>
@@ -124,7 +126,7 @@ def enviar_email_recuperacao(email, token):
         </html>
         """
         
-        mensagem.attach(MIMEText(corpo_email, 'html'))
+        mensagem.attach(MIMEText(corpo_email, 'html','utf-8'))
         
         # Conectando ao servidor de e-mail (Configuração para Gmail)
         servidor = smtplib.SMTP('smtp.gmail.com', 587)
@@ -132,8 +134,8 @@ def enviar_email_recuperacao(email, token):
         servidor.login(remetente_email, remetente_senha)
         
         # Enviando e-mail
-        texto = mensagem.as_string()
-        servidor.sendmail(remetente_email, email, texto)
+        
+        servidor.sendmail(remetente_email, email,  mensagem.as_bytes())
         servidor.quit()
         
         return True
@@ -153,9 +155,9 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 @login_palestrante_bp.route('/login_palestrante', methods=['GET', 'POST'])
 def login_palestrante():
-    """Rota de Login para Palestrantes."""
+    print(f"🔴🔴🔴 ARQUIVO login_palestrante.py FOI CARREGADO 🔴🔴🔴")
     mensagem_erro = None
-    mensagem_sucesso = request.args.get('mensagem_sucesso') # Pega mensagem de sucesso de um redirect
+    mensagem_sucesso = request.args.get('mensagem_sucesso')
     conexao = None
     
     if request.method == 'POST':
@@ -166,28 +168,29 @@ def login_palestrante():
             conexao = conectar_bd()
             cursor = conexao.cursor(dictionary=True)
             
-            # Verificar se o e-mail existe e obter a senha hash
-            cursor.execute("SELECT id, nome_completo, senha FROM palestrantes WHERE email = %s", (email,))
+            # ✅ Adicionado 'status' no SELECT
+            cursor.execute("SELECT id, nome_completo, senha, status FROM palestrantes WHERE email = %s", (email,))
             usuario = cursor.fetchone()
             
             if usuario and check_password_hash(usuario['senha'], senha):
-                # Autenticação bem-sucedida
-                session['logged_in'] = True
-                session['user_id'] = usuario['id']
-                session['user_type'] = "palestrante"
-                
-                
-                # --- Depuração: Confirma que a autenticação ocorreu ---
-                print(f"Login de Palestrante BEM-SUCEDIDO para o ID: {usuario['id']}")
-                
-                return redirect(url_for('login_palestrante.painel_palestrante'))
+                # ✅ Verificar se está suspenso ou banido
+                if usuario.get('status') == 'suspenso':
+                    mensagem_erro = "Sua conta está suspensa. Entre em contato com a administração."
+                elif usuario.get('status') == 'banido':
+                    mensagem_erro = "Sua conta foi banida permanentemente da plataforma."
+                else:
+                    session['logged_in'] = True
+                    session['user_id'] = usuario['id']
+                    session['user_type'] = "palestrante"
+                    print(f"Login de Palestrante BEM-SUCEDIDO para o ID: {usuario['id']}")
+                    return redirect(url_for('login_palestrante.painel_palestrante'))
             else:
                 mensagem_erro = "E-mail ou senha incorretos."
-                print(f"Login de Palestrante FALHOU para o e-mail: {email}") # Depuração: Confirma falha
+                print(f"Login de Palestrante FALHOU para o e-mail: {email}")
         
         except Exception as e:
             mensagem_erro = f"Erro ao tentar fazer login: {e}"
-            print(f"Erro de exceção no login: {e}") # Depuração: Captura exceções
+            print(f"Erro de exceção no login: {e}")
         finally:
             if 'conexao' in locals() and conexao.is_connected():
                 cursor.close()
@@ -359,61 +362,57 @@ def cadastro_palestrante():
 
 @login_palestrante_bp.route('/esqueci_senha', methods=['GET', 'POST'])
 def esqueci_senha():
-    """Rota para lidar com a solicitação de recuperação de senha."""
     mensagem_erro = None
     mensagem_sucesso = None
-    conexao = None
     
     if request.method == 'POST':
-        email = request.form['email']
+        email = request.form.get('email')
         
+        if not email:
+            mensagem_erro = "Por favor, informe seu e-mail."
+            return render_template('esqueci_senha.html', mensagem_erro=mensagem_erro)
+            
         try:
             conexao = conectar_bd()
             cursor = conexao.cursor(dictionary=True)
             
-            # Verificar se o e-mail existe
             cursor.execute("SELECT id, nome_completo FROM palestrantes WHERE email = %s", (email,))
             usuario = cursor.fetchone()
             
             if usuario:
-                # Gerar um token seguro e data de expiração
                 token = secrets.token_urlsafe(32)
-                expiracao = datetime.now() + timedelta(hours=1) 
+                expiracao = datetime.now() + timedelta(hours=1)
                 
-                # Salvar o token no banco de dados
                 cursor.execute("""
                     INSERT INTO tokens_recuperacao_palestrantes (palestrante_id, token, data_expiracao)
                     VALUES (%s, %s, %s)
                 """, (usuario['id'], token, expiracao))
                 conexao.commit()
                 
-                # Enviar e-mail com o link de recuperação
                 if enviar_email_recuperacao(email, token):
                     mensagem_sucesso = "Um e-mail com instruções para recuperar sua senha foi enviado."
                 else:
                     mensagem_erro = "Erro ao enviar e-mail de recuperação. Tente novamente mais tarde."
             else:
-                # Por segurança, não informamos se o e-mail existe ou não
                 mensagem_sucesso = "Se este e-mail estiver cadastrado, enviaremos instruções para recuperar sua senha."
         
         except Exception as e:
             print(f"Erro ao processar recuperação de senha: {e}")
             mensagem_erro = "Erro ao processar a solicitação. Tente novamente mais tarde."
         finally:
-            if conexao and conexao.is_connected():
+            if 'conexao' in locals() and conexao.is_connected():
                 cursor.close()
                 conexao.close()
     
     return render_template('esqueci_senha.html', 
-                           mensagem_erro=mensagem_erro,
-                           mensagem_sucesso=mensagem_sucesso)
+                            mensagem_erro=mensagem_erro,
+                            mensagem_sucesso=mensagem_sucesso)
 
-@login_palestrante_bp.route('/reset_senha/<token>', methods=['GET', 'POST'])
-def reset_senha(token):
-    """Rota para redefinir a senha usando o token recebido por e-mail."""
+@login_palestrante_bp.route('/reset_senha_palestrante/<token>', methods=['GET', 'POST'])
+def reset_senha_palestrante(token):
     mensagem_erro = None
     token_valido = False
-    conexao = None
+    
     
     try:
         conexao = conectar_bd()
@@ -428,7 +427,7 @@ def reset_senha(token):
         """, (token, datetime.now()))
         
         resultado = cursor.fetchone()
-        
+    
         if resultado:
             token_valido = True
             palestrante_id = resultado['palestrante_id']
@@ -475,7 +474,7 @@ def reset_senha(token):
             cursor.close()
             conexao.close()
     
-    return render_template('reset_senha.html', 
+    return render_template('reset_senha_palestrante.html', 
                            token=token,
                            token_valido=token_valido,
                            mensagem_erro=mensagem_erro)
@@ -483,7 +482,7 @@ def reset_senha(token):
 @login_palestrante_bp.route('/painel_palestrante')
 @login_required("palestrante")
 def painel_palestrante():
-    """Rota do painel de controle do administrador (requer login)."""
+    """Rota do painel de controle do  administrador (requer login)."""
     # Para o painel funcionar, ele precisa da informação do usuário logado
     if 'user_id' in session:
         # Busca os dados completos do usuário

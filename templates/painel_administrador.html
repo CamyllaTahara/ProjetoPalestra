@@ -26,8 +26,11 @@
             <li><a href="{{ url_for('gerenciar_palestrantes.listar_palestrantes') }}">Gerenciar Palestrantes</a></li>
             <li><a href="#">Financeiro</a></li>
             <li><a href="#">Suporte/Qualidade</a></li>
+            <li><a href="{{ url_for('chat.admin_conversas') }}">💬 Conversas</a></li>
             <!-- CORREÇÃO CRÍTICA: O endpoint 'logout_administrador' está no blueprint 'login_administrador' -->
             <li><a href="{{ url_for('login_administrador.logout_administrador') }}">Sair</a></li>
+            <li><a href="{{ url_for('chamados.admin_chamados') }}">🚨 Chamados</a></li>
+            <li><a href="{{ url_for('chamados.admin_avaliacoes') }}">⭐ Avaliações</a></li>
         </ul>
     </nav>
 </body>

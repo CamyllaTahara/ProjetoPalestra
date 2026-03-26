@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat - {{ palestra.titulo }}</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; background: #f4f4f9; display: flex; flex-direction: column; height: 100vh; }
+
+        .chat-header {
+            background: #4CAF50; color: white; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .chat-header h2 { font-size: 18px; }
+        .chat-header span { font-size: 13px; opacity: 0.85; }
+        .btn-voltar {
+            color: white; text-decoration: none; background: rgba(0,0,0,0.2);
+            padding: 6px 12px; border-radius: 4px; font-size: 13px;
+        }
+
+        .chat-info {
+            background: #fff; padding: 10px 20px; font-size: 13px; color: #555;
+            border-bottom: 1px solid #ddd; display: flex; gap: 20px;
+        }
+
+        .chat-box {
+            flex: 1; overflow-y: auto; padding: 20px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+
+        .mensagem {
+            max-width: 65%; padding: 10px 14px; border-radius: 12px;
+            font-size: 14px; line-height: 1.4;
+        }
+        .mensagem .meta {
+            font-size: 11px; margin-bottom: 4px; font-weight: bold;
+        }
+        .mensagem .hora { font-size: 11px; margin-top: 4px; opacity: 0.6; text-align: right; }
+
+        .mensagem-minha {
+            background: #dcf8c6; align-self: flex-end; border-bottom-right-radius: 2px;
+        }
+        .mensagem-minha .meta { color: #075e54; }
+
+        .mensagem-outro {
+            background: #fff; align-self: flex-start; border-bottom-left-radius: 2px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .mensagem-outro .meta { color: #128C7E; }
+
+        .chat-input {
+            background: #fff; padding: 15px 20px;
+            border-top: 1px solid #ddd; display: flex; gap: 10px;
+        }
+        .chat-input textarea {
+            flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px;
+            resize: none; font-size: 14px; outline: none; max-height: 100px;
+        }
+        .chat-input button {
+            background: #4CAF50; color: white; border: none;
+            padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 14px;
+        }
+        .chat-input button:hover { background: #45a049; }
+
+        .somente-leitura {
+            background: #fff3cd; padding: 10px 20px; text-align: center;
+            font-size: 13px; color: #856404; border-top: 1px solid #ffc107;
+        }
+
+        .sem-mensagens {
+            text-align: center; color: #999; margin: auto; font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-header">
+    <div>
+        <h2>💬 {{ palestra.titulo }}</h2>
+        <span>{{ palestra.nome_palestrante }} ↔ {{ palestra.nome_instituicao }}</span>
+    </div>
+    <a href="javascript:history.back()" class="btn-voltar">← Voltar</a>
+</div>
+
+<div class="chat-info">
+    <span>📅 {{ palestra.data }}</span>
+    <span>🕐 {{ palestra.horario }}</span>
+    {% if somente_leitura %}
+        <span style="color:#dc3545;">👁️ Modo administrador — somente leitura</span>
+    {% endif %}
+</div>
+
+<div class="chat-box" id="chatBox">
+    {% if mensagens %}
+        {% for msg in mensagens %}
+            <div class="mensagem {{ 'mensagem-minha' if msg.remetente_tipo == user_type else 'mensagem-outro' }}">
+                <div class="meta">{{ msg.remetente_nome }}</div>
+                {{ msg.mensagem }}
+                <div class="hora">{{ msg.enviada_em.strftime('%d/%m/%Y %H:%M') if msg.enviada_em else '' }}</div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="sem-mensagens">Nenhuma mensagem ainda. Seja o primeiro a enviar!</div>
+    {% endif %}
+</div>
+
+{% if not somente_leitura %}
+<div class="chat-input">
+    <textarea id="inputMensagem" placeholder="Digite sua mensagem..." rows="1"
+              onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); enviarMensagem();}"></textarea>
+    <button onclick="enviarMensagem()">Enviar</button>
+</div>
+{% else %}
+<div class="somente-leitura">👁️ Você está visualizando esta conversa como administrador.</div>
+{% endif %}
+
+<script>
+    const socket = io();
+    const palestraId = "{{ palestra.id }}";
+    const userType = "{{ user_type }}";
+    const userId = "{{ user_id }}";
+    const meuNome = "{{ meu_nome }}";
+
+    // Entrar na sala
+    socket.emit('entrar_sala', { palestra_id: palestraId });
+
+    // Scroll para o final
+    const chatBox = document.getElementById('chatBox');
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    function enviarMensagem() {
+        const input = document.getElementById('inputMensagem');
+        const mensagem = input.value.trim();
+        if (!mensagem) return;
+
+        socket.emit('enviar_mensagem', {
+            palestra_id: palestraId,
+            mensagem: mensagem,
+            remetente_tipo: userType,
+            remetente_id: userId,
+            remetente_nome: meuNome
+        });
+
+        input.value = '';
+    }
+
+    // Receber nova mensagem
+    socket.on('nova_mensagem', function(data) {
+        // Remove mensagem de "sem mensagens" se existir
+        const semMsg = chatBox.querySelector('.sem-mensagens');
+        if (semMsg) semMsg.remove();
+
+        const div = document.createElement('div');
+        const ehMinha = data.remetente_tipo === userType;
+        div.className = 'mensagem ' + (ehMinha ? 'mensagem-minha' : 'mensagem-outro');
+        div.innerHTML = `
+            <div class="meta">${data.remetente_nome}</div>
+            ${data.mensagem}
+            <div class="hora">${data.enviada_em}</div>
+        `;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+</script>
+
+</body>
+</html>

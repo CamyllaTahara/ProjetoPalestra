@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Avaliar Atendimento</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; max-width: 600px; margin: 0 auto; }
+        h1 { color: #333; margin-bottom: 5px; }
+        .subtitulo { color: #666; font-size: 14px; margin-bottom: 25px; }
+        .btn-voltar { background: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin-bottom: 20px; }
+        .card { background: #fff; border-radius: 8px; padding: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .info-chamado { background: #f8f9fa; border-left: 4px solid #4CAF50; padding: 12px 15px; border-radius: 4px; margin-bottom: 25px; font-size: 14px; color: #555; }
+        .grupo { margin-bottom: 25px; }
+        .grupo label { font-weight: bold; display: block; margin-bottom: 10px; color: #444; font-size: 15px; }
+        .estrelas { display: flex; flex-direction: row-reverse; justify-content: flex-end; gap: 5px; }
+        .estrelas input { display: none; }
+        .estrelas label { font-size: 35px; color: #ddd; cursor: pointer; transition: color 0.2s; }
+        .estrelas input:checked ~ label,
+        .estrelas label:hover,
+        .estrelas label:hover ~ label { color: #ffc107; }
+        textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; resize: vertical; min-height: 100px; box-sizing: border-box; }
+        .btn-enviar { background: #4CAF50; color: white; padding: 12px 25px; border: none; border-radius: 4px; cursor: pointer; font-size: 15px; width: 100%; margin-top: 10px; }
+        .btn-enviar:hover { background: #45a049; }
+        .alert { padding: 12px 15px; border-radius: 4px; margin-bottom: 20px; }
+        .alert-danger { background: #f8d7da; color: #721c24; }
+        .alert-success { background: #d4edda; color: #155724; }
+        .ja-avaliou { text-align: center; padding: 30px; color: #666; }
+        .ja-avaliou span { font-size: 50px; display: block; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('chamados.meus_chamados') }}" class="btn-voltar">← Voltar</a>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <h1>⭐ Avaliar Atendimento</h1>
+    <p class="subtitulo">Chamado #{{ chamado.id }} — {{ chamado.titulo }}</p>
+
+    <div class="card">
+        {% if ja_avaliou %}
+            <div class="ja-avaliou">
+                <span>✅</span>
+                <p>Você já avaliou este chamado. Obrigado pelo feedback!</p>
+            </div>
+        {% else %}
+            <div class="info-chamado">
+                📋 Seu feedback nos ajuda a melhorar continuamente o atendimento da plataforma.
+            </div>
+
+            <form method="POST">
+                <!-- Atendimento do Admin -->
+                <div class="grupo">
+                    <label>👨‍💼 Como você avalia o atendimento do administrador?</label>
+                    <div class="estrelas">
+                        <input type="radio" name="nota_atendimento" id="at5" value="5" required>
+                        <label for="at5">★</label>
+                        <input type="radio" name="nota_atendimento" id="at4" value="4">
+                        <label for="at4">★</label>
+                        <input type="radio" name="nota_atendimento" id="at3" value="3">
+                        <label for="at3">★</label>
+                        <input type="radio" name="nota_atendimento" id="at2" value="2">
+                        <label for="at2">★</label>
+                        <input type="radio" name="nota_atendimento" id="at1" value="1">
+                        <label for="at1">★</label>
+                    </div>
+                </div>
+
+                <!-- Experiência Geral -->
+                <div class="grupo">
+                    <label>🌐 Como você avalia sua experiência geral na plataforma?</label>
+                    <div class="estrelas">
+                        <input type="radio" name="nota_experiencia" id="ex5" value="5" required>
+                        <label for="ex5">★</label>
+                        <input type="radio" name="nota_experiencia" id="ex4" value="4">
+                        <label for="ex4">★</label>
+                        <input type="radio" name="nota_experiencia" id="ex3" value="3">
+                        <label for="ex3">★</label>
+                        <input type="radio" name="nota_experiencia" id="ex2" value="2">
+                        <label for="ex2">★</label>
+                        <input type="radio" name="nota_experiencia" id="ex1" value="1">
+                        <label for="ex1">★</label>
+                    </div>
+                </div>
+
+                <!-- Comentário -->
+                <div class="grupo">
+                    <label>💬 Comentário (opcional):</label>
+                    <textarea name="comentario" placeholder="Conte-nos mais sobre sua experiência..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-enviar">⭐ Enviar Avaliação</button>
+            </form>
+        {% endif %}
+    </div>
+</body>
+</html>

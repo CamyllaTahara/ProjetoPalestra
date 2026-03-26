@@ -1,0 +1,56 @@
+<body>
+    
+<h1>Editar Perfil</h1>
+{{ palestrante}}
+<form method="POST" enctype="multipart/form-data">
+
+<label>Foto de Perfil</label>
+<img id="preview-foto"
+    src="{{url_for('static', filename='fotos_palestrantes/'+ palestrante.foto)}}?v={{ range(1,100000)|random }}"
+    width="150">
+<input type="file" name="foto_perfil" id="foto_perfil">
+
+<label>Descrição</label>
+<textarea name="descricao">{{ palestrante.descricao }}</textarea>
+
+<label>Ramo de atividade</label>
+<textarea name="ramo_atividade">{{palestrante.ramo_atividade}}</textarea>
+
+<label> Anos de experiência</label>
+<textarea name="anos_experiencia">{{palestrante.anos_experiencia}}</textarea>
+
+<label> Email</label>
+<textarea name="email">{{palestrante.email}}</textarea>
+
+<label>Telefone</label>
+<textarea name="telefone">{{palestrante.telefone}}</textarea>
+
+<label>Novo currículo (PDF)</label>
+<input type="file" name="curriculo_pdf" accept=".pdf">
+
+
+<br><br>
+
+<button type="submit">Salvar</button>
+
+</form>
+
+<script>
+document.getElementById("foto_perfil").addEventListener("change", function(event){
+
+    const arquivo = event.target.files[0];
+
+    if(arquivo){
+        const leitor = new FileReader();
+
+        leitor.onload = function(e){
+            document.getElementById("preview-foto").src = e.target.result;
+        }
+
+        leitor.readAsDataURL(arquivo);
+    }
+
+});
+</script>
+
+</body>

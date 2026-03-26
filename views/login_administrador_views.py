@@ -85,7 +85,7 @@ def enviar_email_recuperacao(email, token):
         mensagem['Subject'] = "Recuperação de Senha - Sistema de Palestras"
         
         # Link com o token para redefinir a senha (CORRIGIDO: usa 'login_administrador' como prefixo)
-        link_recuperacao = url_for('login_administrador.reset_senha', 
+        link_recuperacao = url_for('login_administrador.reset_senha_administrador', 
                                    token=token, 
                                    _external=True)
         
@@ -343,8 +343,8 @@ def esqueci_senha_administrador():
                            mensagem_erro=mensagem_erro,
                            mensagem_sucesso=mensagem_sucesso)
 
-@login_administrador_bp.route('/reset_senha/<token>', methods=['GET', 'POST'])
-def reset_senha(token):
+@login_administrador_bp.route('/reset_senha_administrador/<token>', methods=['GET', 'POST'])
+def reset_senha_administrador(token):
     """Rota para redefinir a senha usando o token recebido por e-mail."""
     mensagem_erro = None
     token_valido = False
@@ -409,7 +409,7 @@ def reset_senha(token):
             cursor.close()
             conexao.close()
     
-    return render_template('reset_senha.html', 
+    return render_template('reset_senha_administrador.html', 
                            token=token,
                            token_valido=token_valido,
                            mensagem_erro=mensagem_erro)

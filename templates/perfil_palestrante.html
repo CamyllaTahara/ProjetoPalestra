@@ -17,6 +17,7 @@
         tbody tr:hover { background-color: #f5f5f5; }
         .empty-message { background-color: #fff; padding: 30px; text-align: center; color: #666; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     </style>
+
 </head>
 <body>
     <a href="{{ url_for('gerenciar_solicitacoes.listar_palestrantes') }}" class="btn-voltar">
@@ -24,17 +25,49 @@
     </a>
 
     <div class="card-perfil">
+
+            <div style="display:flex; align-items:center; gap:20px;">
+                
+                
+    {% if palestrante.foto %}
+        <img src="{{ url_for('static', filename='fotos_palestrantes/' + palestrante.foto) }}"
+        width="120" height="120"
+        style="border-radius:50%; object-fit:cover;">
+    {% else %}
+        <img src="{{ url_for('static', filename='fotos_palestrantes/perfil.png')}}"
+        width="120" height="120"
+        style="border-radius:50%;">
+    {% endif %}
+
+    <hr>
+
+<h2>Sobre o palestrante</h2>
+
+<p>
+{{ palestrante.descricao or "Este palestrante ainda não adicionou uma descrição." }}
+</p>
+
+</div>
+
         <h1>Perfil do Palestrante: {{ palestrante.nome_completo }}</h1>
         <p><strong>Ramo de Atividade:</strong> {{ palestrante.ramo_atividade }}</p>
         <p><strong>Experiência:</strong> {{ palestrante.anos_experiencia }} anos</p>
         <p><strong>Email:</strong> {{ palestrante.email }}</p>
         <p><strong>Telefone:</strong> {{ palestrante.telefone }}</p>
-       <p>
-                <strong>Currículo:</strong> 
-                <a href="{{ url_for('gerenciar_solicitacoes.download_curriculo', palestrante_id=palestrante.id) }}" target="_blank" class="link-curriculo">
-                    Visualizar/Baixar Currículo (PDF)
-                </a>
-            </p>
+      <p>
+            <strong>Currículo:</strong>
+
+            <a href="{{ url_for('gerenciar_solicitacoes.ver_curriculo', palestrante_id=palestrante.id) }}" target="_blank">
+            👁 Ver currículo
+            </a>
+
+|
+
+            <a href="{{ url_for('gerenciar_solicitacoes.download_curriculo', palestrante_id=palestrante.id) }}">
+            ⬇ Baixar PDF
+            </a>
+
+        </p>
         <hr>
         
         <a href="{{ url_for('gerenciar_solicitacoes.solicitar_palestra', palestrante_id=palestrante.id) }}" class="btn-solicitar">
@@ -56,7 +89,7 @@
             <tbody>
                 {% for disponibilidade in disponibilidades%}
                     <tr>
-                    <td>
+                    <td>  
             <a href="{{ url_for('gerenciar_solicitacoes.solicitar_palestra', 
                  palestrante_id=palestrante.id,
                  data=disponibilidade.data.strftime('%Y-%m-%d'), 
@@ -81,4 +114,4 @@
     {% endif %}
 
 </body>
-</html>
+</html>  

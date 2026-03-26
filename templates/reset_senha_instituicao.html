@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Redefinir Senha - Instituição</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Redefinir Senha</h2>
+    {% if mensagem_erro %}
+        <div class="erro">{{ mensagem_erro }}</div>
+    {% endif %}
+    
+    {% if token_valido %}
+        <form method="POST">
+            <input type="hidden" name="token" value="{{ token }}">
+            
+            <label for="senha">Nova Senha:</label>
+            <input type="password" name="senha" id="senha" required placeholder="Digite sua nova senha">
+            
+            <label for="confirmar_senha">Confirmar Senha:</label>
+            <input type="password" name="confirmar_senha" id="confirmar_senha" required placeholder="Confirme sua senha">
+            
+            <button type="submit">Redefinir Senha</button>
+        </form>
+    {% else %}
+        <div class="erro">Link de recuperação inválido ou expirado.</div>
+        <a href="{{ url_for('login_instituicao.esqueci_senha_instituicao') }}">Solicitar novo link</a>
+    {% endif %}
+    
+    <a href="{{ url_for('login_instituicao.esqueci_senha_instituicao') }}">Voltar para o login</a>
+</div>
+</body>
+</html>

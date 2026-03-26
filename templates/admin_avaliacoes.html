@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Avaliações</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; max-width: 1100px; margin: 0 auto; }
+        h1 { color: #333; margin-bottom: 20px; }
+        .btn-voltar { background: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin-bottom: 20px; }
+        .medias { display: flex; gap: 20px; margin-bottom: 25px; flex-wrap: wrap; }
+        .media-card { background: #fff; border-radius: 8px; padding: 20px 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; flex: 1; min-width: 150px; }
+        .media-card .numero { font-size: 36px; font-weight: bold; color: #ffc107; }
+        .media-card .label { font-size: 13px; color: #666; margin-top: 5px; }
+        .estrelas { color: #ffc107; font-size: 18px; }
+        table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+        thead { background: #4CAF50; color: white; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        tbody tr:hover { background: #f5f5f5; }
+        .comentario { font-size: 13px; color: #555; font-style: italic; }
+        .empty { text-align: center; padding: 40px; color: #666; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('login_administrador.painel_administrador') }}" class="btn-voltar">← Voltar ao Painel</a>
+
+    <h1>⭐ Avaliações de Atendimento</h1>
+
+    <!-- Médias -->
+    {% if medias and medias.total > 0 %}
+    <div class="medias">
+        <div class="media-card">
+            <div class="numero">{{ medias.media_atendimento }}</div>
+            <div class="estrelas">★★★★★</div>
+            <div class="label">Média Atendimento</div>
+        </div>
+        <div class="media-card">
+            <div class="numero">{{ medias.media_experiencia }}</div>
+            <div class="estrelas">★★★★★</div>
+            <div class="label">Média Experiência</div>
+        </div>
+        <div class="media-card">
+            <div class="numero">{{ medias.total }}</div>
+            <div class="label">Total de Avaliações</div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if avaliacoes %}
+    <table>
+        <thead>
+            <tr>
+                <th>Chamado</th>
+                <th>Palestra</th>
+                <th>Avaliador</th>
+                <th>Atendimento</th>
+                <th>Experiência</th>
+                <th>Comentário</th>
+                <th>Data</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for av in avaliacoes %}
+            <tr>
+                <td>#{{ av.chamado_id }}</td>
+                <td>{{ av.titulo }}</td>
+                <td>{{ av.avaliador_nome }}</td>
+                <td>
+                    {% for i in range(av.nota_atendimento) %}⭐{% endfor %}
+                    <small>({{ av.nota_atendimento }}/5)</small>
+                </td>
+                <td>
+                    {% for i in range(av.nota_experiencia) %}⭐{% endfor %}
+                    <small>({{ av.nota_experiencia }}/5)</small>
+                </td>
+                <td class="comentario">{{ av.comentario or '-' }}</td>
+                <td>{{ av.criado_em.strftime('%d/%m/%Y') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty">
+        <p>Nenhuma avaliação recebida ainda.</p>
+    </div>
+    {% endif %}
+</body>
+</html>

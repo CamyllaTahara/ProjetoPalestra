@@ -1,10 +1,14 @@
 # views/instituicao_views.py
-from flask import render_template, request, Blueprint, redirect, url_for
+from flask import current_app, render_template, request, Blueprint, redirect, url_for
 from werkzeug.security import generate_password_hash
 import re
 from models.instituicao import conectar_bd
 import mysql.connector
 import os  # Para manipulação de arquivos
+from flask import session
+from utils.security import login_required
+import time 
+ 
 
 palestrante_bp = Blueprint('palestrante', __name__)
 
@@ -127,36 +131,36 @@ def cadastro_palestrante():
                 if cursor.fetchone():
                     mensagem_erro_email = "Erro: Este e-mail já está cadastrado."
                     return render_template('cadastro_palestrante.html',
-                                           mensagem_erro_senha=mensagem_erro_senha,
-                                           mensagem_erro_email=mensagem_erro_email,
-                                           mensagem_erro_cpf=mensagem_erro_cpf,
-                                           mensagem_erro_telefone=mensagem_erro_telefone,
-                                           mensagem_erro_curriculo=mensagem_erro_curriculo,
-                                           dados_form=dados_form)
+                    mensagem_erro_senha=mensagem_erro_senha,
+                    mensagem_erro_email=mensagem_erro_email,
+                    mensagem_erro_cpf=mensagem_erro_cpf,
+                    mensagem_erro_telefone=mensagem_erro_telefone,
+                    mensagem_erro_curriculo=mensagem_erro_curriculo,
+                    dados_form=dados_form)
 
                 # Verificar se o CPF já está cadastrado
                 cursor.execute("SELECT id FROM palestrantes WHERE cpf = %s", (re.sub(r'\D', '', dados_form['cpf']),))
                 if cursor.fetchone():
                     mensagem_erro_cpf = "Erro: Este CPF já está cadastrado."
                     return render_template('cadastro_palestrante.html',
-                                           mensagem_erro_senha=mensagem_erro_senha,
-                                           mensagem_erro_email=mensagem_erro_email,
-                                           mensagem_erro_cpf=mensagem_erro_cpf,
-                                           mensagem_erro_telefone=mensagem_erro_telefone,
-                                           mensagem_erro_curriculo=mensagem_erro_curriculo,
-                                           dados_form=dados_form)
+                    mensagem_erro_senha=mensagem_erro_senha,
+                    mensagem_erro_email=mensagem_erro_email,
+                    mensagem_erro_cpf=mensagem_erro_cpf,
+                    mensagem_erro_telefone=mensagem_erro_telefone,
+                    mensagem_erro_curriculo=mensagem_erro_curriculo,
+                    dados_form=dados_form)
 
                 # Verificar se o telefone já está cadastrado
                 cursor.execute("SELECT id FROM palestrantes WHERE telefone = %s", (re.sub(r'\D', '', dados_form['telefone']),))
                 if cursor.fetchone():
                     mensagem_erro_telefone = "Erro: Este telefone já está cadastrado."
                     return render_template('cadastro_palestrante.html',
-                                           mensagem_erro_senha=mensagem_erro_senha,
-                                           mensagem_erro_email=mensagem_erro_email,
-                                           mensagem_erro_cpf=mensagem_erro_cpf,
-                                           mensagem_erro_telefone=mensagem_erro_telefone,
-                                           mensagem_erro_curriculo=mensagem_erro_curriculo,
-                                           dados_form=dados_form)
+                    mensagem_erro_senha=mensagem_erro_senha,
+                    mensagem_erro_email=mensagem_erro_email,
+                    mensagem_erro_cpf=mensagem_erro_cpf,
+                    mensagem_erro_telefone=mensagem_erro_telefone,
+                    mensagem_erro_curriculo=mensagem_erro_curriculo,
+                    dados_form=dados_form)
                 
 
                 # Se não houver erros, cadastrar o palestrante
@@ -196,10 +200,92 @@ def cadastro_palestrante():
                     print("Conexão fechada.")
 
     return render_template('cadastro_palestrante.html',
-                           mensagem_erro_senha=mensagem_erro_senha,
-                           mensagem_erro_email=mensagem_erro_email,
-                           mensagem_erro_cpf=mensagem_erro_cpf,
-                           mensagem_erro_telefone=mensagem_erro_telefone,
-                           mensagem_erro_curriculo=mensagem_erro_curriculo,
-                           dados_form=dados_form)
-                           
+                        mensagem_erro_senha=mensagem_erro_senha,
+                        mensagem_erro_email=mensagem_erro_email,
+                        mensagem_erro_cpf=mensagem_erro_cpf,
+                        mensagem_erro_telefone=mensagem_erro_telefone,
+                        mensagem_erro_curriculo=mensagem_erro_curriculo,
+                        dados_form=dados_form)
+                        
+
+@palestrante_bp.route("/editar_perfil",methods=["GET","POST"])
+@login_required("palestrante")
+def editar_perfil():
+    conexao=conectar_bd()
+    cursor=conexao.cursor(dictionary=True)
+    user_id=session["user_id"]
+    
+    if request.method == "POST":
+        descricao=request.form["descricao"]
+        ramo_atividade=request.form["ramo_atividade"]
+        anos_experiencia=request.form["anos_experiencia"]
+        email=request.form["email"]
+        telefone=request.form["telefone"]
+        foto=request.files.get("foto_perfil")  
+        curriculo_pdf=request.files.get("curriculo_pdf")
+
+        # NOVO
+        nome_foto = None
+        nome_curriculo = None
+        
+        cursor.execute("SELECT curriculo_pdf, foto FROM palestrantes WHERE id=%s",(user_id,))
+        dados_atuais = cursor.fetchone()
+
+        if foto and foto.filename !="":
+            extensao=foto.filename.rsplit(".",1)[1].lower()
+            nome_foto=f"{user_id}_foto_{int(time.time())}.{extensao}"
+
+            caminho = os.path.join("static", "fotos_palestrantes", nome_foto)
+
+              # apagar foto antiga
+            if dados_atuais["foto"]:
+               foto_antiga = os.path.join("static","fotos_palestrantes",dados_atuais["foto"])
+            if os.path.exists(foto_antiga):
+             os.remove(foto_antiga)
+
+            print("CAMINHO DA FOTO:", caminho)
+            foto.save(caminho)
+
+
+        if curriculo_pdf and curriculo_pdf.filename.endswith(".pdf"):
+            nome_curriculo=f"{user_id}_curriculo.pdf"
+
+            caminho = os.path.join(
+        
+        "uploads_curriculos",
+        nome_curriculo
+    )
+            curriculo_pdf.save(caminho)
+
+
+        # NOVO — buscar dados atuais
+        
+        cursor.execute("SELECT curriculo_pdf, foto FROM palestrantes WHERE id=%s",(user_id,))
+        dados_atuais = cursor.fetchone()
+
+
+        # NOVO — manter currículo antigo se não atualizar
+        if nome_curriculo is None:
+            nome_curriculo = dados_atuais["curriculo_pdf"]
+
+
+        # NOVO — manter foto antiga se não atualizar
+        if nome_foto is None:
+            nome_foto = dados_atuais["foto"]
+
+
+        sql = "UPDATE palestrantes set descricao = %s,ramo_atividade=%s, curriculo_pdf=%s,anos_experiencia=%s, email=%s, telefone=%s, foto=%s WHERE id =%s"
+        cursor.execute(sql,(descricao,ramo_atividade,nome_curriculo,anos_experiencia,email,telefone,nome_foto,user_id))
+        conexao.commit()
+
+        return redirect(url_for("palestrante.editar_perfil"))
+
+    cursor.execute("SELECT * FROM palestrantes WHERE id=%s",(user_id,))
+    palestrante = cursor.fetchone()
+
+    cursor.close()
+    conexao.close()
+
+    print(palestrante)
+
+    return render_template("editar_perfil_palestrante.html", palestrante=palestrante)

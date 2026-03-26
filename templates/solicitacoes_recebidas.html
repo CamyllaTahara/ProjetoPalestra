@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+        
+  
 <head>
     <meta charset="UTF-8">
     <title>Solicitações Recebidas</title>
@@ -190,7 +192,7 @@
                                         </button>
                                     </form>
                                     <form method="POST" action="{{ url_for('gerenciar_solicitacoes.responder_solicitacao', solicitacao_id=solicitacao.id, resposta='recusada') }}" style="display:inline;">
-                                        <button type="submit" class="btn-recusar" onclick="return confirm('Tem certeza que deseja recusar esta palestra?');">
+                                        <button type="button" class="btn-recusar" onclick="abrirModalRecusa('{{ solicitacao.id }}', '{{ solicitacao.titulo }}')">
                                             ✗ Recusar
                                         </button>
                                     </form>
@@ -208,5 +210,65 @@
             <p>Você não tem nenhuma solicitação de palestra no momento.</p>
         </div>
     {% endif %}
+
+<!-- Modal de Recusa -->
+<div id="modalRecusa" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+    <div style="background:#fff; padding:30px; border-radius:8px; max-width:500px; width:90%; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+        <h2 style="color:#dc3545; margin-top:0;">✗ Recusar Solicitação</h2>
+        <p id="modalTitulo" style="color:#555;"></p>
+        <form id="formRecusa" method="POST">
+            <label style="font-weight:bold; display:block; margin-bottom:8px;">
+                Motivo da recusa: <span style="color:#dc3545;">*</span>
+            </label>
+            <textarea 
+                name="motivo_recusa" 
+                id="motivoRecusa"
+                rows="4" 
+                placeholder="Explique o motivo da recusa para a instituição..."
+                required
+                style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-size:14px; resize:vertical; box-sizing:border-box;">
+            </textarea>
+            <p id="erroMotivo" style="color:#dc3545; font-size:13px; display:none;">Por favor, informe o motivo da recusa.</p>
+            <div style="display:flex; gap:10px; margin-top:15px; justify-content:flex-end;">
+                <button type="button" onclick="fecharModal()" style="padding:10px 20px; border:1px solid #6c757d; background:#fff; color:#6c757d; border-radius:4px; cursor:pointer;">
+                    Cancelar
+                </button>
+                <button type="button" onclick="confirmarRecusa()" class="btn-recusar" style="padding:10px 20px;">
+                    Confirmar Recusa
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function abrirModalRecusa(solicitacaoId, titulo) {
+        document.getElementById('modalTitulo').textContent = 'Palestra: ' + titulo;
+        document.getElementById('formRecusa').action = '/responder_solicitacao/' + solicitacaoId + '/recusada';
+        document.getElementById('motivoRecusa').value = '';
+        document.getElementById('erroMotivo').style.display = 'none';
+        document.getElementById('modalRecusa').style.display = 'flex';
+    }
+
+    function fecharModal() {
+        document.getElementById('modalRecusa').style.display = 'none';
+    }
+
+    function confirmarRecusa() {
+        const motivo = document.getElementById('motivoRecusa').value.trim();
+        if (!motivo) {
+            document.getElementById('erroMotivo').style.display = 'block';
+            return;
+        }
+        document.getElementById('formRecusa').submit();
+    }
+
+    // Fecha o modal clicando fora
+    document.getElementById('modalRecusa').addEventListener('click', function(e) {
+        if (e.target === this) fecharModal();
+    });
+</script>
+
+
 </body>
 </html>

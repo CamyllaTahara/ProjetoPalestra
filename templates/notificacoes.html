@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Notificações</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { color: #333; margin-bottom: 20px; }
+        .btn-voltar { background: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin-bottom: 20px; }
+        .notif { background: #fff; border-radius: 8px; padding: 15px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; gap: 12px; align-items: center; text-decoration: none; color: inherit; transition: background 0.2s; }
+        .notif:hover { background: #f8f9fa; }
+        .notif.nao-lida { border-left: 4px solid #4CAF50; }
+        .notif.lida { border-left: 4px solid #eee; opacity: 0.8; }
+        .notif-icone { font-size: 24px; flex-shrink: 0; }
+        .notif-texto { flex: 1; }
+        .notif-msg { font-size: 14px; color: #333; }
+        .notif-post { font-size: 12px; color: #888; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 400px; }
+        .notif-hora { font-size: 12px; color: #aaa; flex-shrink: 0; }
+        .empty { text-align: center; padding: 50px; color: #999; background: #fff; border-radius: 8px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="{{ url_for('feed.feed') }}" class="btn-voltar">← Voltar ao Feed</a>
+    <h1>🔔 Notificações</h1>
+
+    {% if notificacoes %}
+        {% for n in notificacoes %}
+        <a href="{{ url_for('feed.ver_post', post_id=n.post_id) }}" class="notif {{ 'nao-lida' if not n.lida else 'lida' }}">
+            <div class="notif-icone">
+                {{ '❤️' if n.tipo == 'curtida' else '💬' if n.tipo == 'comentario' else '↩️' }}
+            </div>
+            <div class="notif-texto">
+                <div class="notif-msg">{{ n.mensagem }}</div>
+                <div class="notif-post">{{ n.post_descricao[:60] }}...</div>
+            </div>
+            <div class="notif-hora">{{ n.criado_em.strftime('%d/%m %H:%M') }}</div>
+        </a>
+        {% endfor %}
+    {% else %}
+        <div class="empty">
+            <p style="font-size:40px;">🔔</p>
+            <p style="margin-top:10px;">Nenhuma notificação ainda.</p>
+        </div>
+    {% endif %}
+</div>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Nova Postagem</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { color: #333; margin-bottom: 5px; }
+        .subtitulo { color: #666; font-size: 14px; margin-bottom: 25px; }
+        .btn-voltar { background: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin-bottom: 20px; }
+        .card { background: #fff; border-radius: 8px; padding: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        label { font-weight: bold; display: block; margin-bottom: 6px; color: #444; }
+        textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; resize: vertical; min-height: 120px; margin-bottom: 20px; }
+        .upload-area { border: 2px dashed #ddd; border-radius: 8px; padding: 30px; text-align: center; cursor: pointer; margin-bottom: 20px; transition: border-color 0.2s; }
+        .upload-area:hover { border-color: #4CAF50; }
+        .upload-area input { display: none; }
+        .upload-area p { color: #888; font-size: 14px; margin-top: 8px; }
+        .preview-fotos { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .preview-foto { width: 100px; height: 100px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; }
+        .btn-publicar { background: #4CAF50; color: white; padding: 12px 25px; border: none; border-radius: 4px; cursor: pointer; font-size: 15px; width: 100%; }
+        .btn-publicar:hover { background: #45a049; }
+        .alert { padding: 12px 15px; border-radius: 4px; margin-bottom: 20px; }
+        .alert-danger { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="{{ url_for('feed.feed') }}" class="btn-voltar">← Voltar ao Feed</a>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <h1>📸 Nova Postagem</h1>
+    <p class="subtitulo">Compartilhe fotos e experiências das suas palestras!</p>
+
+    <div class="card">
+        <form method="POST" enctype="multipart/form-data">
+            <label>Descrição:</label>
+            <textarea name="descricao" placeholder="Conte sobre esta palestra, experiência ou momento especial..." required></textarea>
+            <label>📍 Localização (opcional):</label>
+<input type="text" name="localizacao" placeholder="Ex: São Paulo, SP"
+       style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-size:14px; margin-bottom:20px;">
+            <label>Fotos (opcional):</label>
+            <div class="upload-area" onclick="document.getElementById('inputFotos').click()">
+                <input type="file" id="inputFotos" name="fotos" multiple accept="image/*" onchange="previewFotos(this)">
+                <span style="font-size:30px;">📷</span>
+                <p>Clique para selecionar fotos</p>
+                <p style="font-size:12px;">PNG, JPG, JPEG, GIF — múltiplas fotos permitidas</p>
+            </div>
+
+            <div class="preview-fotos" id="previewFotos"></div>
+
+            <button type="submit" class="btn-publicar">📤 Publicar</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function previewFotos(input) {
+        const container = document.getElementById('previewFotos');
+        container.innerHTML = '';
+        Array.from(input.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'preview-foto';
+                container.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+</script>
+
+<script>
+// Lista de usuários para autocomplete
+const usuarios = {{ usuarios | tojson | safe }};
+function setupMencao(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    const sugestoes = document.createElement('div');
+    sugestoes.style.cssText = 'position:absolute; background:#fff; border:1px solid #ddd; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,0.15); max-height:200px; overflow-y:auto; z-index:100; display:none; min-width:200px;';
+    input.parentNode.style.position = 'relative';
+    input.parentNode.appendChild(sugestoes);
+
+    input.addEventListener('input', function() {
+        const val = this.value;
+        const ultimaArroba = val.lastIndexOf('@');
+        if (ultimaArroba === -1) { sugestoes.style.display = 'none'; return; }
+
+        const busca = val.slice(ultimaArroba + 1).toLowerCase();
+        if (!busca) { sugestoes.style.display = 'none'; return; }
+
+        const filtrados = usuarios.filter(u => u.nome.toLowerCase().includes(busca));
+        if (!filtrados.length) { sugestoes.style.display = 'none'; return; }
+
+        sugestoes.innerHTML = '';
+        filtrados.slice(0, 5).forEach(u => {
+            const item = document.createElement('div');
+            item.style.cssText = 'padding:8px 12px; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:8px;';
+            item.innerHTML = `<span>${u.tipo === 'palestrante' ? '👤' : '🏢'}</span> ${u.nome}`;
+            item.onmouseenter = () => item.style.background = '#f0f0f0';
+            item.onmouseleave = () => item.style.background = '';
+            item.onclick = () => {
+                const antes = val.slice(0, ultimaArroba);
+                input.value = antes + '@' + u.nome + ' ';
+                sugestoes.style.display = 'none';
+                input.focus();
+            };
+            sugestoes.appendChild(item);
+        });
+        sugestoes.style.display = 'block';
+    });
+
+    document.addEventListener('click', e => {
+        if (!sugestoes.contains(e.target) && e.target !== input) {
+            sugestoes.style.display = 'none';
+        }
+    });
+}
+
+setupMencao('descricao');       // no novo_post.html
+setupMencao('input-comentario'); // no ver_post.html
+</script>
+</body>
+</html>
