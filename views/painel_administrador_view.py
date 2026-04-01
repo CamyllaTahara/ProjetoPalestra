@@ -14,3 +14,4 @@ def logout_administrador():
     return login_required("login_administrador.html")
 
 
+

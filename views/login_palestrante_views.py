@@ -156,6 +156,10 @@ if not os.path.exists(UPLOAD_FOLDER):
 @login_palestrante_bp.route('/login_palestrante', methods=['GET', 'POST'])
 def login_palestrante():
     print(f"🔴🔴🔴 ARQUIVO login_palestrante.py FOI CARREGADO 🔴🔴🔴")
+    print("--- DEBUG LOGIN ---")
+    print(f"ID na sessão: {session.get('user_id')}")
+    print(f"Tipo na sessão: {session.get('user_type')}")
+    
     mensagem_erro = None
     mensagem_sucesso = request.args.get('mensagem_sucesso')
     conexao = None
@@ -497,6 +501,12 @@ def painel_palestrante():
             else:
                 # Se o ID na sessão for inválido, limpa a sessão e redireciona para o login
                 session.clear()
+                if usuario:
+                 return render_template("painel_palestrante.html", usuario=usuario)
+                else:
+                 print("DEBUG: PERDI A SESSÃO PORQUE NÃO ACHEI O USUÁRIO NO BANCO!") # <--- ADICIONE ISSO
+                session.clear()
+                return redirect(url_for('login_palestrante.login_palestrante'))
                 flash("Sessão inválida. Por favor, faça login novamente.", "erro")
                 return redirect(url_for('login_palestrante.login_palestrante'))
 

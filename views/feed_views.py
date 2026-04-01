@@ -64,7 +64,29 @@ def processar_mencoes(texto, post_id, autor_tipo, autor_id, cursor):
             """, (tipo_encontrado, dest_id, post_id, autor_tipo, autor_id))
 
 def destacar_mencoes(texto):
-    return re.sub(r'@([\w\s]+?)(?=\s|$|[,.])', r'<strong style="color:#4CAF50;">@\1</strong>', texto)
+    """Transforma @menções em links clicáveis."""
+    def substituir(match):
+        nome = match.group(1).strip()
+        # Buscar palestrante
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT id FROM palestrantes WHERE nome_completo LIKE %s", (f"%{nome}%",))
+        encontrado = cursor.fetchone()
+        if encontrado:
+            url = f"/perfil/palestrante/{encontrado['id']}"
+        else:
+            cursor.execute("SELECT id FROM instituicoes WHERE nome LIKE %s", (f"%{nome}%",))
+            encontrado = cursor.fetchone()
+            url = f"/perfil/instituicao/{encontrado['id']}" if encontrado else None
+        cursor.close()
+        conn.close()
+
+        if url:
+            return f'<a href="{url}" style="color:#4CAF50; font-weight:bold; text-decoration:none;">@{nome}</a>'
+        return f'<strong style="color:#4CAF50;">@{nome}</strong>'
+
+    return re.sub(r'@([\w\s]+?)(?=\s|$|[,.])', substituir, texto)
+
 
 def buscar_usuarios():
     conn = get_db_connection()
@@ -89,23 +111,57 @@ def feed():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("""
-        SELECT p.id, p.autor_tipo, p.autor_id, p.descricao, p.localizacao, p.criado_em,
-               COUNT(DISTINCT c.id) AS total_curtidas,
-               COUNT(DISTINCT cm.id) AS total_comentarios
-        FROM posts_feed p
-        LEFT JOIN curtidas_post c ON c.post_id = p.id
-        LEFT JOIN comentarios_post cm ON cm.post_id = p.id
-        GROUP BY p.id
-        ORDER BY p.criado_em DESC
-    """)
-    posts_raw = cursor.fetchall()
+    # 1. TENTA BUSCAR POSTS (Meus + Quem eu sigo)
+    if user_id and user_type in ('palestrante', 'instituicao'):
+        cursor.execute("""
+            SELECT p.id, p.autor_tipo, p.autor_id, p.descricao, p.localizacao, p.criado_em,
+                   COUNT(DISTINCT c.id) AS total_curtidas,
+                   COUNT(DISTINCT cm.id) AS total_comentarios
+            FROM posts_feed p
+            LEFT JOIN curtidas_post c ON c.post_id = p.id
+            LEFT JOIN comentarios_post cm ON cm.post_id = p.id
+            WHERE 
+                (p.autor_tipo = %s AND p.autor_id = %s)
+                OR 
+                EXISTS (
+                    SELECT 1 FROM seguidores s 
+                    WHERE s.seguidor_tipo = %s 
+                      AND s.seguidor_id = %s 
+                      AND s.seguido_tipo = p.autor_tipo 
+                      AND s.seguido_id = p.autor_id
+                )
+            GROUP BY p.id
+            ORDER BY p.criado_em DESC
+        """, (user_type, user_id, user_type, user_id))
+        posts_raw = cursor.fetchall()
+    else:
+        posts_raw = []
 
-    posts = []
+    # 2. SE NÃO TIVER POSTS DE QUEM SEGUE, BUSCA TUDO (Feed Global)
+    if not posts_raw:
+        cursor.execute("""
+            SELECT p.id, p.autor_tipo, p.autor_id, p.descricao, p.localizacao, p.criado_em,
+                   COUNT(DISTINCT c.id) AS total_curtidas,
+                   COUNT(DISTINCT cm.id) AS total_comentarios
+            FROM posts_feed p
+            LEFT JOIN curtidas_post c ON c.post_id = p.id
+            LEFT JOIN comentarios_post cm ON cm.post_id = p.id
+            GROUP BY p.id
+            ORDER BY p.criado_em DESC
+            LIMIT 20
+        """)
+        posts_raw = cursor.fetchall()
+
+    # 3. PROCESSA OS DADOS PARA O TEMPLATE (Aqui estava o erro do posts=[])
+    posts_final = []
     for post in posts_raw:
         post['autor_nome'] = get_autor_nome(cursor, post['autor_tipo'], post['autor_id'])
+        
+        # Fotos
         cursor.execute("SELECT caminho FROM fotos_post WHERE post_id = %s", (post['id'],))
         post['fotos'] = cursor.fetchall()
+        
+        # Curtida do usuário logado
         post['ja_curtiu'] = False
         if user_id and user_type:
             cursor.execute("""
@@ -113,22 +169,98 @@ def feed():
                 WHERE post_id = %s AND autor_tipo = %s AND autor_id = %s
             """, (post['id'], user_type, user_id))
             post['ja_curtiu'] = cursor.fetchone() is not None
-        posts.append(post)
+            
+        posts_final.append(post)
 
+    # 4. NOTIFICAÇÕES
     notificacoes_nao_lidas = 0
     if user_id and user_type in ('palestrante', 'instituicao'):
         cursor.execute("""
             SELECT COUNT(*) AS total FROM notificacoes
             WHERE destinatario_tipo = %s AND destinatario_id = %s AND lida = 0
         """, (user_type, user_id))
-        notificacoes_nao_lidas = cursor.fetchone()['total']
+        result_notif = cursor.fetchone()
+        notificacoes_nao_lidas = result_notif['total'] if result_notif else 0
 
     cursor.close()
     conn.close()
 
-    return render_template('feed.html', posts=posts, user_id=user_id, user_type=user_type,
+    return render_template('feed.html', 
+                           posts=posts_final, 
+                           user_id=user_id, 
+                           user_type=user_type,
                            notificacoes_nao_lidas=notificacoes_nao_lidas)
 
+@feed_bp.route('/explorar')
+def explorar():
+    user_id = session.get('user_id')
+    user_type = session.get('user_type')
+    
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # 1. Busca Instituições (exceto VOCÊ, se você for uma instituição)
+    if user_type == 'instituicao':
+        cursor.execute("SELECT * FROM instituicoes WHERE id != %s", (user_id,))
+    else:
+        cursor.execute("SELECT * FROM instituicoes")
+    instituicoes = cursor.fetchall()
+
+    # 2. Busca Palestrantes (exceto VOCÊ, se você for um palestrante)
+    if user_type == 'palestrante':
+        cursor.execute("SELECT * FROM palestrantes WHERE id != %s", (user_id,))
+    else:
+        cursor.execute("SELECT * FROM palestrantes")
+    palestrantes = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('explorar.html', 
+                           instituicoes=instituicoes, 
+                           palestrantes=palestrantes)
+
+@feed_bp.route('/seguir/<tipo>/<int:alvo_id>', methods=['POST'])
+def seguir(tipo, alvo_id):
+    user_id = session.get('user_id')
+    user_type = session.get('user_type')
+
+    if not user_id:
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # 1. Verifica se o vínculo já existe
+        cursor.execute("""
+            SELECT id FROM seguidores 
+            WHERE seguidor_tipo = %s AND seguidor_id = %s 
+            AND seguido_tipo = %s AND seguido_id = %s
+        """, (user_type, user_id, tipo, alvo_id))
+        
+        vinculo = cursor.fetchone()
+
+        if vinculo:
+            # 2. Se já existe, DELETA (Unfollow)
+            cursor.execute("DELETE FROM seguidores WHERE id = %s", (vinculo['id'],))
+        else:
+            # 3. Se não existe, INSERE (Follow)
+            cursor.execute("""
+                INSERT INTO seguidores (seguidor_tipo, seguidor_id, seguido_tipo, seguido_id) 
+                VALUES (%s, %s, %s, %s)
+            """, (user_type, user_id, tipo, alvo_id))
+
+        conn.commit()
+    except mysql.connector.Error as err:
+        print(f"Erro no banco: {err}")
+        # Se der erro de duplicata, não fazemos nada, apenas deixamos seguir a vida
+        pass 
+    finally:
+        cursor.close()
+        conn.close()
+
+    return redirect(request.referrer or url_for('feed.explorar'))
 
 # ─────────────────────────────────────────────
 # CRIAR POST
@@ -448,3 +580,176 @@ def deletar_post(post_id):
 
     flash("Post deletado com sucesso.", "success")
     return redirect(url_for('feed.feed'))
+
+
+# ─────────────────────────────────────────────
+# PERFIL PÚBLICO
+# ─────────────────────────────────────────────
+@feed_bp.route('/perfil/palestrante/<int:palestrante_id>')
+def perfil_palestrante(palestrante_id):
+    user_id = session.get('user_id')
+    user_type = session.get('user_type')
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Busca o palestrante
+    cursor.execute("SELECT * FROM palestrantes WHERE id = %s", (palestrante_id,))
+    perfil = cursor.fetchone()
+    if not perfil:
+        return "Não encontrado", 404
+    
+    perfil['display_name'] = perfil['nome_completo']
+
+    # --- NOVO: CONTADORES ---
+    # Quem segue esta instituição
+    cursor.execute("SELECT COUNT(*) as total FROM seguidores WHERE seguido_tipo='palestrante' AND seguido_id=%s", (palestrante_id,))
+    total_seguidores = cursor.fetchone()['total']
+
+    # Quem esta instituição segue
+    cursor.execute("SELECT COUNT(*) as total FROM seguidores WHERE seguidor_tipo='palestrante' AND seguidor_id=%s", (palestrante_id,))
+    total_seguindo = cursor.fetchone()['total']
+
+    # BUSCA APENAS POSTS DESTE PALESTRANTE
+    cursor.execute("""
+        SELECT p.* FROM posts_feed p 
+        WHERE p.autor_tipo = 'palestrante' AND p.autor_id = %s
+        ORDER BY p.criado_em DESC
+    """, (palestrante_id,))
+    posts_raw = cursor.fetchall()
+
+    for post in posts_raw:
+        post['autor_nome'] = perfil['nome_completo']
+        cursor.execute("SELECT caminho FROM fotos_post WHERE post_id = %s", (post['id'],))
+        post['fotos'] = cursor.fetchall()
+
+    # Verificação de Seguir
+    ja_segue = False
+    if user_id and user_type:
+        cursor.execute("""SELECT id FROM seguidores WHERE seguidor_tipo=%s AND seguidor_id=%s 
+                          AND seguido_tipo='palestrante' AND seguido_id=%s""", 
+                       (user_type, user_id, palestrante_id))
+        ja_segue = cursor.fetchone() is not None
+
+
+    cursor.close()
+    conn.close()
+    # Enviamos como 'perfil' para o HTML ser genérico
+    return render_template('perfil_palestrante.html', 
+                       perfil=perfil, 
+                       total_seguidores=total_seguidores,  # Verifique se esta linha existe!
+                       total_seguindo=total_seguindo,      # E esta!
+                       ja_segue=ja_segue,                  # E esta também!
+                       user_id=user_id, 
+                       user_type=user_type,
+                       posts=posts_raw)
+
+@feed_bp.route('/perfil/instituicao/<int:instituicao_id>')
+def perfil_instituicao(instituicao_id):
+    user_id = session.get('user_id')
+    user_type = session.get('user_type')
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Busca a instituição
+    cursor.execute("SELECT * FROM instituicoes WHERE id = %s", (instituicao_id,))
+    perfil = cursor.fetchone()
+    if not perfil:
+        return "Não encontrado", 404
+    
+    perfil['display_name'] = perfil['nome']
+
+    # --- NOVO: CONTADORES ---
+    # Quem segue esta instituição
+    cursor.execute("SELECT COUNT(*) as total FROM seguidores WHERE seguido_tipo='instituicao' AND seguido_id=%s", (instituicao_id,))
+    total_seguidores = cursor.fetchone()['total']
+
+    # Quem esta instituição segue
+    cursor.execute("SELECT COUNT(*) as total FROM seguidores WHERE seguidor_tipo='instituicao' AND seguidor_id=%s", (instituicao_id,))
+    total_seguindo = cursor.fetchone()['total']
+
+    ja_segue = False
+    if user_id and user_type:
+        cursor.execute("""SELECT id FROM seguidores WHERE seguidor_tipo=%s AND seguidor_id=%s 
+                          AND seguido_tipo='instituicao' AND seguido_id=%s""", 
+                       (user_type, user_id, instituicao_id))
+        ja_segue = cursor.fetchone() is not None
+    
+    if not perfil:
+        conn.close()
+        return "Instituição não encontrada", 404
+
+    # BUSCA APENAS POSTS DESTA INSTITUIÇÃO
+    cursor.execute("""
+        SELECT p.* FROM posts_feed p 
+        WHERE p.autor_tipo = 'instituicao' AND p.autor_id = %s
+        ORDER BY p.criado_em DESC
+    """, (instituicao_id,))
+    posts_raw = cursor.fetchall()
+
+    for post in posts_raw:
+        post['autor_nome'] = perfil['nome']
+        cursor.execute("SELECT caminho FROM fotos_post WHERE post_id = %s", (post['id'],))
+        post['fotos'] = cursor.fetchall()
+
+    # Verificação de Seguir
+    ja_segue = False
+    if user_id and user_type:
+        cursor.execute("""SELECT id FROM seguidores WHERE seguidor_tipo=%s AND seguidor_id=%s 
+                          AND seguido_tipo='instituicao' AND seguido_id=%s""", 
+                       (user_type, user_id, instituicao_id))
+        ja_segue = cursor.fetchone() is not None
+
+    cursor.close()
+    conn.close()
+    return render_template('perfil_instituicao.html', 
+                       perfil=perfil, 
+                       total_seguidores=total_seguidores,  # Verifique se esta linha existe!
+                       total_seguindo=total_seguindo,      # E esta!
+                       ja_segue=ja_segue,                  # E esta também!
+                       user_id=user_id, 
+                       user_type=user_type,
+                       posts=posts_raw)
+
+@feed_bp.route('/meu_perfil_pal')
+def meu_perfil_pal():
+    user_id = session.get('user_id')
+    user_type = session.get('user_type')
+
+    if not user_id or user_type != 'palestrante':
+        return redirect(url_for('login')) # Só palestrantes acessam aqui
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # 1. Busca os dados do próprio palestrante
+    cursor.execute("SELECT * FROM palestrantes WHERE id = %s", (user_id,))
+    perfil = cursor.fetchone()
+    perfil['display_name'] = perfil['nome_completo']
+
+    # 2. Contadores (Seguidores e Seguindo)
+    cursor.execute("SELECT COUNT(*) as total FROM seguidores WHERE seguido_tipo='palestrante' AND seguido_id=%s", (user_id,))
+    total_seguidores = cursor.fetchone()['total']
+
+    cursor.execute("SELECT COUNT(*) as total FROM seguidores WHERE seguidor_tipo='palestrante' AND seguidor_id=%s", (user_id,))
+    total_seguindo = cursor.fetchone()['total']
+
+    # 3. Busca APENAS as postagens dele
+    cursor.execute("""
+        SELECT p.* FROM posts_feed p 
+        WHERE p.autor_tipo = 'palestrante' AND p.autor_id = %s
+        ORDER BY p.criado_em DESC
+    """, (user_id,))
+    meus_posts = cursor.fetchall()
+
+    for post in meus_posts:
+        cursor.execute("SELECT caminho FROM fotos_post WHERE post_id = %s", (post['id'],))
+        post['fotos'] = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('meu_perfil_palestrante.html', 
+                           perfil=perfil, 
+                           total_seguidores=total_seguidores,
+                           total_seguindo=total_seguindo,
+                           posts=meus_posts)

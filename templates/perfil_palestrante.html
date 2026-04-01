@@ -2,116 +2,129 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Perfil e Disponibilidade de {{ palestrante.nome_completo }}</title>
+    <title>Perfil e Disponibilidade de {{ perfil.nome_completo }}</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; max-width: 900px; margin: 0 auto; }
         .btn-voltar { background-color: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin-bottom: 20px; }
-        .btn-voltar:hover { background-color: #5a6268; }
         .card-perfil { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 30px; }
         .btn-solicitar { background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin-top: 20px; font-weight: bold; }
-        .btn-solicitar:hover { background-color: #45a049; }
         h1, h2 { color: #333; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background-color: #fff; }
         thead { background-color: #007bff; color: white; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-        tbody tr:hover { background-color: #f5f5f5; }
-        .empty-message { background-color: #fff; padding: 30px; text-align: center; color: #666; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .card-post { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+        .post-img { max-width: 100%; border-radius: 5px; margin-top: 10px; }
     </style>
-
 </head>
 <body>
-    <a href="{{ url_for('gerenciar_solicitacoes.listar_palestrantes') }}" class="btn-voltar">
-        ← Voltar à Busca
-    </a>
+    <a href="{{ url_for('gerenciar_solicitacoes.listar_palestrantes') }}" class="btn-voltar">← Voltar à Busca</a>
 
     <div class="card-perfil">
+        <div style="display:flex; align-items:center; gap:20px;">
+            {% if perfil.foto %}
+                <img src="{{ url_for('static', filename='fotos_palestrantes/' + perfil.foto) }}" width="120" height="120" style="border-radius:50%; object-fit:cover;">
+            {% else %}
+                <img src="{{ url_for('static', filename='fotos_palestrantes/perfil.png') }}" width="120" height="120" style="border-radius:50%;">
+            {% endif %}
+            <div>
+         <h1>{{ perfil.nome_completo }}</h1>
 
-            <div style="display:flex; align-items:center; gap:20px;">
-                
-                
-    {% if palestrante.foto %}
-        <img src="{{ url_for('static', filename='fotos_palestrantes/' + palestrante.foto) }}"
-        width="120" height="120"
-        style="border-radius:50%; object-fit:cover;">
-    {% else %}
-        <img src="{{ url_for('static', filename='fotos_palestrantes/perfil.png')}}"
-        width="120" height="120"
-        style="border-radius:50%;">
-    {% endif %}
-
-    <hr>
-
-<h2>Sobre o palestrante</h2>
-
-<p>
-{{ palestrante.descricao or "Este palestrante ainda não adicionou uma descrição." }}
-</p>
-
+     <div style="display: flex; gap: 20px; color: #666; font-size: 14px; margin-top: 5px;">
+    <span><strong>{{ total_seguidores }}</strong> seguidores</span>
+    <span><strong>{{ total_seguindo }}</strong> seguindo</span>
 </div>
 
-        <h1>Perfil do Palestrante: {{ palestrante.nome_completo }}</h1>
-        <p><strong>Ramo de Atividade:</strong> {{ palestrante.ramo_atividade }}</p>
-        <p><strong>Experiência:</strong> {{ palestrante.anos_experiencia }} anos</p>
-        <p><strong>Email:</strong> {{ palestrante.email }}</p>
-        <p><strong>Telefone:</strong> {{ palestrante.telefone }}</p>
-      <p>
-            <strong>Currículo:</strong>
 
-            <a href="{{ url_for('gerenciar_solicitacoes.ver_curriculo', palestrante_id=palestrante.id) }}" target="_blank">
-            👁 Ver currículo
-            </a>
+          
+                {% if user_type in ('palestrante', 'instituicao') %}
+                     {% if ja_segue %}
+        <form method="POST" action="{{ url_for('feed.seguir', tipo='palestrante', alvo_id=perfil.id) }}" style="display:inline;">
+            <button type="submit" style="background:#6c757d; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer;">
+                ✓ Seguindo
+            </button>
+        </form>
+    {% else %}
+        <form method="POST" action="{{ url_for('feed.seguir', tipo='palestrante', alvo_id=perfil.id) }}" style="display:inline;">
+            <button type="submit" style="background:#4CAF50; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer;">
+                + Seguir
+            </button>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
 
-|
-
-            <a href="{{ url_for('gerenciar_solicitacoes.download_curriculo', palestrante_id=palestrante.id) }}">
-            ⬇ Baixar PDF
-            </a>
-
-        </p>
         <hr>
+        <h2>Sobre o palestrante</h2>
+        <p>{{ perfil.descricao or "Este palestrante ainda não adicionou uma descrição." }}</p>
         
-        <a href="{{ url_for('gerenciar_solicitacoes.solicitar_palestra', palestrante_id=palestrante.id) }}" class="btn-solicitar">
-            Solicitar Palestra para {{ palestrante.nome_completo }}
-        </a>
+        <p><strong>Ramo de Atividade:</strong> {{ perfil.ramo_atividade }}</p>
+        <p><strong>Experiência:</strong> {{ perfil.anos_experiencia }} anos</p>
+        <p><strong>Email:</strong> {{ perfil.email }}</p>
+        <p><strong>Telefone:</strong> {{ perfil.telefone }}</p>
+        
+        <p>
+            <strong>Currículo:</strong>
+            <a href="{{ url_for('gerenciar_solicitacoes.ver_curriculo', palestrante_id=perfil.id) }}" target="_blank">👁 Ver currículo</a> |
+            <a href="{{ url_for('gerenciar_solicitacoes.download_curriculo', palestrante_id=perfil.id) }}">⬇ Baixar PDF</a>
+        </p>
+        
+        {% if user_type == 'instituicao' %}
+    <a href="{{ url_for('gerenciar_solicitacoes.solicitar_palestra', palestrante_id=perfil.id) }}" class="btn-solicitar">
+        Solicitar Palestra para {{ perfil.nome_completo }}
+    </a>
+{% endif %}
     </div>
 
-    <h2>Disponibilidades Cadastradas (Horários Livres)</h2>
-
+    {% if user_type == 'instituicao' %}
+    <hr>
+    <h2>📅 Horários Disponíveis</h2>
+    
     {% if disponibilidades %}
         <table>
             <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Horário de Início</th>
-                    <th>Horário de Fim</th>
-                </tr>
+                <tr><th>Data</th><th>Início</th><th>Fim</th></tr>
             </thead>
             <tbody>
-                {% for disponibilidade in disponibilidades%}
+                {% for disp in disponibilidades %}
                     <tr>
-                    <td>  
-            <a href="{{ url_for('gerenciar_solicitacoes.solicitar_palestra', 
-                 palestrante_id=palestrante.id,
-                 data=disponibilidade.data.strftime('%Y-%m-%d'), 
-                 horario_inicio=disponibilidade.horario_inicio,
-                 horario_fim=disponibilidade.horario_fim) }}"
-                 style="text-decoration: none; font-weight: bold; color: #007bff;">
-                 
-                {{ disponibilidade.data.strftime('%d/%m/%Y') }}
-            </a>
-        </td> 
-        
-        <td>{{ disponibilidade.horario_inicio }}</td> 
-        <td>{{ disponibilidade.horario_fim }}</td>
-    </tr>
+                        <td> 
+                            <a href="{{ url_for('gerenciar_solicitacoes.solicitar_palestra', 
+                                 palestrante_id=perfil.id,
+                                 data=disp.data.strftime('%Y-%m-%d')) }}"
+                                 style="text-decoration: none; font-weight: bold; color: #007bff;">
+                                {{ disp.data.strftime('%d/%m/%Y') }}
+                            </a>
+                        </td>
+                        <td>{{ disp.horario_inicio }}</td>
+                        <td>{{ disp.horario_fim }}</td>
+                    </tr>
                 {% endfor %}
             </tbody>
         </table>
     {% else %}
-        <div class="empty-message">
-            <p>Este palestrante não registrou nenhuma disponibilidade futura no momento.</p>
-        </div>
+        <p>Nenhuma disponibilidade futura registrada.</p>
     {% endif %}
+{% endif %}
 
+    <hr>
+    <h2>📸 Publicações</h2>
+    <div class="feed-perfil">
+        {% if posts %}
+            {% for post in posts %}
+                <div class="card-post">
+                    <p><strong>{{ perfil.nome_completo }}</strong> - <small>{{ post.criado_em.strftime('%d/%m/%Y') }}</small></p>
+                    <p>{{ post.descricao }}</p>
+                    
+                    {% if post.fotos %}
+                        {% for foto in post.fotos %}
+                            <img src="{{ url_for('static', filename='uploads/' + foto.caminho) }}" class="post-img">
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Este palestrante ainda não fez publicações.</p>
+        {% endif %}
+    </div>
 </body>
-</html>  
+</html>
