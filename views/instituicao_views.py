@@ -1,11 +1,12 @@
 
 # views/instituicao_views.py
-from flask import render_template, request, Blueprint
+from flask import flash, redirect, render_template, request, Blueprint, session, url_for
 from werkzeug.security import generate_password_hash
 import requests
 import re
 from models.instituicao import conectar_bd
 import mysql.connector
+from utils.security import login_required
 
 instituicao_bp = Blueprint('instituicao', __name__)
 
@@ -204,3 +205,61 @@ def cadastro_instituicao():
                            mensagem_erro_telefone=mensagem_erro_telefone,
                            mensagem_erro_numero=mensagem_erro_numero, # Passa a mensagem de erro para o template
                            dados_form=dados_form)
+
+import time
+import os
+
+@instituicao_bp.route("/editar_perfil", methods=["GET", "POST"])
+@login_required("instituicao")
+def editar_perfil():
+    conexao = conectar_bd()
+    cursor = conexao.cursor(dictionary=True)
+    user_id = session["user_id"]
+    
+    if request.method == "POST":
+        endereco = request.form["endereco"]
+        email = request.form["email"]
+        telefone = request.form["telefone"]
+        cnpj = request.form["cnpj"]
+        foto = request.files.get("foto_perfil") # Pega o arquivo do formulário
+
+        # Buscar dados atuais para saber o nome da foto antiga
+        cursor.execute("SELECT foto FROM instituicoes WHERE id=%s", (user_id,))
+        dados_atuais = cursor.fetchone()
+        nome_foto = dados_atuais["foto"] # Por padrão, mantém a que já existe
+
+        if foto and foto.filename != "":
+            # Gerar novo nome para a foto
+            extensao = foto.filename.rsplit(".", 1)[1].lower()
+            nome_foto = f"inst_{user_id}_{int(time.time())}.{extensao}"
+            
+            # Caminho onde será salva (crie a pasta 'fotos_instituicoes' dentro de static)
+            pasta_destino = os.path.join("static", "fotos_instituicoes")
+            if not os.path.exists(pasta_destino):
+                os.makedirs(pasta_destino)
+            
+            caminho = os.path.join(pasta_destino, nome_foto)
+
+            # Apagar foto antiga se ela existir e não for a padrão
+            if dados_atuais["foto"]:
+                caminho_antigo = os.path.join(pasta_destino, dados_atuais["foto"])
+                if os.path.exists(caminho_antigo):
+                    os.remove(caminho_antigo)
+
+            foto.save(caminho)
+
+        # Update com a nova foto (ou a antiga mantida)
+        sql = "UPDATE instituicoes SET endereco=%s, email=%s, telefone=%s, cnpj=%s, foto=%s WHERE id=%s"
+        cursor.execute(sql, (endereco, email, telefone, cnpj, nome_foto, user_id))
+        conexao.commit()
+
+        flash("Perfil atualizado com sucesso!", "success")
+        return redirect(url_for("instituicao.editar_perfil"))
+
+    # GET: Carregar dados para o formulário
+    cursor.execute("SELECT * FROM instituicoes WHERE id=%s", (user_id,))
+    instituicao = cursor.fetchone()
+    cursor.close()
+    conexao.close()
+
+    return render_template("editar_perfil_instituicao.html", instituicao=instituicao)

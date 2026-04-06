@@ -78,8 +78,9 @@ def perfil_palestrante(palestrante_id):
         conn.close()
         
         return render_template("perfil_palestrante.html", 
-                             palestrante=palestrante, 
-                             disponibilidades=disponibilidades)
+                             perfil=palestrante, 
+                             disponibilidades=disponibilidades,
+                             user_type=session.get('user_type'))
     
     except Exception as e:
         flash(f"Erro ao carregar perfil: {e}", "danger")

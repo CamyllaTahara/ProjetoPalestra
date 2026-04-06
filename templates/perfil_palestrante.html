@@ -30,13 +30,15 @@
          <h1>{{ perfil.nome_completo }}</h1>
 
      <div style="display: flex; gap: 20px; color: #666; font-size: 14px; margin-top: 5px;">
-    <span><strong>{{ total_seguidores }}</strong> seguidores</span>
-    <span><strong>{{ total_seguindo }}</strong> seguindo</span>
+      <span style="cursor:pointer;" onclick="document.getElementById('modalSeguidores').style.display='flex'">
+            <strong>{{ total_seguidores }}</strong> seguidores
+            </span>
+            <span style="cursor:pointer;" onclick="document.getElementById('modalSeguindo').style.display='flex'">
+            <strong>{{ total_seguindo }}</strong> seguindo
+            </span>
 </div>
 
-
-          
-                {% if user_type in ('palestrante', 'instituicao') %}
+   {% if user_type in ('palestrante', 'instituicao') %}
                      {% if ja_segue %}
         <form method="POST" action="{{ url_for('feed.seguir', tipo='palestrante', alvo_id=perfil.id) }}" style="display:inline;">
             <button type="submit" style="background:#6c757d; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer;">
@@ -126,5 +128,64 @@
             <p>Este palestrante ainda não fez publicações.</p>
         {% endif %}
     </div>
+      
+    <!-- Modal Seguindo -->
+<div id="modalSeguindo" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+    <div style="background:#fff; border-radius:8px; padding:25px; width:350px; max-height:500px; overflow-y:auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0;">Seguindo</h3>
+            <span onclick="document.getElementById('modalSeguindo').style.display='none'" style="cursor:pointer; font-size:20px;">✕</span>
+        </div>
+        {% if lista_seguindo %}
+            {% for s in lista_seguindo %}
+                {% set perfil_url = url_for('feed.perfil_palestrante', palestrante_id=s.seguido_id) if s.seguido_tipo == 'palestrante' else url_for('feed.perfil_instituicao', instituicao_id=s.seguido_id) %}
+                <a href="{{ perfil_url }}"
+                   style="display:flex; align-items:center; gap:10px; padding:10px; border-radius:8px; text-decoration:none; color:#333; margin-bottom:5px; background:#f8f9fa;">
+                    <div style="width:36px; height:36px; border-radius:50%; background:#4CAF50; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">
+                        {{ s.nome[0] | upper }}
+                    </div>
+                    <span style="font-size:14px;">{{ s.nome }}</span>
+                    <span style="font-size:12px; color:#888; margin-left:auto;">{{ '👤' if s.seguido_tipo == 'palestrante' else '🏢' }}</span>
+                </a>
+            {% endfor %}
+        {% else %}
+            <p style="text-align:center; color:#999; padding:20px;">Não está seguindo ninguém ainda.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal Seguidores -->
+<div id="modalSeguidores" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+    <div style="background:#fff; border-radius:8px; padding:25px; width:350px; max-height:500px; overflow-y:auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0;">Seguidores</h3>
+            <span onclick="document.getElementById('modalSeguidores').style.display='none'" style="cursor:pointer; font-size:20px;">✕</span>
+        </div>
+        {% if lista_seguidores %}
+            {% for s in lista_seguidores %}
+    {% set perfil_url = url_for('feed.perfil_palestrante', palestrante_id=s.seguidor_id) if s.seguidor_tipo == 'palestrante' else url_for('feed.perfil_instituicao', instituicao_id=s.seguidor_id) %}
+    <a href="{{ perfil_url }}"
+       style="display:flex; align-items:center; gap:10px; padding:10px; border-radius:8px; text-decoration:none; color:#333; margin-bottom:5px; background:#f8f9fa;">
+        <div style="width:36px; height:36px; border-radius:50%; background:#4CAF50; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">
+            {{ s.nome[0] | upper }}
+        </div>
+        <span style="font-size:14px;">{{ s.nome }}</span>
+        <span style="font-size:12px; color:#888; margin-left:auto;">{{ '👤' if s.seguidor_tipo == 'palestrante' else '🏢' }}</span>
+    </a>
+    {% endfor %}
+        {% else %}
+            <p style="text-align:center; color:#999; padding:20px;">Sem seguidores no momento..</p>
+        {% endif %}
+    </div>
+</div>
+<script>
+    // Fecha modal clicando fora
+    document.getElementById('modalSeguidores').addEventListener('click', function(e) {
+        if (e.target === this) this.style.display = 'none';
+    });
+    document.getElementById('modalSeguindo').addEventListener('click', function(e) {
+        if (e.target === this) this.style.display = 'none';
+    });
+</script>
 </body>
 </html>

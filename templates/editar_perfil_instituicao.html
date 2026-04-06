@@ -1,0 +1,54 @@
+<body>
+    
+<h1>Editar Perfil</h1>
+{{ instituicao}}
+<form method="POST" enctype="multipart/form-data">
+
+    <div class="foto-sessao">
+        <label>Foto de Perfil:</label><br>
+        {% if instituicao.foto %}
+            <img src="{{ url_for('static', filename='fotos_instituicoes/' + instituicao.foto) }}" width="100" style="border-radius: 50%;">
+        {% else %}
+            <img src="{{ url_for('static', filename='fotos_instituicoes/perfil.png') }}" width="100">
+        {% endif %}
+        <br>
+        <input type="file" name="foto_perfil" accept="image/*">
+    </div>
+
+<label>Endereço:</label>
+<textarea name="endereco">{{ instituicao.endereco }}</textarea>  
+
+<label>E-mail:</label>
+<textarea name="email">{{ instituicao.email }}</textarea>
+
+<label>CNPJ:</label>
+<textarea name="cnpj">{{instituicao.cnpj}}</textarea>
+
+<label> Telefone</label>
+<textarea name="telefone">{{instituicao.telefone}}</textarea>
+
+
+<br><br>
+
+<button type="submit">Salvar</button>
+
+</form>
+
+<script>
+document.getElementById("foto_perfil").addEventListener("change", function(event){
+
+    const arquivo = event.target.files[0];
+
+    if(arquivo){
+        const leitor = new FileReader();
+
+        leitor.onload = function(e){
+            document.getElementById("preview-foto").src = e.target.result;
+        }
+
+        leitor.readAsDataURL(arquivo);
+    }
+
+});
+</script> 
+</body>
