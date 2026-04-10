@@ -7,6 +7,8 @@ from datetime import datetime, timedelta
 from utils.mail import send_notification_email
 from flask import current_app
 
+from views.feed_views import buscar_lista_seguidores, buscar_lista_seguindo
+
 gerenciar_solicitacoes_bp = Blueprint("gerenciar_solicitacoes", __name__)
 
 def get_db_connection():
@@ -46,9 +48,11 @@ def listar_palestrantes():
 def perfil_palestrante(palestrante_id):
     """Exibe o perfil de um palestrante com suas disponibilidades."""
     try:
+        user_id = session.get('user_id')
+        user_type = session.get('user_type')
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        
+         
         # Buscar dados do palestrante
         cursor.execute("""
             SELECT id, nome_completo, ramo_atividade, anos_experiencia, email, telefone, curriculo_pdf,descricao,foto
@@ -62,6 +66,20 @@ def perfil_palestrante(palestrante_id):
             flash("Palestrante não encontrado", "danger")
             return redirect(url_for('gerenciar_solicitacoes.listar_palestrantes'))
         
+        cursor.execute("SELECT COUNT(*) as total FROM seguidores WHERE seguido_tipo='palestrante' AND seguido_id=%s", (palestrante_id,))
+        total_seguidores = cursor.fetchone()['total']
+        cursor.execute("SELECT COUNT(*) as total FROM seguidores WHERE seguidor_tipo='palestrante' AND seguidor_id=%s", (palestrante_id,))
+        total_seguindo = cursor.fetchone()['total']
+
+        
+        ja_segue = False
+        if user_id and user_type:
+         cursor.execute("""SELECT id FROM seguidores WHERE seguidor_tipo=%s AND seguidor_id=%s 
+                          AND seguido_tipo='palestrante' AND seguido_id=%s""",
+                       (user_type, user_id, palestrante_id))
+        ja_segue = cursor.fetchone() is not None
+        
+        
         # Buscar disponibilidades do palestrante
         cursor.execute("""
             SELECT id, data, horario_inicio, horario_fim
@@ -69,17 +87,31 @@ def perfil_palestrante(palestrante_id):
             WHERE palestrante_id = %s AND data >= CURDATE()
             ORDER BY data, horario_inicio
         """, (palestrante_id,))
-        
         disponibilidades = cursor.fetchall()
         if disponibilidades:
          print(f"DEBUG: Tipo da data: {type(disponibilidades[0]['horario_inicio'])}")
          print(f"DEBUG: Valor Bruto da Data: {disponibilidades[0]['horario_inicio']}")
+
+        ja_segue = False
+        if user_id and user_type:
+         cursor.execute("""SELECT id FROM seguidores WHERE seguidor_tipo=%s AND seguidor_id=%s 
+                          AND seguido_tipo='palestrante' AND seguido_id=%s""",
+                       (user_type, user_id, palestrante_id))
+        ja_segue = cursor.fetchone() is not None
+
+
+        lista_seguidores = buscar_lista_seguidores(cursor, 'palestrante', palestrante_id)
+        lista_seguindo = buscar_lista_seguindo(cursor, 'palestrante', palestrante_id)
         cursor.close()
         conn.close()
+
         
-        return render_template("perfil_palestrante.html", 
+
+        
+        return render_template("perfil_palestrante.html", total_seguidores=total_seguidores,
+                           total_seguindo=total_seguindo, ja_segue=ja_segue,
                              perfil=palestrante, 
-                             disponibilidades=disponibilidades,
+                             disponibilidades=disponibilidades,lista_seguidores=lista_seguidores, lista_seguindo=lista_seguindo,
                              user_type=session.get('user_type'))
     
     except Exception as e:

@@ -1,9 +1,10 @@
+from functools import wraps
 import os
 
 import eventlet
 eventlet.monkey_patch()  
 
-from flask import Flask, session
+from flask import Flask, redirect, request, session, url_for
 
 # ============================================================
 # PASSO 1: CRIAR A APLICAÇÃO
@@ -181,3 +182,27 @@ if __name__ == '__main__':
     print("="*60 + "\n")
     
     app.run(debug=True)
+
+def login_required(role):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            # --- PRINTS DE DEBUG ---
+            print("\n--- TESTE DE ACESSO ---")
+            print(f"Rota acessada: {request.path}")
+            print(f"Role exigida pela rota: {role}")
+            print(f"O que tem na session['user_id']: {session.get('user_id')}")
+            print(f"O que tem na session['user_type']: {session.get('user_type')}")
+            
+            if 'user_id' not in session:
+                print("RESULTADO: Bloqueado (Usuário não logado)")
+                return redirect(url_for('auth.login'))
+            
+            if session.get('user_type') != role:
+                print(f"RESULTADO: Bloqueado (Tipo {session.get('user_type')} tentou entrar em rota de {role})")
+                return redirect(url_for('feed.meu_perfil_pal')) 
+            
+            print("RESULTADO: Acesso Permitido!")
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator

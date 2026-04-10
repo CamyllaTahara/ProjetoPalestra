@@ -6,23 +6,16 @@
     <style>
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; max-width: 900px; margin: 0 auto; }
         .btn-voltar { background: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin-bottom: 20px; }
-        .btn-voltar:hover { background: #5a6268; }
         .card { background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 25px; }
         .perfil-header { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
         .avatar { width: 100px; height: 100px; border-radius: 50%; background: #4CAF50; display: flex; align-items: center; justify-content: center; color: white; font-size: 36px; font-weight: bold; flex-shrink: 0; }
-        h1 { color: #333; margin-bottom: 5px; }
-        h2 { color: #333; margin-bottom: 15px; }
-        .info { display: flex; flex-direction: column; gap: 8px; }
-        .info p { font-size: 14px; color: #555; }
-        .info strong { color: #333; }
+        h1 { color: #333; margin: 0; }
+        .stats { display: flex; gap: 20px; color: #666; font-size: 14px; margin: 10px 0; }
+        .info p { font-size: 14px; color: #555; margin: 8px 0; }
         hr { border: none; border-top: 1px solid #eee; margin: 20px 0; }
-        .btn-solicitar { background: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold; margin-top: 10px; }
-        .btn-solicitar:hover { background: #45a049; }
-        .posts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .post-card { background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
-        .post-card img { width: 100%; height: 180px; object-fit: cover; }
-        .post-card-info { padding: 10px; font-size: 13px; color: #555; }
-        .sem-posts { text-align: center; padding: 30px; color: #999; }
+        .card-post { border: 1px solid #ddd; margin-bottom: 20px; padding: 15px; border-radius: 8px; background: #fff; }
+        .btn-seguir { background:#4CAF50; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; font-weight: bold; }
+        .btn-seguindo { background:#6c757d; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -33,146 +26,74 @@
             <div class="avatar">{{ perfil.nome[0] | upper }}</div>
             <div>
                 <h1>🏢 {{ perfil.nome }}</h1>
+                
                 <div class="stats">
-                <span style="cursor:pointer;" onclick="document.getElementById('modalSeguidores').style.display='flex'">
-            <strong>{{ total_seguidores }}</strong> seguidores
-            </span>
-            <span style="cursor:pointer;" onclick="document.getElementById('modalSeguindo').style.display='flex'">
-            <strong>{{ total_seguindo }}</strong> seguindo
-            </span>
-            </div>
-<div style="display: flex; flex-direction: column; gap: 10px;">
+                    <span style="cursor:pointer;" onclick="document.getElementById('modalSeguidores').style.display='flex'">
+                        <strong>{{ total_seguidores }}</strong> seguidores
+                    </span>
+                    <span style="cursor:pointer;" onclick="document.getElementById('modalSeguindo').style.display='flex'">
+                        <strong>{{ total_seguindo }}</strong> seguindo
+                    </span>
+                </div>
 
-
-    {% if user_id and (user_type != 'instituicao' or user_id != perfil.id) %}
-        <form action="{{ url_for('feed.seguir', tipo='instituicao', alvo_id=perfil.id) }}" method="POST" style="margin-top: 5px;">
-            {% if ja_segue %}
-                <button type="submit" class="btn" style="background: #e0e0e0; color: #333; border: none; padding: 6px 15px; border-radius: 20px; cursor: pointer;">
-                    ✓ Seguindo
-                </button>
-            {% else %}
-                <button type="submit" class="btn" style="background: #007bff; color: white; border: none; padding: 6px 15px; border-radius: 20px; cursor: pointer; font-weight: bold;">
-                    + Seguir
-                </button>
+                {% if user_id and user_type %}
+                <div style="margin-top: 10px;">
+                    <form method="POST" action="{{ url_for('feed.seguir', tipo='instituicao', alvo_id=perfil.id) }}">
+                        {% if ja_segue %}
+                            <button type="submit" class="btn-seguindo" style="background:#6c757d; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">
+                                ✓ Seguindo
+                            </button>
+                        {% else %}
+                            <button type="submit" class="btn-seguir" style="background:#4CAF50; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">
+                                + Seguir
+                            </button>
+                        {% endif %}
+                    </form>
+                </div>
             {% endif %}
-        </form>
-    {% endif %}
-</div>
-
-            </div>
         </div>
-
+    </div>
         <hr>
 
         <div class="info">
-            {% if perfil.endereco %}
-                <p>📍 <strong>Endereço:</strong> {{ perfil.endereco }}</p>
-            {% endif %}
-            {% if perfil.email %}
-                <p>📧 <strong>E-mail:</strong> {{ perfil.email }}</p>
-            {% endif %}
-            {% if perfil.telefone %}
-                <p>📞 <strong>Telefone:</strong> {{ perfil.telefone }}</p>
-            {% endif %}
+            {% if perfil.endereco %}<p>📍 <strong>Endereço:</strong> {{ perfil.endereco }}</p>{% endif %}
+            {% if perfil.email %}<p>📧 <strong>E-mail:</strong> {{ perfil.email }}</p>{% endif %}
+            {% if perfil.telefone %}<p>📞 <strong>Telefone:</strong> {{ perfil.telefone }}</p>{% endif %}
         </div>
-
-        
-<h2>📌 Publicações</h2>
-
-<div class="feed-perfil">
-    {% if posts %}
-        {% for post in posts %}
-            <div class="card-post" style="border: 1px solid #ddd; margin-bottom: 20px; padding: 15px; border-radius: 8px;">
-                <p><strong>{{ perfil.nome }}</strong> - <small>{{ post.criado_em.strftime('%d/%m/%Y') }}</small></p>
-                
-                {% if post.foto_capa %}
-                    <img src="{{ url_for('static', filename='uploads/' + post.foto_capa) }}" style="max-width: 100%; border-radius: 5px;">
-                {% endif %}
-
-                <p>{{ post.descricao }}</p>
-                
-                <div class="interacoes">
-                    <span>❤️ {{ post.total_curtidas or 0 }}</span>
-                    <span>💬 {{ post.total_comentarios or 0 }}</span>
-                </div>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>Esta instituição ainda não fez nenhuma publicação.</p>
-    {% endif %}
-</div>
-        {% if user_type in ('palestrante', 'instituicao') %}
-    {% if ja_segue %}
-        <form method="POST" action="{{ url_for('feed.seguir', tipo='instituicao', alvo_id=perfil.id) }}" style="display:inline;">
-            <button type="submit" style="background:#6c757d; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer;">
-                ✓ Seguindo
-            </button>
-        </form>
-    {% else %}
-        <form method="POST" action="{{ url_for('feed.seguir', tipo='instituicao', alvo_id=perfil.id) }}" style="display:inline;">
-            <button type="submit" style="background:#4CAF50; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer;">
-                + Seguir
-            </button>
-        </form>
-    {% endif %}
-{% endif %}
     </div>
-     <!-- Modal Seguindo -->
-<div id="modalSeguindo" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
-    <div style="background:#fff; border-radius:8px; padding:25px; width:350px; max-height:500px; overflow-y:auto;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3 style="margin:0;">Seguindo</h3>
-            <span onclick="document.getElementById('modalSeguindo').style.display='none'" style="cursor:pointer; font-size:20px;">✕</span>
-        </div>
-        {% if lista_seguindo %}
-            {% for s in lista_seguindo %}
-            <a href="{{ url_for('feed.perfil_' + s.seguido_tipo, **{s.seguido_tipo + '_id': s.seguido_id}) }}"
-               style="display:flex; align-items:center; gap:10px; padding:10px; border-radius:8px; text-decoration:none; color:#333; margin-bottom:5px; background:#f8f9fa;">
-                <div style="width:36px; height:36px; border-radius:50%; background:#4CAF50; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">
-                    {{ s.nome[0] | upper }}
+
+    <h2>📌 Publicações</h2>
+    <div class="feed-perfil">
+        {% if posts %}
+            {% for post in posts %}
+                <div class="card-post">
+                    <p><strong>{{ perfil.nome }}</strong> - <small>{{ post.criado_em.strftime('%d/%m/%Y') }}</small></p>
+                    
+                    {% if post.foto_capa %}
+                        <img src="{{ url_for('static', filename='uploads/' + post.foto_capa) }}" style="max-width: 100%; border-radius: 5px; margin-bottom: 10px;">
+                    {% endif %}
+
+                    <p>{{ post.descricao }}</p>
+                    
+                    <div class="interacoes" style="margin-top: 10px; color: #666;">
+                        <span>❤️ {{ post.total_curtidas or 0 }}</span>
+                        <span style="margin-left: 15px;">💬 {{ post.total_comentarios or 0 }}</span>
+                    </div>
                 </div>
-                <span style="font-size:14px;">{{ s.nome }}</span>
-                <span style="font-size:12px; color:#888; margin-left:auto;">{{ '👤' if s.seguido_tipo == 'palestrante' else '🏢' }}</span>
-            </a>
             {% endfor %}
         {% else %}
-            <p style="text-align:center; color:#999; padding:20px;">Não está seguindo ninguém ainda.</p>
+            <p style="color: #999;">Esta instituição ainda não fez nenhuma publicação.</p>
         {% endif %}
     </div>
-</div>
 
-<!-- Modal Seguidores -->
-<div id="modalSeguidores" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
-    <div style="background:#fff; border-radius:8px; padding:25px; width:350px; max-height:500px; overflow-y:auto;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3 style="margin:0;">Seguidores</h3>
-            <span onclick="document.getElementById('modalSeguidores').style.display='none'" style="cursor:pointer; font-size:20px;">✕</span>
-        </div>
-        {% if lista_seguidores %}
-            {% for s in lista_seguidores %}
-            <a href="{{ url_for('feed.perfil_' + s.seguidor_tipo, **{s.seguidor_tipo + '_id': s.seguidor_id}) }}"
-               style="display:flex; align-items:center; gap:10px; padding:10px; border-radius:8px; text-decoration:none; color:#333; margin-bottom:5px; background:#f8f9fa;">
-                <div style="width:36px; height:36px; border-radius:50%; background:#4CAF50; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">
-                    {{ s.nome[0] | upper }}
-                </div>
-                <span style="font-size:14px;">{{ s.nome }}</span>
-                <span style="font-size:12px; color:#888; margin-left:auto;">{{ '👤' if s.seguidores_tipo == 'palestrante' else '🏢' }}</span>
-            </a>
-            {% endfor %}
-        {% else %}
-            <p style="text-align:center; color:#999; padding:20px;">Sem seguidores no momento..</p>
-        {% endif %}
-    </div>
-</div>
     <script>
-    // Fecha modal clicando fora
-    document.getElementById('modalSeguidores').addEventListener('click', function(e) {
-        if (e.target === this) this.style.display = 'none';
-    });
-    document.getElementById('modalSeguindo').addEventListener('click', function(e) {
-        if (e.target === this) this.style.display = 'none';
-    });
-</script>
-
+        // Fecha modal clicando fora
+        window.onclick = function(event) {
+            if (event.target.className === 'modal-overlay') { // Ajuste se necessário
+                document.getElementById('modalSeguidores').style.display = 'none';
+                document.getElementById('modalSeguindo').style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>

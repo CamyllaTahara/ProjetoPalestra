@@ -1,5 +1,5 @@
 # views/instituicao_views.py
-from flask import current_app, render_template, request, Blueprint, redirect, url_for
+from flask import current_app, flash, render_template, request, Blueprint, redirect, url_for
 from werkzeug.security import generate_password_hash
 import re
 from models.instituicao import conectar_bd
@@ -208,9 +208,12 @@ def cadastro_palestrante():
                         dados_form=dados_form)
                         
 
-@palestrante_bp.route("/editar_perfil",methods=["GET","POST"])
+@palestrante_bp.route("/editar_perfil_palestrante",methods=["GET","POST"])
 @login_required("palestrante")
-def editar_perfil():
+def editar_perfil_palestrante():
+    print(">>> O FLASK TENTOU ENTRAR NA ROTA DE EDIÇÃO <<<")
+    print("--- ENTROU NA FUNÇÃO EDITAR_PERFIL ---")
+    print(f"Método da requisição: {request.method}")
     conexao=conectar_bd()
     cursor=conexao.cursor(dictionary=True)
     user_id=session["user_id"]
@@ -230,6 +233,7 @@ def editar_perfil():
         
         cursor.execute("SELECT curriculo_pdf, foto FROM palestrantes WHERE id=%s",(user_id,))
         dados_atuais = cursor.fetchone()
+        
 
         if foto and foto.filename !="":
             extensao=foto.filename.rsplit(".",1)[1].lower()
@@ -277,7 +281,8 @@ def editar_perfil():
         sql = "UPDATE palestrantes set descricao = %s,ramo_atividade=%s, curriculo_pdf=%s,anos_experiencia=%s, email=%s, telefone=%s, foto=%s WHERE id =%s"
         cursor.execute(sql,(descricao,ramo_atividade,nome_curriculo,anos_experiencia,email,telefone,nome_foto,user_id))
         conexao.commit()
-
+        
+        flash("Perfil atualizado com sucesso!", "success")
         return redirect(url_for("palestrante.editar_perfil"))
 
     cursor.execute("SELECT * FROM palestrantes WHERE id=%s",(user_id,))
@@ -285,7 +290,7 @@ def editar_perfil():
 
     cursor.close()
     conexao.close()
-
+      
     print(palestrante)
 
     return render_template("editar_perfil_palestrante.html", palestrante=palestrante)

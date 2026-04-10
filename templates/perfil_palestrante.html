@@ -17,8 +17,15 @@
     </style>
 </head>
 <body>
-    <a href="{{ url_for('gerenciar_solicitacoes.listar_palestrantes') }}" class="btn-voltar">← Voltar à Busca</a>
 
+    <div style="background: yellow; padding: 10px; border: 1px solid black;">
+    ID do Palestrante: {{ perfil.id }} <br>
+    Seu ID (Sessão): {{ user_id }} <br>
+    Seu Tipo (Sessão): {{ user_type }} <br>
+    Contador: {{ total_seguidores }}
+</div>
+    <a href="{{ url_for('gerenciar_solicitacoes.listar_palestrantes') }}" class="btn-voltar">← Voltar à Busca</a>
+ 
     <div class="card-perfil">
         <div style="display:flex; align-items:center; gap:20px;">
             {% if perfil.foto %}
@@ -138,16 +145,26 @@
         </div>
         {% if lista_seguindo %}
             {% for s in lista_seguindo %}
-                {% set perfil_url = url_for('feed.perfil_palestrante', palestrante_id=s.seguido_id) if s.seguido_tipo == 'palestrante' else url_for('feed.perfil_instituicao', instituicao_id=s.seguido_id) %}
-                <a href="{{ perfil_url }}"
-                   style="display:flex; align-items:center; gap:10px; padding:10px; border-radius:8px; text-decoration:none; color:#333; margin-bottom:5px; background:#f8f9fa;">
-                    <div style="width:36px; height:36px; border-radius:50%; background:#4CAF50; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">
-                        {{ s.nome[0] | upper }}
-                    </div>
-                    <span style="font-size:14px;">{{ s.nome }}</span>
-                    <span style="font-size:12px; color:#888; margin-left:auto;">{{ '👤' if s.seguido_tipo == 'palestrante' else '🏢' }}</span>
-                </a>
-            {% endfor %}
+    {# IF para decidir a ROTA: Se sou eu, vai para o painel privado, senão para o perfil público #}
+    {% if s.seguido_id == session.get('user_id') and s.seguido_tipo == session.get('user_type') %}
+        {% set perfil_url = url_for('feed.meu_perfil_pal') if s.seguido_tipo == 'palestrante' else url_for('feed.meu_perfil_inst') %}
+    {% else %}
+        {% set perfil_url = url_for('feed.perfil_palestrante', palestrante_id=s.seguido_id) if s.seguido_tipo == 'palestrante' else url_for('feed.perfil_instituicao', instituicao_id=s.seguido_id) %}
+    {% endif %}
+
+    <a href="{{ perfil_url }}"
+       style="display:flex; align-items:center; gap:10px; padding:10px; border-radius:8px; text-decoration:none; color:#333; margin-bottom:5px; background:#f8f9fa;">
+        <div style="width:36px; height:36px; border-radius:50%; background:#4CAF50; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">
+            {{ s.nome[0] | upper }}
+        </div>
+        <span style="font-size:14px;">
+            {{ s.nome }} 
+            {# Dica: Adicione um (Você) para ficar mais intuitivo #}
+            {% if s.seguido_id == session.get('user_id') and s.seguido_tipo == session.get('user_type') %} <strong>(Você)</strong>{% endif %}
+        </span>
+        <span style="font-size:12px; color:#888; margin-left:auto;">{{ '👤' if s.seguido_tipo == 'palestrante' else '🏢' }}</span>
+    </a>
+{% endfor %}
         {% else %}
             <p style="text-align:center; color:#999; padding:20px;">Não está seguindo ninguém ainda.</p>
         {% endif %}
@@ -162,17 +179,36 @@
             <span onclick="document.getElementById('modalSeguidores').style.display='none'" style="cursor:pointer; font-size:20px;">✕</span>
         </div>
         {% if lista_seguidores %}
-            {% for s in lista_seguidores %}
-    {% set perfil_url = url_for('feed.perfil_palestrante', palestrante_id=s.seguidor_id) if s.seguidor_tipo == 'palestrante' else url_for('feed.perfil_instituicao', instituicao_id=s.seguidor_id) %}
+           {% for s in lista_seguidores %}
+    {# 1. Lógica para definir a URL correta #}
+    {% if s.seguidor_id == session.get('user_id') and s.seguidor_tipo == session.get('user_type') %}
+        {# Se o seguidor da lista for VOCÊ, redireciona para o seu painel de controle #}
+        {% set perfil_url = url_for('feed.meu_perfil_pal') if s.seguidor_tipo == 'palestrante' else url_for('feed.meu_perfil_inst') %}
+    {% else %}
+        {# Se for outra pessoa, redireciona para o perfil público dela #}
+        {% set perfil_url = url_for('feed.perfil_palestrante', palestrante_id=s.seguidor_id) if s.seguidor_tipo == 'palestrante' else url_for('feed.perfil_instituicao', instituicao_id=s.seguidor_id) %}
+    {% endif %}
+
+    {# 2. Renderização do link #}
     <a href="{{ perfil_url }}"
-       style="display:flex; align-items:center; gap:10px; padding:10px; border-radius:8px; text-decoration:none; color:#333; margin-bottom:5px; background:#f8f9fa;">
+       style="display:flex; align-items:center; gap:10px; padding:10px; border-radius:8px; text-decoration:none; color:#333; margin-bottom:5px; background:#f8f9fa; border: 1px solid #eee;">
+        
         <div style="width:36px; height:36px; border-radius:50%; background:#4CAF50; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">
             {{ s.nome[0] | upper }}
         </div>
-        <span style="font-size:14px;">{{ s.nome }}</span>
-        <span style="font-size:12px; color:#888; margin-left:auto;">{{ '👤' if s.seguidor_tipo == 'palestrante' else '🏢' }}</span>
+
+        <span style="font-size:14px;">
+            {{ s.nome }}
+            {% if s.seguidor_id == session.get('user_id') and s.seguidor_tipo == session.get('user_type') %} 
+                <strong style="color: #4CAF50;">(Você)</strong>
+            {% endif %}
+        </span>
+
+        <span style="font-size:12px; color:#888; margin-left:auto;">
+            {{ '👤 Palestrante' if s.seguidor_tipo == 'palestrante' else '🏢 Instituição' }}
+        </span>
     </a>
-    {% endfor %}
+{% endfor %}
         {% else %}
             <p style="text-align:center; color:#999; padding:20px;">Sem seguidores no momento..</p>
         {% endif %}

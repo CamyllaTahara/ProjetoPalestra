@@ -228,6 +228,8 @@ def explorar():
 # ─────────────────────────────────────────────
 @feed_bp.route('/seguir/<tipo>/<int:alvo_id>', methods=['POST'])
 def seguir(tipo, alvo_id):
+
+    print(f"Tentativa de seguir: Tipo {tipo}, ID Alvo {alvo_id}")
     user_id = session.get('user_id')
     user_type = session.get('user_type')
 
@@ -601,6 +603,8 @@ def perfil_palestrante(palestrante_id):
     total_seguidores = cursor.fetchone()['total']
     cursor.execute("SELECT COUNT(*) as total FROM seguidores WHERE seguidor_tipo='palestrante' AND seguidor_id=%s", (palestrante_id,))
     total_seguindo = cursor.fetchone()['total']
+
+    
 
     cursor.execute("""
         SELECT p.* FROM posts_feed p 

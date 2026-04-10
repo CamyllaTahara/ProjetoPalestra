@@ -5,7 +5,7 @@
     <title>Painel instituição</title>
 </head>
 <body>
-    <h2>Bem-vindo, InstituiçãO {{ usuario['nome'] }}</h2>
+    <h2>Bem-vindo, Instituição {{ usuario['nome'] }}</h2>
 
     <a href="{{ url_for('login_instituicao.logout_instituicao') }}">Sair</a>
     <li><a href="{{ url_for('gerenciar_solicitacoes.listar_palestrantes') }}">Buscar Palestrantes</a></li>
