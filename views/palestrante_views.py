@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash
 import re
 from models.instituicao import conectar_bd
 import mysql.connector
-import os  # Para manipulação de arquivos
+import os 
 from flask import session
 from utils.security import login_required
 import time 
@@ -16,7 +16,7 @@ def cpf_valido(cpf):
     cpf = ''.join(filter(str.isdigit, cpf))
     if len(cpf) != 11 or cpf == cpf[0] * 11:
         return False
-    # Cálculo do primeiro dígito verificador
+    
     soma = 0
     for i in range(9):
         soma += int(cpf[i]) * (10 - i)
@@ -24,7 +24,7 @@ def cpf_valido(cpf):
     digito1_esperado = str(resto) if resto < 10 else '0'
     if cpf[9] != digito1_esperado:
         return False
-    # Cálculo do segundo dígito verificador
+
     soma = 0
     for i in range(10):
         soma += int(cpf[i]) * (11 - i)
@@ -39,7 +39,7 @@ def validar_telefone(telefone):
 def validar_email(email):
     return '@' in email and '.' in email
 
-# Pasta para salvar os currículos (certifique-se de criar esta pasta)
+
 UPLOAD_FOLDER = 'uploads_curriculos'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -64,11 +64,11 @@ def cadastro_palestrante():
         dados_form['ramo_atividade'] = request.form.get('ramo_atividade', '')
         curriculo = request.files.get('curriculo')
 
-        # Validação do nome
+   
         if not dados_form['nome_completo'].strip():
             mensagem_erro_nome = "Erro: O nome completo é obrigatório."
 
-        # Validação da senha
+
         if len(senha) < 8:
             mensagem_erro_senha = "Erro: A senha deve ter pelo menos 8 caracteres."
         elif not any(c in "!@#$%&*" for c in senha):
@@ -80,19 +80,19 @@ def cadastro_palestrante():
         elif not any(c.isdigit() for c in senha):
             mensagem_erro_senha = "Erro: A senha deve conter pelo menos um número."
 
-        # Validação do CPF
+
         if not cpf_valido(dados_form['cpf']):
             mensagem_erro_cpf = "Erro: CPF inválido."
 
-        # Validação do telefone
+
         if not validar_telefone(dados_form['telefone']):
             mensagem_erro_telefone = "Erro: Telefone inválido. Deve ter 10 ou 11 dígitos."
 
-        # Validação do e-mail
+
         if not validar_email(dados_form['email']):
             mensagem_erro_email = "Erro: E-mail inválido."
 
-        # Validação do currículo
+
         curriculo_filename = None
         if curriculo:
             if curriculo.filename == '':
@@ -100,15 +100,14 @@ def cadastro_palestrante():
             elif not curriculo.filename.lower().endswith('.pdf'):
                 mensagem_erro_curriculo = "Erro: Por favor, envie um arquivo PDF."
             else:
-                # Salvar o currículo com um nome seguro
                 filename = os.path.join(UPLOAD_FOLDER, f"{dados_form['nome_completo']}.pdf") # Nomear pelo CPF
                 try:
                     curriculo.save(filename)
-                    curriculo_filename = filename  # Salvar o caminho para o banco de dados
+                    curriculo_filename = filename 
                 except Exception as e:
                     mensagem_erro_curriculo = f"Erro ao salvar o currículo: {e}"
         else:
-            mensagem_erro_curriculo = "Erro: O currículo é obrigatório." # Tornando o currículo obrigatório
+            mensagem_erro_curriculo = "Erro: O currículo é obrigatório."
 
         if (mensagem_erro_senha or mensagem_erro_email or mensagem_erro_cpf or
                 mensagem_erro_telefone or mensagem_erro_nome or mensagem_erro_curriculo):
@@ -126,7 +125,7 @@ def cadastro_palestrante():
                 print("Conexão bem-sucedida!")
                 cursor = conexao.cursor()
 
-                # Verificar se o e-mail já existe
+
                 cursor.execute("SELECT id FROM palestrantes WHERE email = %s", (dados_form['email'],))
                 if cursor.fetchone():
                     mensagem_erro_email = "Erro: Este e-mail já está cadastrado."
@@ -138,7 +137,7 @@ def cadastro_palestrante():
                     mensagem_erro_curriculo=mensagem_erro_curriculo,
                     dados_form=dados_form)
 
-                # Verificar se o CPF já está cadastrado
+
                 cursor.execute("SELECT id FROM palestrantes WHERE cpf = %s", (re.sub(r'\D', '', dados_form['cpf']),))
                 if cursor.fetchone():
                     mensagem_erro_cpf = "Erro: Este CPF já está cadastrado."
@@ -150,7 +149,7 @@ def cadastro_palestrante():
                     mensagem_erro_curriculo=mensagem_erro_curriculo,
                     dados_form=dados_form)
 
-                # Verificar se o telefone já está cadastrado
+
                 cursor.execute("SELECT id FROM palestrantes WHERE telefone = %s", (re.sub(r'\D', '', dados_form['telefone']),))
                 if cursor.fetchone():
                     mensagem_erro_telefone = "Erro: Este telefone já está cadastrado."
@@ -163,13 +162,12 @@ def cadastro_palestrante():
                     dados_form=dados_form)
                 
 
-                # Se não houver erros, cadastrar o palestrante
                 dados = (
                     dados_form['nome_completo'],
                     re.sub(r'\D', '', dados_form['cpf']),
                     dados_form['anos_experiencia'],
                     dados_form['ramo_atividade'],
-                    curriculo_filename,  # Salvar o caminho do arquivo
+                    curriculo_filename,  
                     dados_form['email'],
                     re.sub(r'\D', '', dados_form['telefone']),
                     generate_password_hash(senha)
@@ -180,8 +178,8 @@ def cadastro_palestrante():
                     (nome_completo, cpf, anos_experiencia, ramo_atividade, curriculo_pdf, email, telefone, senha)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 """
-                print("Dados a serem inseridos:", dados) # Imprima os dados que você está tentando salvar
-                print("Query SQL:", sql) # Imprima a query SQL
+                print("Dados a serem inseridos:", dados) 
+                print("Query SQL:", sql) 
                 cursor.execute(sql, dados)
                 conexao.commit()
                 print("Dados inseridos com sucesso!")
@@ -227,7 +225,7 @@ def editar_perfil_palestrante():
         foto=request.files.get("foto_perfil")  
         curriculo_pdf=request.files.get("curriculo_pdf")
 
-        # NOVO
+   
         nome_foto = None
         nome_curriculo = None
         
@@ -241,7 +239,7 @@ def editar_perfil_palestrante():
 
             caminho = os.path.join("static", "fotos_palestrantes", nome_foto)
 
-              # apagar foto antiga
+
             if dados_atuais["foto"]:
                foto_antiga = os.path.join("static","fotos_palestrantes",dados_atuais["foto"])
             if os.path.exists(foto_antiga):
@@ -262,18 +260,15 @@ def editar_perfil_palestrante():
             curriculo_pdf.save(caminho)
 
 
-        # NOVO — buscar dados atuais
+
         
         cursor.execute("SELECT curriculo_pdf, foto FROM palestrantes WHERE id=%s",(user_id,))
         dados_atuais = cursor.fetchone()
 
-
-        # NOVO — manter currículo antigo se não atualizar
         if nome_curriculo is None:
             nome_curriculo = dados_atuais["curriculo_pdf"]
 
 
-        # NOVO — manter foto antiga se não atualizar
         if nome_foto is None:
             nome_foto = dados_atuais["foto"]
 

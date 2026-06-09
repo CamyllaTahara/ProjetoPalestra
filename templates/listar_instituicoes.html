@@ -2,106 +2,125 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Instituições</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
-        h1 { color: #333; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .btn-add { background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; }
-        .btn-add:hover { background-color: #45a049; }
-        table { width: 100%; border-collapse: collapse; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #4CAF50; color: white; }
-        tr:hover { background-color: #f5f5f5; }
-        .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-        .btn-edit { color: #007bff; text-decoration: none; }
-        .btn-edit:hover { text-decoration: underline; }
-        .btn-remove { background: none; border: none; color: #dc3545; cursor: pointer; padding: 0; }
-        .btn-remove:hover { text-decoration: underline; }
-        .btn-reativar { background: none; border: none; color: #28a745; cursor: pointer; padding: 0; font-size: 14px; }
-        .btn-reativar:hover { text-decoration: underline; }
-        .alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; }
-        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .btn-back { display: inline-block; margin-top: 20px; color: #007bff; text-decoration: none; }
-        .btn-back:hover { text-decoration: underline; }
-        .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
-        .badge-ativo { background-color: #d4edda; color: #155724; }
-        .badge-suspenso { background-color: #fff3cd; color: #856404; }
-        .badge-banido { background-color: #f8d7da; color: #721c24; }
-    </style>
+    <title>Gerenciar Instituições</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_gerenciar_lista.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-    <div class="header">
-        <h1>Lista de Instituições</h1>
-        <a href="{{ url_for('gerenciar_instituicoes.criar_instituicao') }}" class="btn-add">
-            + Adicionar nova instituição
-        </a>
+    <canvas id="canvas-bg"></canvas>
+
+    <div class="container-lista">
+        <div class="header-acoes">
+            <div>
+                <a href="{{ url_for('login_administrador.painel_administrador') }}" class="btn-voltar">
+                    <i data-lucide="arrow-left"></i> Voltar ao Painel
+                </a>
+                <h1><i data-lucide="building"></i> Gerenciar Instituições</h1>
+            </div>
+            <a href="{{ url_for('gerenciar_instituicoes.criar_instituicao') }}" class="btn-add">
+                <i data-lucide="plus-circle"></i> Nova Instituição
+            </a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="table-container">
+            {% if instituicoes %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Instituição</th>
+                        <th>CNPJ</th>
+                        <th>Contato</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inst in instituicoes %}
+                    <tr>
+                        <td><span class="id-badge">#{{ inst.id }}</span></td>
+                        <td>
+                            <div class="user-info">
+                                <strong>{{ inst.nome }}</strong>
+                                <span style="font-size: 0.75rem; color: #888;">{{ inst.endereco or 'Endereço não informado' }}</span>
+                            </div>
+                        </td>
+                        <td class="font-mono cnpj-mask">{{ inst.cnpj or '-' }}</td>
+                        <td>
+                            <div class="user-info">
+                                <span class="tel-mask">{{ inst.telefone or '-' }}</span>
+                                <span style="font-size: 0.8rem;">{{ inst.email }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ inst.status or 'ativo' }}">
+                                {{ (inst.status or 'ativo') | upper }}
+                            </span>
+                        </td>
+                        <td class="actions">
+                            <a href="{{ url_for('gerenciar_instituicoes.editar_instituicao', id=inst.id) }}" class="btn-icon btn-edit" title="Editar">
+                                <i data-lucide="edit-3"></i>
+                            </a>
+                            
+                            {% if inst.status in ('suspenso', 'banido') %}
+                            <form method="POST" action="{{ url_for('gerenciar_instituicoes.reativar_instituicao', id=inst.id) }}" style="display:inline;" onsubmit="return confirm('Reativar esta instituição?');">
+                                <button type="submit" class="btn-icon btn-reativar" title="Reativar">
+                                    <i data-lucide="check-circle"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+
+                            <form method="POST" action="{{ url_for('gerenciar_instituicoes.remover_instituicao', id=inst.id) }}" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja remover esta instituição?');">
+                                <button type="submit" class="btn-icon btn-remove" title="Remover">
+                                    <i data-lucide="trash-2"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i data-lucide="search-x" style="width: 48px; height: 48px; margin-bottom: 10px;"></i>
+                <p>Nenhuma instituição cadastrada no sistema.</p>
+            </div>
+            {% endif %}
+        </div>
     </div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+    <script>
+        // Formata Telefone
+        const formatPhone = (v) => {
+            if (!v || v === '-') return v;
+            v = v.replace(/\D/g, '').slice(0, 11);
+            if (v.length === 11) return v.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+            return v.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+        };
 
-    {% if instituicoes %}
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nome</th>
-                <th>CNPJ</th>
-                <th>Email</th>
-                <th>Telefone</th>
-                <th>Endereço</th>
-                <th>Status</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for inst in instituicoes %}
-            <tr>
-                <td>{{ inst.id }}</td>
-                <td>{{ inst.nome }}</td>
-                <td>{{ inst.cnpj or '-' }}</td>
-                <td>{{ inst.email }}</td>
-                <td>{{ inst.telefone or '-' }}</td>
-                <td>{{ inst.endereco or '-' }}</td>
-                <td>
-                    <span class="badge badge-{{ inst.status or 'ativo' }}">
-                        {{ (inst.status or 'ativo') | upper }}
-                    </span>
-                </td>
-                <td class="actions">
-                    <a href="{{ url_for('gerenciar_instituicoes.editar_instituicao', id=inst.id) }}" class="btn-edit">
-                        Editar
-                    </a>
-                    {% if inst.status in ('suspenso', 'banido') %}
-                        <form method="POST" action="{{ url_for('gerenciar_instituicoes.reativar_instituicao', id=inst.id) }}"
-                              style="display:inline;"
-                              onsubmit="return confirm('Reativar esta instituição?');">
-                            <button type="submit" class="btn-reativar">✓ Reativar</button>
-                        </form>
-                    {% endif %}
-                    <form method="POST" action="{{ url_for('gerenciar_instituicoes.remover_instituicao', id=inst.id) }}"
-                          style="display:inline;"
-                          onsubmit="return confirm('Tem certeza que deseja remover esta instituição?');">
-                        <button type="submit" class="btn-remove">Remover</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p>Nenhuma instituição cadastrada.</p>
-    {% endif %}
+        // Formata CNPJ
+        const formatCNPJ = (v) => {
+            if (!v || v === '-') return v;
+            v = v.replace(/\D/g, '').slice(0, 14);
+            return v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+        };
 
-    <a href="{{ url_for('login_administrador.painel_administrador') }}" class="btn-back">
-        ← Voltar ao Painel
-    </a>
+        // Aplica as máscaras
+        document.querySelectorAll('.tel-mask').forEach(td => td.textContent = formatPhone(td.textContent));
+        document.querySelectorAll('.cnpj-mask').forEach(td => td.textContent = formatCNPJ(td.textContent));
+
+        // Inicia ícones
+        lucide.createIcons();
+    </script>
+
+    <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
 </body>
 </html>

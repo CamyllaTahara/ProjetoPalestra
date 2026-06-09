@@ -79,44 +79,43 @@ def cadastro_instituicao():
         elif not any(c.isdigit() for c in senha):
             mensagem_erro_senha = "Erro: A senha deve conter pelo menos um número."
 
-        # Validação do CNPJ (formato)
+
         if not validar_cnpj(dados_form['cnpj']):
             mensagem_erro_cnpj = "Erro: CNPJ inválido. Deve conter 14 dígitos."
-        # Validação do CNPJ (ativo - usando API)
+      
         elif validar_cnpj(dados_form['cnpj']):
             is_cnpj_ativo = verificar_cnpj_ativo(dados_form['cnpj'])
             print(f"CNPJ está ativo? {is_cnpj_ativo}") # Adicionado para debug
             if not is_cnpj_ativo:
                 mensagem_erro_cnpj = "Erro: CNPJ não está ativo ou não foi encontrado."
 
-        # Validação do telefone
+
         if not validar_telefone(dados_form['telefone']):
             mensagem_erro_telefone = "Erro: Telefone inválido. Deve ter 10 ou 11 dígitos."
 
-        # Validação do e-mail
         if not validar_email(dados_form['email']):
             mensagem_erro_email = "Erro: E-mail inválido."
 
-        # Validação do número 
+
         if dados_form['numero'] and not re.match(r'^[a-zA-Z0-9]+$', dados_form['numero']):
             mensagem_erro_numero = "Erro: O número do endereço deve conter apenas letras e números."
 
         if (mensagem_erro_senha or mensagem_erro_email 
              or mensagem_erro_cnpj or mensagem_erro_telefone 
-              or  mensagem_erro_numero): # Inclui a nova mensagem de erro
+              or  mensagem_erro_numero): 
             return render_template('cadastro_instituicao.html',
                                    mensagem_erro_senha=mensagem_erro_senha,
                                    mensagem_erro_email=mensagem_erro_email,
                                    mensagem_erro_cnpj=mensagem_erro_cnpj,
                                    mensagem_erro_telefone=mensagem_erro_telefone,
-                                   mensagem_erro_numero=mensagem_erro_numero, # Passa a nova mensagem de erro para o template
+                                   mensagem_erro_numero=mensagem_erro_numero, 
                                    dados_form=dados_form)
         else:
             try:
                 conexao = conectar_bd()
                 cursor = conexao.cursor()
 
-                # Verificar se o nome da instituição já existe
+          
                 cursor.execute("SELECT id FROM instituicoes WHERE nome = %s", (dados_form['nome'],))
                 if cursor.fetchone():
                     mensagem_erro_nome = "Erro: Já existe uma instituição cadastrada com este nome."
@@ -129,7 +128,7 @@ def cadastro_instituicao():
                                            mensagem_erro_numero=mensagem_erro_numero,
                                            dados_form=dados_form)
 
-                # Verificar se o e-mail já existe
+  
                 cursor.execute("SELECT id FROM instituicoes WHERE email = %s", (dados_form['email'],))
                 if cursor.fetchone():
                     mensagem_erro_email = "Erro: Este e-mail já está cadastrado."
@@ -143,7 +142,7 @@ def cadastro_instituicao():
                                            dados_form=dados_form)
 
             
-                # Verificar se o CNPJ já está cadastrado (mesmo que inativo)
+
                 cursor.execute("SELECT id FROM instituicoes WHERE cnpj = %s", (re.sub(r'\D', '', dados_form['cnpj']),))
                 if cursor.fetchone():
                     mensagem_erro_cnpj = "Erro: Este CNPJ já está cadastrado."
@@ -156,7 +155,7 @@ def cadastro_instituicao():
                                            mensagem_erro_numero=mensagem_erro_numero,
                                            dados_form=dados_form)
 
-                # Verificar se o telefone já está cadastrado
+
                 cursor.execute("SELECT id FROM instituicoes WHERE telefone = %s", (re.sub(r'\D', '', dados_form['telefone']),))
                 if cursor.fetchone():
                     mensagem_erro_telefone = "Erro: Este telefone já está cadastrado."
@@ -169,14 +168,14 @@ def cadastro_instituicao():
                                            mensagem_erro_numero=mensagem_erro_numero,
                                            dados_form=dados_form)
 
-                # Se não houver erros, cadastrar a instituição
+
                 dados = (
                     dados_form['nome'],
-                    re.sub(r'\D', '', dados_form['cnpj']), # Remove formatação do CNPJ antes de inserir
+                    re.sub(r'\D', '', dados_form['cnpj']), 
                     dados_form['endereco'],
-                    dados_form['numero'], # Adiciona o número na tupla de dados
+                    dados_form['numero'], 
                     dados_form['email'],
-                    re.sub(r'\D', '', dados_form['telefone']), # Remove formatação do telefone antes de inserir
+                    re.sub(r'\D', '', dados_form['telefone']), 
                     generate_password_hash(senha)
                 )
                 sql = """
@@ -221,26 +220,24 @@ def editar_perfil():
         email = request.form["email"]
         telefone = request.form["telefone"]
         cnpj = request.form["cnpj"]
-        foto = request.files.get("foto_perfil") # Pega o arquivo do formulário
+        foto = request.files.get("foto_perfil") 
 
-        # Buscar dados atuais para saber o nome da foto antiga
         cursor.execute("SELECT foto FROM instituicoes WHERE id=%s", (user_id,))
         dados_atuais = cursor.fetchone()
-        nome_foto = dados_atuais["foto"] # Por padrão, mantém a que já existe
+        nome_foto = dados_atuais["foto"] 
 
         if foto and foto.filename != "":
-            # Gerar novo nome para a foto
+
             extensao = foto.filename.rsplit(".", 1)[1].lower()
             nome_foto = f"inst_{user_id}_{int(time.time())}.{extensao}"
             
-            # Caminho onde será salva (crie a pasta 'fotos_instituicoes' dentro de static)
+   
             pasta_destino = os.path.join("static", "fotos_instituicoes")
             if not os.path.exists(pasta_destino):
                 os.makedirs(pasta_destino)
             
             caminho = os.path.join(pasta_destino, nome_foto)
 
-            # Apagar foto antiga se ela existir e não for a padrão
             if dados_atuais["foto"]:
                 caminho_antigo = os.path.join(pasta_destino, dados_atuais["foto"])
                 if os.path.exists(caminho_antigo):
@@ -248,7 +245,7 @@ def editar_perfil():
 
             foto.save(caminho)
 
-        # Update com a nova foto (ou a antiga mantida)
+
         sql = "UPDATE instituicoes SET endereco=%s, email=%s, telefone=%s, cnpj=%s, foto=%s WHERE id=%s"
         cursor.execute(sql, (endereco, email, telefone, cnpj, nome_foto, user_id))
         conexao.commit()
@@ -256,7 +253,6 @@ def editar_perfil():
         flash("Perfil atualizado com sucesso!", "success")
         return redirect(url_for("instituicao.editar_perfil"))
 
-    # GET: Carregar dados para o formulário
     cursor.execute("SELECT * FROM instituicoes WHERE id=%s", (user_id,))
     instituicao = cursor.fetchone()
     cursor.close()

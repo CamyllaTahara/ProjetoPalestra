@@ -1,0 +1,135 @@
+/* 1. Reset e Base */
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Alinha no topo para o scroll ser natural */
+    min-height: 100vh;
+    padding: 20px 0 40px 0; /* Espaçamento equilibrado em cima e embaixo */
+    background-color: #0b0e14;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+    overflow-x: hidden; /* Evita scroll lateral bobo */
+}
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.6; /* Deixa as partículas mais suaves */
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 30px 35px; /* Padding interno um pouco menor */
+    width: 70%;
+    max-width: 850px; /* Reduzi levemente a largura */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+    position: relative;
+    z-index: 10;
+    
+}
+h1 { 
+    color: #ffc107; 
+    margin: 10px 0 5px 0; 
+    font-size: 1.8rem; /* Um pouco menor para ganhar espaço */
+}
+
+.subtitulo { 
+    color: #888; 
+    margin-bottom: 20px; 
+    font-size: 0.85rem; 
+}
+/* 3. Estrela de Avaliação */
+.estrelas {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    font-size: 2.8rem;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.estrelas input { display: none; }
+.estrelas label { 
+    cursor: pointer; 
+    color: rgba(255, 255, 255, 0.1); 
+    transition: transform 0.2s, color 0.3s; 
+}
+
+.estrelas label:hover { transform: scale(1.2); }
+
+.estrelas input:checked ~ label,
+.estrelas label:hover,
+.estrelas label:hover ~ label { 
+    color: #ffc107; 
+    text-shadow: 0 0 15px rgba(255, 193, 7, 0.5);
+}
+
+/* 4. Formulário e Inputs */
+.grupo { margin-bottom: 25px; }
+.grupo label { 
+    display: block; 
+    margin-bottom: 12px; 
+    color: #efefef; 
+    font-weight: 500;
+}
+
+textarea { 
+    width: 100%; 
+    background: rgba(0, 0, 0, 0.3); 
+    border: 1px solid rgba(255, 255, 255, 0.1); 
+    color: white; 
+    border-radius: 10px; 
+    padding: 15px; 
+    min-height: 120px; 
+    resize: vertical;
+    outline: none;
+}
+
+textarea:focus { border-color: #ffc107; }
+
+/* 5. Botão de Enviar (Padrão do seu sistema) */
+.btn-enviar {
+    width: 100%;
+    background: #ffc107;
+    color: #000;
+    border: none;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
+}
+
+.btn-enviar:hover {
+    background: #e0a800;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+}
+
+.btn-voltar {
+    align-self: flex-start; /* Alinha à esquerda */
+    margin-left: 5%;
+    color: #888;
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-voltar:hover { color: #fff; }

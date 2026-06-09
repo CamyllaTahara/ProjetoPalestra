@@ -1,0 +1,230 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+body {
+    background-color: #0a0a0a;
+    background-image: url('caminho/do/seu/fundo-conexoes.png');
+    background-attachment: fixed;
+    background-size: cover;
+    color: #e0e0e0;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+h1 {
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: #ffffff;
+    text-align: center;
+    margin: 40px 0;
+}
+
+h2 {
+    color: #00d2ff;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.container {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(15, 15, 15, 0.75) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 25px;
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 40px auto;
+}
+
+/* Duas seções (cards) perfeitamente separadas */
+.section {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 35px;
+}
+
+/* --- ESTRUTURA DAS TABELAS --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Força o navegador a respeitar as larguras em % */
+}
+
+th {
+    text-align: left;
+    padding: 12px 15px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+td {
+    padding: 15px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle !important;
+    font-size: 0.9rem;
+    word-wrap: break-word; /* Evita que textos fujam da célula */
+}
+
+/* --- 📅 LARGURAS ESPECÍFICAS: TABELA AGENDADAS (6 colunas = 100%) --- */
+.tabela-agendadas th:nth-child(1), .tabela-agendadas td:nth-child(1) { width: 20%; } /* Título */
+.tabela-agendadas th:nth-child(2), .tabela-agendadas td:nth-child(2) { width: 15%; } /* Palestrante */
+.tabela-agendadas th:nth-child(3), .tabela-agendadas td:nth-child(3) { width: 22%; } /* Contato */
+.tabela-agendadas th:nth-child(4), .tabela-agendadas td:nth-child(4) { width: 16%; } /* Data/Hora */
+.tabela-agendadas th:nth-child(5), .tabela-agendadas td:nth-child(5) { width: 12%; text-align: center; } /* Status */
+.tabela-agendadas th:nth-child(6), .tabela-agendadas td:nth-child(6) { width: 15%; text-align: right; } /* Ações */
+
+/* --- 🕒 NOVO: LARGURAS ESPECÍFICAS: TABELA HISTÓRICO (4 colunas = 100%) --- */
+.tabela-historico th:nth-child(1), .tabela-historico td:nth-child(1) { width: 40%; } /* Título */
+.tabela-historico th:nth-child(2), .tabela-historico td:nth-child(2) { width: 25%; } /* Palestrante */
+.tabela-historico th:nth-child(3), .tabela-historico td:nth-child(3) { width: 20%; } /* Data */
+.tabela-historico th:nth-child(4), .tabela-historico td:nth-child(4) { width: 15%; text-align: right; } /* Status */
+
+/* Ajuste do Título e Descrição */
+table td strong {
+    display: block;
+    line-height: 1.2;
+    margin-bottom: 4px;
+    color: #fff;
+}
+
+/* Ajuste da Coluna de Contato */
+.info-contato {
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+/* --- COMPONENTES (Status e Botões) --- */
+.status {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-aceita, .status-realizada, .status-confirmada { background: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3); }
+.status-pendente { background: rgba(241, 196, 15, 0.15); color: #f1c40f; border: 1px solid rgba(241, 196, 15, 0.3); }
+.status-cancelada, .status-recusada { background: rgba(231, 76, 60, 0.15); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.3); }
+
+.btn-voltar {
+    display: flex;
+    align-items: center;
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
+    max-width: 1100px;
+    margin: 20px auto;
+    font-size: 0.85rem;
+    gap: 8px;
+    transition: 0.3s;
+}
+
+.btn-voltar:hover { color: #fff; }
+
+.acoes {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+}
+
+.btn-acao {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    transition: 0.2s;
+}
+
+/* Ícones das ações idênticos e padronizados */
+.btn-acao svg {
+    width: 14px !important;
+    height: 14px !important;
+    stroke: #ffffff !important;
+    stroke-width: 2.5px !important;
+    fill: none !important;
+}
+
+.btn-acao:hover {
+    transform: scale(1.08);
+    filter: brightness(1.2);
+}
+
+.empty-message {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 20px 0;
+}
+
+/* Estilos do Modal de Feedback das Mensagens Flash */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-content-glass {
+            background: rgba(20, 20, 20, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .btn-modal-sucesso{
+            margin-top: 22px;
+            padding: 12px 22px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0, 210, 255, 0.25);
+            transition: all 0.25s ease;
+        }
+
+        .btn-modal-sucesso:hover{
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 12px 30px rgba(0, 210, 255, 0.35);
+            filter: brightness(1.05);
+        }
+
+        .btn-modal-sucesso:active{
+            transform: scale(0.98);
+        }

@@ -52,8 +52,7 @@ def perfil_palestrante(palestrante_id):
         user_type = session.get('user_type')
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-         
-        # Buscar dados do palestrante
+
         cursor.execute("""
             SELECT id, nome_completo, ramo_atividade, anos_experiencia, email, telefone, curriculo_pdf,descricao,foto
             FROM palestrantes
@@ -80,7 +79,7 @@ def perfil_palestrante(palestrante_id):
         ja_segue = cursor.fetchone() is not None
         
         
-        # Buscar disponibilidades do palestrante
+
         cursor.execute("""
             SELECT id, data, horario_inicio, horario_fim
             FROM disponibilidade_palestrantes
@@ -129,7 +128,6 @@ def download_curriculo(palestrante_id):
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         
-        # 1. Obter o NOME DO ARQUIVO do banco de dados
         cursor.execute("""
             SELECT nome_completo, curriculo_pdf
             FROM palestrantes
@@ -141,14 +139,11 @@ def download_curriculo(palestrante_id):
         cursor.close()
         conn.close()
         
-        # 2. Verificar se o currículo existe no registro do palestrante
+   
         if not palestrante or not palestrante['curriculo_pdf']:
             flash("Currículo não encontrado ou não cadastrado.", "danger")
             return redirect(url_for('gerenciar_solicitacoes.perfil_palestrante', palestrante_id=palestrante_id))
 
-        # 3. Montar o caminho completo do arquivo no servidor
-        # O Flask procura o caminho a partir da pasta raiz do projeto.
-        # Ajuste 'static/curriculos/' se o caminho for diferente.
         curriculo_pdf_nome = palestrante['curriculo_pdf']
         caminho_arquivo = os.path.join(
     current_app.root_path,
@@ -156,13 +151,10 @@ def download_curriculo(palestrante_id):
     curriculo_pdf_nome
 )
         print(f"DEBUG: Tentando encontrar o arquivo em: {os.path.abspath(caminho_arquivo)}")
-        
-        # 4. Configurar o nome do arquivo para o download
+
         nome_download = f"Curriculo_{palestrante['nome_completo'].replace(' ', '_').replace('.', '')}.pdf"
         
-        # 5. Enviar o arquivo.
-        # Usa os.path.abspath() para garantir que o caminho absoluto seja passado para send_file
-        # Embora o Flask geralmente resolva paths relativos à raiz, este é um bom padrão.
+
         return send_file(os.path.abspath(caminho_arquivo), 
                          as_attachment=True, 
                          download_name=nome_download,
@@ -220,7 +212,7 @@ def solicitar_palestra(palestrante_id):
         data_proposta = request.form.get('data_proposta')
         horario_proposta = request.form.get('horario_proposta')
         
-        # Validações
+        
         if not titulo or not descricao:
             flash("Título e descrição são obrigatórios", "danger")
             return redirect(url_for('gerenciar_solicitacoes.solicitar_palestra', palestrante_id=palestrante_id))
@@ -239,7 +231,7 @@ def solicitar_palestra(palestrante_id):
             cursor = conn.cursor(dictionary=True)
             prazo_expiracao = datetime.now() + timedelta(days=3)
             
-            # Verificar duplicação
+           
             cursor.execute("""
                 SELECT id FROM solicitacoes_palestras
                 WHERE instituicao_id = %s 
@@ -254,21 +246,15 @@ def solicitar_palestra(palestrante_id):
                 cursor.close()
                 conn.close()
                 return redirect(url_for('gerenciar_solicitacoes.solicitar_palestra', palestrante_id=palestrante_id))
-            
-            # Criar a solicitação
+         
             sql = """
                 INSERT INTO solicitacoes_palestras 
                 (instituicao_id, palestrante_id, titulo, descricao, data_proposta, horario_proposta, status, endereco_palestra, prazo_expiracao)
                 VALUES (%s, %s, %s, %s, %s, %s, 'pendente', %s, %s)
             """
             cursor.execute(sql, (instituicao_id, palestrante_id, titulo, descricao, data_proposta, horario_proposta, endereco_palestra, prazo_expiracao))
-            conn.commit()  # ✅ SALVAR PRIMEIRO!
-            
-            # ============================================================
-            # 📧 NOTIFICAÇÕES POR E-MAIL (AMBAS AS PARTES)
-            # ============================================================
-            
-            # Buscar dados do PALESTRANTE
+            conn.commit() 
+
             cursor.execute("""
                 SELECT email, nome_completo 
                 FROM palestrantes 
@@ -276,7 +262,7 @@ def solicitar_palestra(palestrante_id):
             """, (palestrante_id,))
             palestrante = cursor.fetchone()
             
-            # Buscar dados da INSTITUIÇÃO
+
             cursor.execute("""
                 SELECT nome, email 
                 FROM instituicoes 
@@ -284,44 +270,140 @@ def solicitar_palestra(palestrante_id):
             """, (instituicao_id,))
             instituicao = cursor.fetchone()
             
-            # Formatar datas
+
             data_formatada = data_obj.strftime('%d/%m/%Y')
             data_expiracao_formatada = prazo_expiracao.strftime('%d/%m/%Y às %H:%M')
             
             from utils.mail import send_notification_email
             
-            # ─────────────────────────────────────────────────────────
-            # 1️⃣ E-MAIL PARA O PALESTRANTE (Notificação de Solicitação)
-            # ─────────────────────────────────────────────────────────
+
             subject_palestrante = f"📬 Nova Solicitação de Palestra: {titulo}"
-            body_palestrante = f"""Olá, {palestrante['nome_completo']}!
+            body_palestrante = f"""
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0; padding:0; background-color:#0b0f1a; font-family:Arial, sans-serif;">
 
-Você recebeu uma nova solicitação de palestra através do sistema.
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0b0f1a; padding: 40px 20px;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%;">
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📌 DETALHES DA SOLICITAÇÃO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            
+                    <tr>
+                        <td align="center" style="padding-bottom: 30px;">
+                            <h1 style="margin:0; font-size:1.6rem; color:#00d2ff; letter-spacing:-0.5px;">✦ PalestraApp</h1>
+                            <p style="margin:6px 0 0; color:#94a3b8; font-size:0.85rem;">Sistema de Agendamento de Palestras</p>
+                        </td>
+                    </tr>
 
-🏢 Instituição: {instituicao['nome']}
-📋 Título: {titulo}
-📅 Data: {data_formatada}
-🕐 Horário: {horario_proposta}
-📍 Local: {endereco_palestra}
+    
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #0f172a, #1e293b); border: 1px solid rgba(0,210,255,0.15); border-radius: 16px; padding: 35px;">
+                            <table width="100%" cellpadding="0" cellspacing="0">
 
-📝 Descrição:
-{descricao}
+                                <tr>
+                                    <td align="center" style="padding-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.07);">
+                                        <div style="background: rgba(0,210,255,0.1); border: 1px solid rgba(0,210,255,0.3); border-radius: 50px; display:inline-block; padding: 10px 22px; margin-bottom: 15px;">
+                                            <span style="color:#00d2ff; font-size:0.85rem; font-weight:600; letter-spacing:1px;">📋 NOVA SOLICITAÇÃO</span>
+                                        </div>
+                                        <h2 style="margin:0; color:#f8fafc; font-size:1.4rem;">Olá, {palestrante['nome_completo']}!</h2>
+                                        <p style="margin:10px 0 0; color:#94a3b8; font-size:0.95rem; line-height:1.6;">
+                                            Você recebeu uma nova solicitação de palestra.
+                                        </p>
+                                    </td>
+                                </tr>
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                     
+                                <tr>
+                                    <td style="padding-top: 25px; padding-bottom: 20px;">
+                                        <p style="margin:0 0 12px; color:#94a3b8; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; font-weight:600;">Detalhes da Solicitação</p>
 
-⚠️ PRAZO DE RESPOSTA: 
-Esta solicitação expira em: {data_expiracao_formatada}
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">🏢 Instituição</span><br>
+                                                    <strong style="color:#f8fafc; font-size:0.95rem;">{instituicao['nome']}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">📋 Título</span><br>
+                                                    <strong style="color:#f8fafc; font-size:0.95rem;">{titulo}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">📅 Data</span><br>
+                                                    <strong style="color:#f8fafc; font-size:0.95rem;">{data_formatada}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">🕐 Horário</span><br>
+                                                    <strong style="color:#f8fafc; font-size:0.95rem;">{horario_proposta}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">📍 Local</span><br>
+                                                    <strong style="color:#f8fafc; font-size:0.95rem;">{endereco_palestra}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 10px 0;">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">📝 Descrição</span><br>
+                                                    <span style="color:#cbd5e1; font-size:0.95rem; line-height:1.6;">{descricao}</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
 
-Por favor, acesse o sistema para aceitar ou recusar esta solicitação.
+                                <tr>
+                                    <td style="padding-bottom: 25px;">
+                                        <div style="background: rgba(245,158,11,0.06); border-left: 3px solid #f59e0b; border-radius: 8px; padding: 15px 18px;">
+                                            <p style="margin:0 0 4px; color:#f59e0b; font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:1px;">⚠️ Prazo de Resposta</p>
+                                            <p style="margin:0; color:#cbd5e1; font-size:0.9rem; line-height:1.6;">
+                                                Esta solicitação expira em <strong style="color:#f8fafc;">{data_expiracao_formatada}</strong>. Acesse o sistema para aceitar ou recusar.
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                 
+                                <tr>
+                                    <td align="center" style="padding-bottom: 10px;">
+                                        <a href="http://localhost:5000"
+                                           style="display:inline-block; background: linear-gradient(135deg, #00d2ff, #0099cc); color:#000000; font-weight:700; font-size:0.95rem; text-decoration:none; padding: 14px 35px; border-radius: 10px;">
+                                            Acessar o Sistema →
+                                        </a>
+                                    </td>
+                                </tr>
 
-Atenciosamente,
-Sistema de Agendamento de Palestras
+                            </table>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="center" style="padding-top: 25px;">
+                            <p style="margin:0; color:#475569; font-size:0.8rem; line-height:1.6;">
+                                Este e-mail foi enviado automaticamente pelo sistema PalestraApp — TCC.<br>
+                                Por favor, não responda diretamente a este e-mail.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
 """
             
             email_palestrante_enviado = send_notification_email(
@@ -329,39 +411,137 @@ Sistema de Agendamento de Palestras
                 subject=subject_palestrante,
                 body=body_palestrante
             )
-            
-            # ─────────────────────────────────────────────────────────
-            # 2️⃣ E-MAIL PARA A INSTITUIÇÃO (Confirmação de Envio)
-            # ─────────────────────────────────────────────────────────
+
             subject_instituicao = f"✅ Solicitação Enviada: {titulo}"
-            body_instituicao = f"""Prezada {instituicao['nome']},
+            body_instituicao =  f"""
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0; padding:0; background-color:#0b0f1a; font-family:Arial, sans-serif;">
 
-Sua solicitação de palestra foi enviada com sucesso!
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0b0f1a; padding: 40px 20px;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%;">
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 RESUMO DA SOLICITAÇÃO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                
+                    <tr>
+                        <td align="center" style="padding-bottom: 30px;">
+                            <h1 style="margin:0; font-size:1.6rem; color:#00d2ff; letter-spacing:-0.5px;">✦ PalestraApp</h1>
+                            <p style="margin:6px 0 0; color:#94a3b8; font-size:0.85rem;">Sistema de Agendamento de Palestras</p>
+                        </td>
+                    </tr>
 
-👤 Palestrante: {palestrante['nome_completo']}
-📋 Título: {titulo}
-📅 Data Proposta: {data_formatada}
-🕐 Horário: {horario_proposta}
-📍 Local: {endereco_palestra}
+                  
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #0f172a, #1e293b); border: 1px solid rgba(0,210,255,0.15); border-radius: 16px; padding: 35px;">
+                            <table width="100%" cellpadding="0" cellspacing="0">
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                          
+                                <tr>
+                                    <td align="center" style="padding-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.07);">
+                                        <div style="background: rgba(0,210,255,0.1); border: 1px solid rgba(0,210,255,0.3); border-radius: 50px; display:inline-block; padding: 10px 22px; margin-bottom: 15px;">
+                                            <span style="color:#00d2ff; font-size:0.85rem; font-weight:600; letter-spacing:1px;">📋 NOVA SOLICITAÇÃO</span>
+                                        </div>
+                                        <h2 style="margin:0; color:#f8fafc; font-size:1.4rem;">Olá, {palestrante['nome_completo']}!</h2>
+                                        <p style="margin:10px 0 0; color:#94a3b8; font-size:0.95rem; line-height:1.6;">
+                                            Você recebeu uma nova solicitação de palestra.
+                                        </p>
+                                    </td>
+                                </tr>
 
-⏳ PRÓXIMOS PASSOS:
+            
+                                <tr>
+                                    <td style="padding-top: 25px; padding-bottom: 20px;">
+                                        <p style="margin:0 0 12px; color:#94a3b8; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; font-weight:600;">Detalhes da Solicitação</p>
 
-• O palestrante foi notificado e tem até {data_expiracao_formatada} para responder
-• Você receberá um e-mail assim que ele aceitar ou recusar
-• Você pode acompanhar o status no painel "Minhas Solicitações"
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">🏢 Instituição</span><br>
+                                                    <strong style="color:#f8fafc; font-size:0.95rem;">{instituicao['nome']}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">📋 Título</span><br>
+                                                    <strong style="color:#f8fafc; font-size:0.95rem;">{titulo}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">📅 Data</span><br>
+                                                    <strong style="color:#f8fafc; font-size:0.95rem;">{data_formatada}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">🕐 Horário</span><br>
+                                                    <strong style="color:#f8fafc; font-size:0.95rem;">{horario_proposta}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">📍 Local</span><br>
+                                                    <strong style="color:#f8fafc; font-size:0.95rem;">{endereco_palestra}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 10px 0;">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">📝 Descrição</span><br>
+                                                    <span style="color:#cbd5e1; font-size:0.95rem; line-height:1.6;">{descricao}</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                         
+                                <tr>
+                                    <td style="padding-bottom: 25px;">
+                                        <div style="background: rgba(245,158,11,0.06); border-left: 3px solid #f59e0b; border-radius: 8px; padding: 15px 18px;">
+                                            <p style="margin:0 0 4px; color:#f59e0b; font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:1px;">⚠️ Prazo de Resposta</p>
+                                            <p style="margin:0; color:#cbd5e1; font-size:0.9rem; line-height:1.6;">
+                                                Esta solicitação expira em <strong style="color:#f8fafc;">{data_expiracao_formatada}</strong>. Acesse o sistema para aceitar ou recusar.
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
 
-💡 DICA: Se a solicitação expirar sem resposta, você pode solicitar novamente.
+                 
+                                <tr>
+                                    <td align="center" style="padding-bottom: 10px;">
+                                        <a href="http://localhost:5000"
+                                           style="display:inline-block; background: linear-gradient(135deg, #00d2ff, #0099cc); color:#000000; font-weight:700; font-size:0.95rem; text-decoration:none; padding: 14px 35px; border-radius: 10px;">
+                                            Acessar o Sistema →
+                                        </a>
+                                    </td>
+                                </tr>
 
-Atenciosamente,
-Sistema de Agendamento de Palestras
+                            </table>
+                        </td>
+                    </tr>
+
+          
+                    <tr>
+                        <td align="center" style="padding-top: 25px;">
+                            <p style="margin:0; color:#475569; font-size:0.8rem; line-height:1.6;">
+                                Este e-mail foi enviado automaticamente pelo sistema PalestraApp — TCC.<br>
+                                Por favor, não responda diretamente a este e-mail.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
 """
             
             email_instituicao_enviado = send_notification_email(
@@ -370,14 +550,12 @@ Sistema de Agendamento de Palestras
                 body=body_instituicao
             )
             
-            # ============================================================
-            # FIM DAS NOTIFICAÇÕES
-            # ============================================================
+    
             
             cursor.close()
             conn.close()
             
-            # Feedback personalizado baseado no sucesso dos e-mails
+          
             if email_palestrante_enviado and email_instituicao_enviado:
                 flash(f"✅ Solicitação enviada! Você e o palestrante foram notificados por e-mail. O palestrante tem até {data_expiracao_formatada} para responder.", "success")
             elif email_palestrante_enviado:
@@ -391,9 +569,7 @@ Sistema de Agendamento de Palestras
             flash(f"Erro ao criar solicitação: {e}", "danger")
             return redirect(url_for('gerenciar_solicitacoes.solicitar_palestra', palestrante_id=palestrante_id))
     
-    # =========================================================
-    # TRATAMENTO GET (MOSTRAR FORMULÁRIO)
-    # =========================================================
+
     
     data_pre = request.args.get('data') 
     horario_inicio_pre = request.args.get('horario_inicio')
@@ -436,7 +612,16 @@ def minhas_solicitacoes():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         
+       
+        cursor.execute(""" UPDATE solicitacoes_palestras
+                            SET status = 'sem resposta'
+                            WHERE instituicao_id = %s
+                            AND status = 'pendente'
+                            AND prazo_expiracao < NOW()
+                            """, [instituicao_id]) 
+        conn.commit()
         
+       
         cursor.execute("""
             SELECT sp.id, sp.titulo, sp.descricao, sp.endereco_palestra, sp.data_proposta, sp.horario_proposta, 
                    sp.status, sp.criada_em, p.nome_completo, sp.endereco_palestra, sp.prazo_expiracao
@@ -456,8 +641,6 @@ def minhas_solicitacoes():
         flash(f"Erro ao listar solicitações: {e}", "danger")
         return redirect(url_for('login_instituicao.painel_instituicao'))
 
-# ============= ROTAS PARA PALESTRANTE =============
-
 @gerenciar_solicitacoes_bp.route("/solicitacoes_recebidas", methods=["GET"])
 @login_required("palestrante")
 def solicitacoes_recebidas():
@@ -468,23 +651,21 @@ def solicitacoes_recebidas():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         
-        # --- 1. LÓGICA DE EXPIRAÇÃO (ANTES DE LISTAR) ---
-        # Marca como 'expirada' toda solicitação 'pendente' cujo prazo já passou.
+
         cursor.execute("""
             UPDATE solicitacoes_palestras
-            SET status = 'expirada'
+            SET status = 'sem resposta'
             WHERE palestrante_id = %s 
             AND status = 'pendente' 
             AND prazo_expiracao < NOW()
         """, (palestrante_id,))
-        conn.commit() # Confirma a atualização no banco de dados
+        conn.commit() 
         
-        # --- 2. CONSULTA (SELECT COM NOVAS COLUNAS) ---
         cursor.execute("""
             SELECT sp.id, i.nome, sp.titulo, sp.descricao, sp.data_proposta, sp.horario_proposta, 
                    sp.status, sp.criada_em, sp.endereco_palestra, 
-                   sp.prazo_expiracao,                -- <<< 1. Seleciona o prazo de expiração
-                   i.nome AS nome_instituicao          -- <<< 2. Alias renomeado para maior clareza
+                   sp.prazo_expiracao,                
+                   i.nome AS nome_instituicao          
             FROM solicitacoes_palestras sp
             JOIN instituicoes i ON sp.instituicao_id = i.id
             WHERE sp.palestrante_id = %s
@@ -496,7 +677,7 @@ def solicitacoes_recebidas():
         
         conn.close()
         
-        # --- 3. RENDERIZAÇÃO ---
+
         return render_template("solicitacoes_recebidas.html", solicitacoes=solicitacoes)
     
     except Exception as e:
@@ -520,7 +701,6 @@ def responder_solicitacao(solicitacao_id, resposta):
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         
-        # 1. BUSCAR DADOS DA SOLICITAÇÃO
         cursor.execute("""
             SELECT 
                 sp.id, sp.instituicao_id, sp.data_proposta, sp.horario_proposta, 
@@ -539,7 +719,7 @@ def responder_solicitacao(solicitacao_id, resposta):
             flash("Solicitação não encontrada, já respondida ou não pertence a você.", "danger")
             return redirect(url_for('gerenciar_solicitacoes.solicitacoes_recebidas'))
 
-        # Desempacota os dados
+
         data_proposta = solicitacao['data_proposta']
         horario_proposta = solicitacao['horario_proposta']
         titulo = solicitacao['titulo']
@@ -548,13 +728,10 @@ def responder_solicitacao(solicitacao_id, resposta):
         email_instituicao = solicitacao['email_instituicao']
         
         body_recusa = ""
-        
-        # =========================================================
-        # TRATAMENTO DE ACEITE
-        # =========================================================
+
         if resposta == 'aceita':
             
-            # 2. CHECAGEM DE CONFLITO DE AGENDA
+        
             cursor.execute("""
                 SELECT id FROM palestras_confirmadas
                 WHERE palestrante_id = %s 
@@ -567,7 +744,6 @@ def responder_solicitacao(solicitacao_id, resposta):
                 flash("Conflito de agenda: Você já tem uma palestra confirmada nesta data e horário.", "danger")
                 return redirect(url_for('gerenciar_solicitacoes.solicitacoes_recebidas'))
                 
-            # 3. CRIAÇÃO DA PALESTRA CONFIRMADA
             cursor.execute("""
                 INSERT INTO palestras_confirmadas 
                 (solicitacao_id, palestrante_id, instituicao_id, titulo, descricao, 
@@ -576,10 +752,7 @@ def responder_solicitacao(solicitacao_id, resposta):
             """, (solicitacao_id, palestrante_id, solicitacao['instituicao_id'], 
                   titulo, solicitacao['descricao'], data_proposta, 
                   horario_proposta, solicitacao['endereco_palestra']))
-            
-            # ============================================================
-            # 🆕 4. REMOVER DISPONIBILIDADE (NOVO!)
-            # ============================================================
+
             print("\n" + "="*60)
             print("🗑️  REMOVENDO DISPONIBILIDADE ACEITA")
             print("="*60)
@@ -587,7 +760,6 @@ def responder_solicitacao(solicitacao_id, resposta):
             print(f"Data: {data_proposta}")
             print(f"Horário: {horario_proposta}")
             
-            # Buscar a disponibilidade específica que corresponde ao horário aceito
             cursor.execute("""
                 SELECT id, horario_inicio, horario_fim 
                 FROM disponibilidade_palestrantes
@@ -603,7 +775,6 @@ def responder_solicitacao(solicitacao_id, resposta):
                 print(f"✅ Disponibilidade encontrada: ID {disponibilidade['id']}")
                 print(f"   Horário: {disponibilidade['horario_inicio']} - {disponibilidade['horario_fim']}")
                 
-                # Deletar a disponibilidade
                 cursor.execute("""
                     DELETE FROM disponibilidade_palestrantes 
                     WHERE id = %s
@@ -615,58 +786,271 @@ def responder_solicitacao(solicitacao_id, resposta):
                 print("   (Pode ser que a solicitação foi feita sem usar uma disponibilidade específica)")
             
             print("="*60 + "\n")
-            # ============================================================
-            # FIM DA REMOÇÃO DE DISPONIBILIDADE
-            # ============================================================
-        
-        # =========================================================
-        # TRATAMENTO DE RECUSA
-        # =========================================================
+      
         elif resposta == 'recusada':
             motivo=request.form.get('motivo_recusa','').strip()
             body_recusa = f"\nMotivo da Recusa: {motivo}" if motivo else "\nMotivo da Recusa: Não especificado pelo palestrante."
         
-        # 5. ATUALIZAR STATUS DA SOLICITAÇÃO
         cursor.execute("""
             UPDATE solicitacoes_palestras
             SET status = %s, respondida_em = NOW(), motivo_recusa=%s
             WHERE id = %s
         """, (resposta, motivo if resposta == 'recusada' else None, solicitacao_id))
         
-        conn.commit()  # ✅ COMMIT DE TUDO (palestra + remoção + atualização)
-        
-        # 6. PREPARAR E ENVIAR E-MAIL
+        conn.commit()  
+
         data_formatada = data_proposta.strftime('%d/%m/%Y')
         
         if resposta == 'aceita':
             subject = f"✅ Confirmação: Palestra '{titulo}' Aceita!"
-            body = f"""Prezada {nome_instituicao},
+            body =f"""
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0; padding:0; background-color:#0b0f1a; font-family:Arial, sans-serif;">
 
-O palestrante {nome_palestrante} aceitou a solicitação para a palestra:
-Título: {titulo}
-Data: {data_formatada}
-Horário: {horario_proposta}
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0b0f1a; padding: 40px 20px;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%;">
 
-Detalhes logísticos podem ser acertados diretamente com o palestrante.
+                  
+                    <tr>
+                        <td align="center" style="padding-bottom: 30px;">
+                            <h1 style="margin:0; font-size:1.6rem; color:#00d2ff; letter-spacing:-0.5px;">✦ PalestraApp</h1>
+                            <p style="margin:6px 0 0; color:#94a3b8; font-size:0.85rem;">Sistema de Agendamento de Palestras</p>
+                        </td>
+                    </tr>
 
-Atenciosamente,
+                  
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #0f172a, #1e293b); border: 1px solid rgba(16,185,129,0.2); border-radius: 16px; padding: 35px;">
+                            <table width="100%" cellpadding="0" cellspacing="0">
+
+                              
+                                <tr>
+                                    <td align="center" style="padding-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.07);">
+                                        <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 50px; display:inline-block; padding: 10px 22px; margin-bottom: 15px;">
+                                            <span style="color:#10b981; font-size:0.85rem; font-weight:600; letter-spacing:1px;">✔ PALESTRA ACEITA</span>
+                                        </div>
+                                        <h2 style="margin:0; color:#f8fafc; font-size:1.4rem;">Ótimas notícias, {nome_instituicao}!</h2>
+                                        <p style="margin:10px 0 0; color:#94a3b8; font-size:0.95rem; line-height:1.6;">
+                                            O palestrante aceitou a sua solicitação.
+                                        </p>
+                                    </td>
+                                </tr>
+
+                            
+                                <tr>
+                                    <td style="padding-top: 25px; padding-bottom: 20px;">
+                                        <p style="margin:0 0 12px; color:#94a3b8; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; font-weight:600;">Detalhes da Palestra</p>
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">👤 Palestrante</span><br>
+                                                    <strong style="color:#f8fafc; font-size:0.95rem;">{nome_palestrante}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">📋 Título</span><br>
+                                                    <strong style="color:#f8fafc; font-size:0.95rem;">{titulo}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">📅 Data</span><br>
+                                                    <strong style="color:#f8fafc; font-size:0.95rem;">{data_formatada}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 10px 0;">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">🕐 Horário</span><br>
+                                                    <strong style="color:#f8fafc; font-size:0.95rem;">{horario_proposta}</strong>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                               
+                                <tr>
+                                    <td style="padding-bottom: 25px;">
+                                        <div style="background: rgba(0,210,255,0.06); border-left: 3px solid #00d2ff; border-radius: 8px; padding: 12px 18px;">
+                                            <p style="margin:0; color:#94a3b8; font-size:0.85rem; line-height:1.6;">
+                                                💡 Os detalhes logísticos podem ser acertados diretamente com o palestrante.
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                           
+                                <tr>
+                                    <td align="center" style="padding-bottom: 10px;">
+                                        <a href="http://localhost:5000"
+                                           style="display:inline-block; background: linear-gradient(135deg, #00d2ff, #0099cc); color:#000000; font-weight:700; font-size:0.95rem; text-decoration:none; padding: 14px 35px; border-radius: 10px;">
+                                            Acessar o Sistema →
+                                        </a>
+                                    </td>
+                                </tr>
+
+                            </table>
+                        </td>
+                    </tr>
+
+              
+                    <tr>
+                        <td align="center" style="padding-top: 25px;">
+                            <p style="margin:0; color:#475569; font-size:0.8rem; line-height:1.6;">
+                                Este e-mail foi enviado automaticamente pelo sistema PalestraApp — TCC.<br>
+                                Por favor, não responda diretamente a este e-mail.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
 Sua Plataforma"""
         else:
             subject = f"❌ Resposta: Palestra '{titulo}' Recusada"
-            body = f"""Prezada {nome_instituicao},
+            body = f"""
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0; padding:0; background-color:#0b0f1a; font-family:Arial, sans-serif;">
 
-Lamentamos informar que o palestrante {nome_palestrante} recusou a solicitação para a palestra:
-Título: {titulo}
-Data Proposta: {data_formatada}
-Horário: {horario_proposta}
-{body_recusa}
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0b0f1a; padding: 40px 20px;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%;">
 
-Agradecemos sua compreensão.
+                    
+                    <tr>
+                        <td align="center" style="padding-bottom: 30px;">
+                            <h1 style="margin:0; font-size:1.6rem; color:#00d2ff; letter-spacing:-0.5px;">✦ PalestraApp</h1>
+                            <p style="margin:6px 0 0; color:#94a3b8; font-size:0.85rem;">Sistema de Agendamento de Palestras</p>
+                        </td>
+                    </tr>
 
-Atenciosamente,
-Sua Plataforma"""
+                    
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #0f172a, #1e293b); border: 1px solid rgba(244,63,94,0.2); border-radius: 16px; padding: 35px;">
+                            <table width="100%" cellpadding="0" cellspacing="0">
+
+                               
+                                <tr>
+                                    <td align="center" style="padding-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.07);">
+                                        <div style="background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.3); border-radius: 50px; display:inline-block; padding: 10px 22px; margin-bottom: 15px;">
+                                            <span style="color:#f43f5e; font-size:0.85rem; font-weight:600; letter-spacing:1px;">❌ PALESTRA RECUSADA</span>
+                                        </div>
+                                        <h2 style="margin:0; color:#f8fafc; font-size:1.4rem;">Prezada, {nome_instituicao}!</h2>
+                                        <p style="margin:10px 0 0; color:#94a3b8; font-size:0.95rem; line-height:1.6;">
+                                            Lamentamos informar que o palestrante recusou a solicitação.
+                                        </p>
+                                    </td>
+                                </tr>
+
+                                
+                                <tr>
+                                    <td style="padding-top: 25px; padding-bottom: 20px;">
+                                        <p style="margin:0 0 12px; color:#94a3b8; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; font-weight:600;">Detalhes da Solicitação</p>
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">👤 Palestrante</span><br>
+                                                    <strong style="color:#f8fafc; font-size:0.95rem;">{nome_palestrante}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">📋 Título</span><br>
+                                                    <strong style="color:#f8fafc; font-size:0.95rem;">{titulo}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">📅 Data Proposta</span><br>
+                                                    <strong style="color:#f8fafc; font-size:0.95rem;">{data_formatada}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 10px 0;">
+                                                    <span style="color:#94a3b8; font-size:0.85rem;">🕐 Horário</span><br>
+                                                    <strong style="color:#f8fafc; font-size:0.95rem;">{horario_proposta}</strong>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                                
+                                <tr>
+                                    <td style="padding-bottom: 25px;">
+                                        <p style="margin:0 0 10px; color:#94a3b8; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; font-weight:600;">Motivo da Recusa</p>
+                                        <div style="background: rgba(244,63,94,0.06); border-left: 3px solid #f43f5e; border-radius: 8px; padding: 15px 18px;">
+                                            <p style="margin:0; color:#cbd5e1; font-size:0.95rem; line-height:1.7; font-style:italic;">
+                                                "{body_recusa}"
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Dica -->
+                                <tr>
+                                    <td style="padding-bottom: 25px;">
+                                        <div style="background: rgba(245,158,11,0.06); border-left: 3px solid #f59e0b; border-radius: 8px; padding: 12px 18px;">
+                                            <p style="margin:0; color:#94a3b8; font-size:0.85rem; line-height:1.6;">
+                                                💡 Você pode buscar outro palestrante disponível no sistema.
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                               
+                                <tr>
+                                    <td align="center" style="padding-bottom: 10px;">
+                                        <a href="http://localhost:5000"
+                                           style="display:inline-block; background: linear-gradient(135deg, #00d2ff, #0099cc); color:#000000; font-weight:700; font-size:0.95rem; text-decoration:none; padding: 14px 35px; border-radius: 10px;">
+                                            Buscar Palestrantes →
+                                        </a>
+                                    </td>
+                                </tr>
+
+                            </table>
+                        </td>
+                    </tr>
+
+                    
+                    <tr>
+                        <td align="center" style="padding-top: 25px;">
+                            <p style="margin:0; color:#475569; font-size:0.8rem; line-height:1.6;">
+                                Este e-mail foi enviado automaticamente pelo sistema PalestraApp — TCC.<br>
+                                Por favor, não responda diretamente a este e-mail.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
+"""
         
-        # ENVIAR E-MAIL
+
         from utils.mail import send_notification_email
         email_enviado = send_notification_email(email_instituicao, subject, body)
         

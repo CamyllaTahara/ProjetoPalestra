@@ -1,0 +1,264 @@
+:root {
+    --bg-deep: #06090f;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --accent-primary: #79c0ff;
+    --text-bright: #f0f6fc;
+    --text-dim: #8b949e;
+}
+
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-bright);
+    background: var(--bg-deep);
+    overflow: hidden;
+}
+.header-intro h1 {
+    
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+     -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 2.5rem;
+    letter-spacing: -1px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    
+    /* Um brilho sutil atrás da letra para combinar com o tema neon */
+    text-shadow: 0 0 20px rgba(121, 192, 255, 0.4);
+    
+    /* Garante que não tenha degradê caso você queira a cor sólida igual à imagem */
+    background: none;
+    -webkit-text-fill-color: initial; 
+}
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 20px;
+    z-index: 1;
+}
+
+/* O "Card" de login com Glassmorphism */
+.card-login {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 40px 20px;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.card-login:hover .card-icon {
+    opacity: 1;
+    filter: drop-shadow(0 0 25px rgba(121, 192, 255, 1));
+    transform: scale(1.1);
+}
+
+/* Brilho no Hover */
+.card-login:hover {
+    transform: translateY(-12px);
+    border-color: var(--accent-primary);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
+                0 0 20px rgba(121, 192, 255, 0.2);
+}
+.card-icon i {
+    width: 50px;
+    height: 50px;
+    stroke: var(--accent-primary);
+    filter: drop-shadow(0 0 15px var(--accent-primary));
+    margin-bottom: 20px;
+}
+
+/* Estilo dos Inputs */
+.input-group {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    margin-left: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+input {
+    width: 100%;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: white;
+    box-sizing: border-box;
+    transition: 0.3s;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    background: rgba(121, 192, 255, 0.05);
+    box-shadow: 0 0 15px rgba(121, 192, 255, 0.1);
+}
+
+/* Botão Neon */
+.btn-login {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: var(--text-bright);
+    color: var(--bg-deep);
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
+}
+
+.btn-login:hover {
+    background: var(--accent-primary);
+    box-shadow: 0 0 20px var(--accent-primary);
+    transform: translateY(-2px);
+}
+
+.link-esqueceu {
+    display: inline-block;
+    margin-top: 25px;
+    color: #f0f6fc;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.3s;
+    opacity: 0.8;
+}
+
+.link-esqueceu:hover {
+    opacity: 1;
+    color: var(--accent-primary);
+    text-shadow: 0 0 10px rgba(121, 192, 255, 0.05);
+}
+
+.erro {
+    background: rgba(255, 100, 100, 0.1);
+    color: #ff6b6b;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    border: 1px solid rgba(255, 100, 100, 0.2);
+}
+
+.btn-entrar {
+    margin-top: auto;
+    padding: 10px 25px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    font-size: 13px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: 0.15s;
+}
+
+.btn-entrar:hover {
+    background: #f0f6fc; /* Fica branco sólido */
+    color: #06090f;      /* Texto fica escuro */
+    transform: translateY(-3px); /* Faz o botão "subir" levemente */
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.6); /* Brilho neon branco */
+}
+
+.card-acesso:hover .btn-entrar {
+    background: var(--text-bright);
+    color: var(--bg-deep);
+    box-shadow: 0 0 15px var(--text-bright);
+}
+
+/* Borda e Brilho do Container Admin */
+.card-login.admin-mode:hover {
+    transform: translateY(-12px);
+    border-color: var(--accent-secondary);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
+                0 0 20px rgba(210, 168, 255, 0.2);
+}
+
+/* Ícone Roxo do Admin */
+.card-login.admin-mode .card-icon i {
+    stroke: var(--accent-secondary);
+    filter: drop-shadow(0 0 15px var(--accent-secondary));
+}
+
+/* Botão Entrar Personalizado para Admin */
+.card-login.admin-mode .btn-entrar:hover {
+   background: var(--accent-secondary);
+    box-shadow: 0 0 15px var(--accent-secondary);
+
+}
+
+/* Link de Esqueceu a Senha acompanhando o tema */
+.card-login.admin-mode .link-esqueceu:hover {
+    color: var(--accent-secondary);
+    text-shadow: 0 0 10px rgba(210, 168, 255, 0.5);
+}
+
+/* Foco do Input em Roxo */
+.card-login.admin-mode input:focus {
+    border-color: var(--accent-secondary);
+    background: rgba(210, 168, 255, 0.05);
+    box-shadow: 0 0 15px rgba(210, 168, 255, 0.2);
+}
+
+.login-footer {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-dim); /* Aquela cor levemente cinza que você usa */
+}
+
+.login-footer p {
+    margin-bottom: 10px;
+}
+
+.signup-link {
+    color: var(--accent-primary); /* O azul brilhante do seu título */
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid transparent;
+}
+
+.signup-link:hover {
+    color: var(--text-bright);
+    text-shadow: 0 0 8px var(--accent-primary);
+    border-bottom: 1px solid var(--accent-primary);
+}
+
+.forgot-password {
+    display: block;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    text-decoration: none;
+    margin-top: 15px;
+    opacity: 0.7;
+}
+
+.forgot-password:hover {
+    opacity: 1;
+    text-decoration: underline;
+}

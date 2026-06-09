@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+body {
+    background-color: #0a0a0a;
+    color: #e0e0e0;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+}
+
+#canvas-bg { position: fixed; top: 0; left: 0; z-index: -1; }
+
+.container-conversas {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+h1 { color: #fff; margin: 20px 0; display: flex; align-items: center; gap: 12px; }
+
+.btn-voltar { color: #888; text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; transition: 0.3s; }
+.btn-voltar:hover { color: #00d2ff; }
+
+/* Painel de Filtros */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 20px;
+    align-items: flex-end;
+}
+
+.filter-group { display: flex; flex-direction: column; gap: 8px; }
+.filter-group label { font-size: 0.75rem; color: #00d2ff; font-weight: 600; text-transform: uppercase; }
+
+input[type="text"] {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 12px;
+    border-radius: 8px;
+    outline: none;
+    transition: 0.3s;
+}
+
+input[type="text"]:focus { border-color: #00d2ff; background: rgba(255, 255, 255, 0.08); }
+
+.filter-buttons { display: flex; gap: 10px; }
+.btn-filtrar { background: #007bff; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.btn-limpar { background: rgba(255,255,255,0.1); color: white; text-decoration: none; padding: 12px 20px; border-radius: 8px; font-size: 0.9rem; display: flex; align-items: center; }
+
+/* Tabela e Dados */
+.table-container {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+table { width: 100%; border-collapse: collapse; }
+th { background: rgba(255, 255, 255, 0.05); color: #00d2ff; padding: 15px; text-align: left; font-size: 0.8rem; text-transform: uppercase; }
+td { padding: 18px 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+
+.involved-info { display: flex; flex-direction: column; gap: 5px; font-size: 0.85rem; }
+.involved-info span { display: flex; align-items: center; gap: 8px; color: #ccc; }
+.involved-info i { width: 14px; color: #888; }
+
+.badge-status {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+.status-confirmada { background: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid #2ecc71; }
+.status-pendente { background: rgba(241, 196, 15, 0.15); color: #f1c40f; border: 1px solid #f1c40f; }
+
+.activity-info { display: flex; flex-direction: column; }
+.msg-count { color: #00d2ff; font-weight: 600; display: flex; align-items: center; gap: 5px; font-size: 0.9rem; }
+.last-msg { font-size: 0.7rem; color: #777; margin-top: 4px; }
+.msg-none { color: #555; font-style: italic; font-size: 0.85rem; }
+
+.btn-visualizar {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-visualizar:hover { background: #fff; color: #000; }
+
+/* Garante que o título e a data fiquem na mesma linha e centralizados */
+.info-main {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.subtext {
+    display: flex;
+    align-items: center; /* Centraliza verticalmente o ícone com o texto */
+    gap: 6px;            /* Espaço entre o ícone e a data */
+    color: #888;
+    font-size: 0.85rem;
+}
+
+.subtext svg {
+    width: 16px;         /* Tamanho fixo para o ícone não variar */
+    height: 16px;
+    flex-shrink: 0;      /* Impede o ícone de amassar */
+}

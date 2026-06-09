@@ -3,33 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <title>Redefinir Senha - Palestrante</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_reset_senha.css') }}">
+    <!-- Importante para os ícones funcionarem -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
+    <canvas id="canvas-bg"></canvas>
+    
     <div class="login-container">
+        <div class="header-intro">
         <h2>Redefinir Senha</h2>
-    {% if mensagem_erro %}
-        <div class="erro">{{ mensagem_erro }}</div>
-    {% endif %}
-    
-    {% if token_valido %}
-        <form method="POST">
-            <input type="hidden" name="token" value="{{ token }}">
-            
-            <label for="senha">Nova Senha:</label>
-            <input type="password" name="senha" id="senha" required placeholder="Digite sua nova senha">
-            
-            <label for="confirmar_senha">Confirmar Senha:</label>
-            <input type="password" name="confirmar_senha" id="confirmar_senha" required placeholder="Confirme sua senha">
-            
-            <button type="submit">Redefinir Senha</button>
-        </form>
+        </div>
+
+    <div class="card-login ">
+            <div class="card-icon">
+                <i data-lucide="key"></i>
+                </div>
+
+
+    {% if mensagem_sucesso %}
+        <!-- TELA DE SUCESSO: O formulário some e aparece só isso aqui -->
+        <div class="success-screen">
+            <h3 class="success-title">Link Enviado!</h3>
+            <p class="success-text">{{ mensagem_sucesso }}</p>
+            <span class="sub-text">Confira sua caixa de entrada e spam.</span>
+            <a href="{{ url_for('login_palestrante.login') }}" class="btn-entrar" style="display: block; text-decoration: none;">Voltar para o Login</a>
+        </div>
     {% else %}
-        <div class="erro">Link de recuperação inválido ou expirado.</div>
-        <a href="{{ url_for('login_palestrante.esqueci_senha') }}">Solicitar novo link</a>
-    {% endif %}
-    
-    <a href="{{ url_for('login_palestrante.esqueci_senha') }}">Voltar para o login</a>
-</div>
+        <!-- TELA INICIAL: Só aparece se NÃO houver mensagem de sucesso -->
+        <div class="form-content">
+            <p class="instruction-text">Digite seu e-mail cadastrado para recuperar sua senha.</p>
+            
+            {% if mensagem_erro %}
+                <div class="erro-box">{{ mensagem_erro }}</div>
+            {% endif %}
+
+                {% if token_valido %}
+                    <form method="POST">
+                        <input type="hidden" name="token" value="{{ token }}">
+
+                        <div class="input-group">
+                            <label for="senha">Nova Senha:</label>
+                            <input type="password" name="senha" id="senha" required placeholder="Digite sua nova senha">
+                        </div>
+
+                        <div class="password-checklist">
+                            <div class="check-item" id="rule-length">
+                                <span class="checkmark"></span>
+                                <span class="text">Mínimo de 8 caracteres</span>
+                            </div>
+                            <div class="check-item" id="rule-upper">
+                                <span class="checkmark"></span>
+                                <span class="text">Uma letra maiúscula</span>
+                            </div>
+                            <div class="check-item" id="rule-lower">
+                                <span class="checkmark"></span>
+                                <span class="text">Uma letra minúscula</span>
+                            </div>
+                            <div class="check-item" id="rule-number">
+                                <span class="checkmark"></span>
+                                <span class="text">Um número</span>
+                            </div>
+                            <div class="check-item" id="rule-special">
+                                <span class="checkmark"></span>
+                                <span class="text">Um caractere especial (!@#$%&*)</span>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="confirmar_senha">Confirmar Senha:</label>
+                            <input type="password" name="confirmar_senha" id="confirmar_senha" required placeholder="Confirme sua senha">
+                        </div>
+
+                        <button type="submit" class="btn-entrar">Redefinir Senha</button>
+                    </form>
+                {% else %}
+                    <div class="erro-box">Link de recuperação inválido ou expirado.</div>
+                    <a href="{{ url_for('login_palestrante.esqueci_senha') }}" class="link-voltar">Solicitar novo link</a>
+                {% endif %}
+            {% endif %}
+            
+            <a href="{{ url_for('login_palestrante.esqueci_senha') }}" class="link-voltar" style="margin-top: 15px; display: inline-block;">Voltar para Recuperação de Senha</a>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
+    <script>
+        // Inicia os ícones do Lucide
+        lucide.createIcons();
+
+        // Lógica de validação simplificada e funcional
+        const passwordInput = document.getElementById('senha');
+        const rules = {
+            length: document.getElementById('rule-length'),
+            upper: document.getElementById('rule-upper'),
+            lower: document.getElementById('rule-lower'),
+            number: document.getElementById('rule-number'),
+            special: document.getElementById('rule-special')
+        };
+
+        if (passwordInput) {
+            passwordInput.addEventListener('input', () => {
+                const val = passwordInput.value;
+                toggleRule(rules.length, val.length >= 8);
+                toggleRule(rules.upper, /[A-Z]/.test(val));
+                toggleRule(rules.lower, /[a-z]/.test(val));
+                toggleRule(rules.number, /[0-9]/.test(val));
+                toggleRule(rules.special, /[!@#$%&*]/.test(val));
+            });
+        }
+
+        function toggleRule(element, isValid) {
+            if (!element) return;
+            if (isValid) {
+                // Adiciona a classe apenas se não houver, para disparar a animação CSS
+                if (!element.classList.contains('valid')) {
+                    element.classList.add('valid');
+                }
+            } else {
+                element.classList.remove('valid');
+            }
+        }
+    </script>
 </body>
 </html>

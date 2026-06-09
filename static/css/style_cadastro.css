@@ -1,0 +1,260 @@
+:root {
+    --bg-deep: #06090f;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --accent-primary: #79c0ff;   /* Azul Palestrante/Instituição */
+    --accent-secondary: #d2a8ff; /* Roxo Administrador */
+    --text-bright: #f0f6fc;
+    --text-dim: #8b949e;
+}
+
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-bright);
+    background: var(--bg-deep);
+    overflow-x: hidden; 
+    
+}
+#canvas-bg {
+    position: fixed;   /* Fixa na tela, não move com o scroll */
+    top: 0;
+    left: 0;
+    width: 100vw;      /* 100% da largura da janela visual (viewport) */
+    height: 100vh;     /* 100% da altura da janela visual (viewport) */
+    z-index: -1;       /* Fica ATRAZ de todos os outros elementos */
+    background: #06090f; /* Fundo escuro padrão */
+}
+
+/* --- TÍTULOS --- */
+.header-intro h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 15px;
+    color: var(--accent-primary);
+    text-shadow: 0 0 20px rgba(121, 192, 255, 0.4);
+    text-align: center;
+}
+
+/* Título especial para Admin */
+.admin-title h1 {
+    color: var(--accent-secondary) !important;
+    text-shadow: 0 0 20px rgba(210, 168, 255, 0.4) !important;
+}
+
+/* --- CONTAINER E CARD --- */
+.login-container {
+    width: 100%;
+    max-width: 450px; /* Padrão para Login/Esqueci Senha */
+    padding: 20px;
+    z-index: 1;
+    
+}
+
+/* Ajuste para o Cadastro de 2 colunas */
+.login-container.cadastro-wide {
+    max-width: 750px;
+    padding: 10px; 
+}
+
+.card-login {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    padding: 25px 35px;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+/* --- EFEITOS HOVER --- */
+.card-login:hover {
+    transform: translateY(-10px);
+    border-color: var(--accent-primary);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(121, 192, 255, 0.2);
+}
+
+/* Hover específico do Admin (Roxo) */
+.admin-border:hover {
+    border-color: var(--accent-secondary) !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(210, 168, 255, 0.2) !important;
+}
+
+/* --- FORMULÁRIO DE CADASTRO (GRID) --- */
+.cadastro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 20px;
+    
+}
+
+.cadastro-grid:has(.numero-field) {
+    grid-template-columns: 3fr 1fr; /* 75% para endereço, 25% para número */
+}
+
+/* Garante que os outros campos que devem ser grandes continuem grandes */
+.cadastro-grid:has(.numero-field) .input-group:not(.numero-field):not(:nth-child(3)) {
+    /* (Opcional) Se os outros campos ficarem estranhos, a gente usa o full-width neles */
+}
+.numero-field {
+    margin-top: 5px; /* Empurra um pouco para baixo se estiver encostando */
+}
+
+.numero-field input {
+    width: 100%; /* Ocupa apenas o espaço da coluna pequena (1fr) */
+}
+.full-width { grid-column: span 2; }
+
+/* --- INPUTS E BOTÕES --- */
+.input-group label {
+    display: block;
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+input {
+    width: 100%;
+    padding: 10px 5px;;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    color: white;
+    transition: 0.3s;
+}
+
+input:focus {
+    border-color: var(--accent-primary);
+    background: rgba(121, 192, 255, 0.05);
+    outline: none;
+}
+.curriculo {
+ width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: var(--text-bright);
+    color: var(--bg-deep);
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
+
+}
+
+.btn-login {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: var(--text-bright);
+    color: var(--bg-deep);
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
+}
+
+.btn-login:hover {
+    background: var(--accent-primary);
+    box-shadow: 0 0 20px var(--accent-primary);
+    transform: translateY(-2px);
+}
+
+/* Botão especial Admin */
+.admin-border .btn-login:hover {
+    background: var(--accent-secondary);
+    box-shadow: 0 0 20px var(--accent-secondary);
+}
+
+/* --- CHECKLIST (A SUA IDÉIA DO ESTOURO) --- */
+.check-item {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    opacity: 0.4;
+    transition: 0.3s;
+}
+
+.check-item.valid { opacity: 1; }
+
+.checkmark {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--text-dim);
+    border-radius: 50%;
+    margin-right: 10px;
+    transition: 0.4s;
+}
+
+.check-item.valid .checkmark {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    animation: pop-explosion 0.4s ease-out; /* O ESTOURO AQUI */
+}
+
+@keyframes pop-explosion {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.6); filter: brightness(1.5); }
+    100% { transform: scale(1); }
+}
+
+/* Esconde o botão feio do sistema */
+.input-file-hidden {
+    display: none;
+}
+
+/* Cria o seu botão personalizado */
+.custom-file-upload {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px dashed var(--glass-border); /* Borda tracejada fica legal para upload */
+    border-radius: 12px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+
+.custom-file-upload:hover {
+    border-color: var(--accent-primary);
+    background: rgba(121, 192, 255, 0.05);
+    color: var(--accent-primary);
+    box-shadow: 0 0 15px rgba(121, 192, 255, 0.1);
+}
+
+.custom-file-upload i {
+    width: 18px;
+    stroke: var(--accent-primary);
+}
+/* Estilo para o Select acompanhar o Glassmorphism */
+select.custom-select {
+    width: 100%;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    color: var(--text-bright);
+    appearance: none; /* Remove a setinha padrão */
+    cursor: pointer;
+}
+
+select.custom-select option {
+    background: var(--bg-deep); /* Fundo das opções escuro */
+    color: white;
+}
+

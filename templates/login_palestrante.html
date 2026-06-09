@@ -3,11 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Login - Palestrante</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
+    <canvas id="canvas-bg"></canvas>
+    
     <div class="login-container">
-        <h2>Login - Palestrante</h2>
+        <div class="header-intro">
+        <h1>Acesso Palestrante</h1>
+        <p>Conecte-se para orgizar seu perfil e agenda </p>
+        </div>
+        <div class="card-login">
+            <div class="card-icon">
+                <i data-lucide="user"></i>
+                </div>
+
     {% if mensagem_erro %}
         <div class="erro">{{ mensagem_erro }}</div>
     {% endif %}
@@ -17,16 +28,27 @@
     {% endif %}
 
     <form method="POST">
+        <div class="input-group">
         <label for="email">Email:</label>
         <input type="text" name="email" id="email" required placeholder="Digite seu E-mail">
-
+    </div>
+        <div class="input-group">
         <label for="senha">Senha:</label>
         <input type="password" name="senha" id="senha" required placeholder="Digite sua senha">
+    </div>
+        <button type="submit" class="btn-entrar">Entrar</button>
 
-        <button type="submit">Entrar</button>
+        
     </form>
 
-    <a href="{{ url_for('login_palestrante.esqueci_senha') }}">Esqueceu a senha?</a>
+    
+    <div class="login-footer">
+    <p>Não tem uma conta? <a href="{{ url_for('palestrante.cadastro_palestrante') }}" class="signup-link">Cadastre-se aqui</a></p>
+    </div>
+
+    <a href="{{ url_for('login_palestrante.esqueci_senha') }}" class="link-esqueceu">Esqueceu a senha?</a>
 </div>
+    <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
+    <script>lucide.createIcons();</script>
 </body>
 </html>

@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+body {
+    background-color: #0a0a0a;
+    background-image: url('caminho/do/seu/fundo-conexoes.png');
+    background-attachment: fixed;
+    background-size: cover;
+    color: #e0e0e0;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+h1 {
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: #ffffff;
+    text-align: center;
+    margin: 40px 0;
+}
+
+.section {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 40px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* --- ESTRUTURA DAS TABELAS --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    padding: 12px 15px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+td {
+    padding: 18px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+    font-size: 0.9rem;
+}
+
+/* --- LARGURAS ESPECÍFICAS: TABELA AGENDADAS (6 colunas) --- */
+.tabela-agendadas th:nth-child(1), .tabela-agendadas td:nth-child(1) { width: 22%; } /* Título */
+.tabela-agendadas th:nth-child(2), .tabela-agendadas td:nth-child(2) { width: 10%; } /* Inst. */
+.tabela-agendadas th:nth-child(3), .tabela-agendadas td:nth-child(3) { width: 20%; } /* Contato */
+.tabela-agendadas th:nth-child(4), .tabela-agendadas td:nth-child(4) { width: 18%; } /* Data/Hora */
+.tabela-agendadas th:nth-child(5), .tabela-agendadas td:nth-child(5) { width: 12%; } /* Status */
+.tabela-agendadas th:nth-child(6), .tabela-agendadas td:nth-child(6) { width: 18%; text-align: right; } 
+
+.status {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-aceita, .status-realizada { background: rgba(40, 167, 69, 0.15); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3); }
+.status-pendente { background: rgba(241, 196, 15, 0.15); color: #f1c40f; border: 1px solid rgba(241, 196, 15, 0.3); }
+.status-cancelada { background: rgba(247, 7, 7, 0.842); color: #f10909; border: 1px solid rgba(46, 204, 113, 0.3); }
+
+.btn-voltar {
+    display: flex;
+    align-items: center;
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
+    max-width: 1200px;
+    margin: 20px auto;
+    font-size: 0.85rem;
+    gap: 8px;
+}
+
+.acoes {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+}
+
+.btn-acao {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    transition: 0.2s;
+}
+
+
+.container {
+    /* O segredo do desfoque */
+    backdrop-filter: blur(12px); 
+    -webkit-backdrop-filter: blur(12px); /* Suporte para Safari */
+    
+    /* Um fundo escuro semi-transparente para dar contraste */
+    background: rgba(15, 15, 15, 0.75) !important; 
+    
+    /* Borda sutil para definir o limite do vidro */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    
+    /* Arredondamento para combinar com seu design */
+    border-radius: 20px;
+    padding: 18px;
+    
+    /* Garante que o conteúdo fique acima das partículas */
+    position: relative;
+    z-index: 1;
+    max-width: 1000px;
+    
+margin: 40px auto;
+}

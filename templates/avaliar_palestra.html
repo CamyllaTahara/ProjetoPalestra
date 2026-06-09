@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliar Palestra | Sistema de Palestras</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_avaliar_palestra.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+   
+</head>
+<body>
+    <canvas id="canvas-bg"></canvas>
+
+    {% if session.get('user_type') == 'palestrante' %}
+        <a href="{{ url_for('gerenciar_palestras.minhas_palestras') }}" class="btn-voltar">
+            <i data-lucide="arrow-left"></i> Voltar às Palestras
+        </a>
+    {% else %}
+        <a href="{{ url_for('gerenciar_palestras.palestras_instituicao') }}" class="btn-voltar">
+            <i data-lucide="arrow-left"></i> Voltar às Palestras
+        </a>
+    {% endif %}
+
+    <div class="container" style="position: relative; z-index: 10;">
+        <div class="card-avaliacao-glass">
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div style="background: rgba(255,255,255,0.05); border-left: 4px solid {% if category == 'danger' %}#ff5252{% else %}#00d2ff{% endif %}; padding: 15px; border-radius: 6px; margin-bottom: 25px; color: white; font-size: 0.95rem;">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <h2 style="color: white; margin-bottom: 8px; text-align: center; font-weight: 700; background: linear-gradient(135deg, #ffffff, #a5a5a5); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                Avaliação do Evento
+            </h2>
+            <p style="color: rgba(255,255,255,0.6); text-align: center; margin-bottom: 30px; font-size: 0.95rem; line-height: 1.5;">
+                Você está avaliando a palestra:<br>
+                <strong style="color: #00d2ff; font-size: 1.1rem;">"{{ solicitacao.titulo }}"</strong>
+            </p>
+
+            <hr style="border-color: rgba(255,255,255,0.1); margin-bottom: 30px;">
+
+            {% if ja_avaliou %}
+                <div class="alert-ja-avaliou">
+                    <i data-lucide="alert-triangle" style="width: 40px; height: 40px; margin-bottom: 10px;"></i>
+                    <p style="margin: 0; font-size: 1rem; font-weight: 600;">Você já enviou uma avaliação para esta palestra!</p>
+                </div>
+                <div style="text-align: center; margin-top: 30px;">
+                    {% if session.get('user_type') == 'palestrante' %}
+                        <a href="{{ url_for('gerenciar_palestras.minhas_palestras') }}" class="btn-enviar-avaliacao" style="text-decoration: none;">Voltar ao Painel</a>
+                    {% else %}
+                        <a href="{{ url_for('gerenciar_palestras.palestras_instituicao') }}" class="btn-enviar-avaliacao" style="text-decoration: none;">Voltar ao Painel</a>
+                    {% endif %}
+                </div>
+            
+            {% else %}
+                
+                <form action="{{ url_for('gerenciar_palestras.avaliar_solicitacao', solicitacao_id=solicitacao.id) }}" method="POST">
+                    
+                    <div class="rating-row">
+                        <div class="rating-label-group">
+                            <label for="nota_conduta" style="color: white; font-weight: 600; display: block; margin-bottom: 2px;">Nota de Conduta</label>
+                            <small style="color: rgba(255,255,255,0.45); display: block;">Postura, ética e profissionalismo.</small>
+                        </div>
+                        <select id="nota_conduta" name="nota_conduta" style="width: 160px;" required>
+                            <option value="" disabled selected>Nota (1 a 5)</option>
+                            <option value="5">5 - Excelente</option>
+                            <option value="4">4 - Muito Bom</option>
+                            <option value="3">3 - Regular</option>
+                            <option value="2">2 - Ruim</option>
+                            <option value="1">1 - Péssimo</option>
+                        </select>
+                    </div>
+
+                    <div class="rating-row">
+                        <div class="rating-label-group">
+                            <label for="nota_pontualidade" style="color: white; font-weight: 600; display: block; margin-bottom: 2px;">Nota de Pontualidade</label>
+                            <small style="color: rgba(255,255,255,0.45); display: block;">Cumprimento dos horários acordados.</small>
+                        </div>
+                        <select id="nota_pontualidade" name="nota_pontualidade" style="width: 160px;" required>
+                            <option value="" disabled selected>Nota (1 a 5)</option>
+                            <option value="5">5 - Excelente</option>
+                            <option value="4">4 - Muito Bom</option>
+                            <option value="3">3 - Regular</option>
+                            <option value="2">2 - Ruim</option>
+                            <option value="1">1 - Péssimo</option>
+                        </select>
+                    </div>
+
+                    <div class="rating-row">
+                        <div class="rating-label-group">
+                            <label for="nota_respeito" style="color: white; font-weight: 600; display: block; margin-bottom: 2px;">Nota de Respeito</label>
+                            <small style="color: rgba(255,255,255,0.45); display: block;">Tratamento e cordialidade mútuos.</small>
+                        </div>
+                        <select id="nota_respeito" name="nota_respeito" style="width: 160px;" required>
+                            <option value="" disabled selected>Nota (1 a 5)</option>
+                            <option value="5">5 - Excelente</option>
+                            <option value="4">4 - Muito Bom</option>
+                            <option value="3">3 - Regular</option>
+                            <option value="2">2 - Ruim</option>
+                            <option value="1">1 - Péssimo</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-top: 25px;">
+                        <label for="comentario" style="color: white; font-weight: 600; display: block; margin-bottom: 8px;">Comentário Adicional (Opcional)</label>
+                        <textarea id="comentario" name="comentario" rows="4" style="width: 100%; resize: vertical;" placeholder="Conte um pouco sobre sua experiência..."></textarea>
+                    </div>
+
+                    <div class="group-buttons-flex">
+                        {% if session.get('user_type') == 'palestrante' %}
+                            <a href="{{ url_for('gerenciar_palestras.minhas_palestras') }}" class="btn-link-voltar">Avaliar mais tarde</a>
+                        {% else %}
+                            <a href="{{ url_for('gerenciar_palestras.palestras_instituicao') }}" class="btn-link-voltar">Voltar</a>
+                        {% endif %}
+                        <button type="submit" class="btn-enviar-avaliacao">
+                            <i data-lucide="send" style="width: 16px; height: 16px;"></i> Enviar Avaliação
+                        </button>
+                    </div>
+
+                </form>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

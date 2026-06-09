@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Suporte | Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_central_suporte.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+    <canvas id="canvas-bg"></canvas>
+
+    <div class="container">
+         
+<div class="header-suporte-admin">
+            <a href="{{ url_for('login_administrador.painel_administrador') }}" class="btn-voltar">
+                <i data-lucide="arrow-left" style="width:16px"></i> Voltar ao Painel
+            </a>
+        <h1>
+            <i data-lucide="shield-alert" style="color: var(--primary); width: 28px; height: 28px;"></i> 
+            Central de Suporte Técnico
+        </h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% for chamado in chamados %}
+            <div class="chamado-card">
+                <div class="chamado-header">
+                    <div class="user-info">
+                        <i data-lucide="user" style="width: 18px; height: 18px;"></i>
+                        {{ chamado.usuario_nome }}
+                        <span class="user-tag">{{ chamado.usuario_tipo }}</span>
+                    </div>
+                    <span class="badge-status status-{{ chamado.status }}">{{ chamado.status }}</span>
+                </div>
+                
+                <div class="chamado-body">
+                    {{ chamado.mensagem }}
+                </div>
+
+                {% if chamado.status == 'Pendente' %}
+                    <form method="POST" action="{{ url_for('gerenciar_suporte.responder_chamado', chamado_id=chamado.id) }}" class="reply-box">
+                        <input type="text" name="resposta" placeholder="Digite a solução ou resposta para o usuário..." required autocomplete="off">
+                        <button type="submit">Responder</button>
+                    </form>
+                {% else %}
+                    <div class="resposta-concluida">
+                        <strong style="display: flex; align-items: center; gap: 6px; margin-bottom: 5px;">
+                            <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i> Respondido pelo Administrador:
+                        </strong>
+                        {{ chamado.resposta }}
+                    </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="chamado-card" style="text-align: center; color: var(--text-dim); padding: 40px 20px;">
+                <i data-lucide="check-square" style="width: 40px; height: 40px; margin-bottom: 10px; opacity: 0.5;"></i>
+                <p>Nenhum chamado pendente. Tudo limpo por aqui! 🎉</p>
+            </div>
+        {% endfor %}
+
+    </div>
+
+    <script>
+        // Inicializa todos os ícones Lucide da tela
+        lucide.createIcons();
+    </script>
+    <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
+</body>
+</html>

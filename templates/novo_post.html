@@ -43,7 +43,35 @@
     <div class="card">
         <form method="POST" enctype="multipart/form-data">
             <label>Descrição:</label>
-            <textarea name="descricao" placeholder="Conte sobre esta palestra, experiência ou momento especial..." required></textarea>
+<div style="position: relative;">
+    <textarea name="descricao" id="input-descricao" placeholder="Conte sobre esta palestra..." required></textarea>
+    <div id="lista-mencoes" class="sugestoes-container"></div>
+</div>
+
+<style>
+    .sugestoes-container {
+        position: absolute;
+        top: 100%; /* Aparece logo abaixo do campo */
+        left: 0;
+        width: 100%;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        z-index: 999;
+        display: none; /* Escondido por padrão */
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    .sugestao-item {
+        padding: 10px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+    }
+    .sugestao-item:hover {
+        background-color: #f0f0f0;
+    }
+</style>
             <label>📍 Localização (opcional):</label>
 <input type="text" name="localizacao" placeholder="Ex: São Paulo, SP"
        style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-size:14px; margin-bottom:20px;">
@@ -79,56 +107,55 @@
     }
 </script>
 
+<div id="lista-mencoes" style="display:none; position:absolute; background:white; border:1px solid #ccc; z-index:1000;"></div>
+
 <script>
-// Lista de usuários para autocomplete
-const usuarios = {{ usuarios | tojson | safe }};
-function setupMencao(inputId) {
-    const input = document.getElementById(inputId);
-    if (!input) return;
+const textarea = document.getElementById('input-descricao');
+const lista = document.getElementById('lista-mencoes');
 
-    const sugestoes = document.createElement('div');
-    sugestoes.style.cssText = 'position:absolute; background:#fff; border:1px solid #ddd; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,0.15); max-height:200px; overflow-y:auto; z-index:100; display:none; min-width:200px;';
-    input.parentNode.style.position = 'relative';
-    input.parentNode.appendChild(sugestoes);
+textarea.addEventListener('input', function() {
+    const texto = this.value;
+    const palavras = texto.split(/\s/);
+    const ultimaPalavra = palavras[palavras.length - 1];
 
-    input.addEventListener('input', function() {
-        const val = this.value;
-        const ultimaArroba = val.lastIndexOf('@');
-        if (ultimaArroba === -1) { sugestoes.style.display = 'none'; return; }
+    // Se a última palavra começar com @ e tiver pelo menos 2 letras depois do @
+    if (ultimaPalavra.startsWith('@') && ultimaPalavra.length > 2) {
+        const busca = ultimaPalavra.substring(1);
 
-        const busca = val.slice(ultimaArroba + 1).toLowerCase();
-        if (!busca) { sugestoes.style.display = 'none'; return; }
+        fetch(`/buscar_usuarios_mencao?q=${busca}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length > 0) {
+                    lista.innerHTML = '';
+                    data.forEach(user => {
+                        const div = document.createElement('div');
+                        div.className = 'sugestao-item';
+                        div.innerHTML = `<strong>${user.nome}</strong> <small>(${user.tipo})</small>`;
+                        div.onclick = () => completarMencao(user.nome);
+                        lista.appendChild(div);
+                    });
+                    lista.style.display = 'block';
+                } else {
+                    lista.style.display = 'none';
+                }
+            });
+    } else {
+        lista.style.display = 'none';
+    }
+});
 
-        const filtrados = usuarios.filter(u => u.nome.toLowerCase().includes(busca));
-        if (!filtrados.length) { sugestoes.style.display = 'none'; return; }
-
-        sugestoes.innerHTML = '';
-        filtrados.slice(0, 5).forEach(u => {
-            const item = document.createElement('div');
-            item.style.cssText = 'padding:8px 12px; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:8px;';
-            item.innerHTML = `<span>${u.tipo === 'palestrante' ? '👤' : '🏢'}</span> ${u.nome}`;
-            item.onmouseenter = () => item.style.background = '#f0f0f0';
-            item.onmouseleave = () => item.style.background = '';
-            item.onclick = () => {
-                const antes = val.slice(0, ultimaArroba);
-                input.value = antes + '@' + u.nome + ' ';
-                sugestoes.style.display = 'none';
-                input.focus();
-            };
-            sugestoes.appendChild(item);
-        });
-        sugestoes.style.display = 'block';
-    });
-
-    document.addEventListener('click', e => {
-        if (!sugestoes.contains(e.target) && e.target !== input) {
-            sugestoes.style.display = 'none';
-        }
-    });
+function completarMencao(nome) {
+    const palavras = textarea.value.split(/\s/);
+    palavras.pop(); // Remove o @incompleto
+    textarea.value = palavras.join(' ') + (palavras.length > 0 ? ' @' : '@') + nome + ' ';
+    lista.style.display = 'none';
+    textarea.focus();
 }
 
-setupMencao('descricao');       // no novo_post.html
-setupMencao('input-comentario'); // no ver_post.html
+// Fecha a lista se clicar fora dela
+document.addEventListener('click', (e) => {
+    if (e.target !== textarea) lista.style.display = 'none';
+});
 </script>
 </body>
 </html>

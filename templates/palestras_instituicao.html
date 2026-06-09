@@ -2,231 +2,217 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Minhas Palestras</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            padding: 20px;
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-        h1, h2 {
-            color: #333;
-        }
-        .btn-voltar {
-            background-color: #6c757d;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 4px;
-            display: inline-block;
-            margin-bottom: 20px;
-        }
-        .btn-voltar:hover {
-            background-color: #5a6268;
-        }
-        .section {
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        thead {
-            background-color: #4CAF50;
-            color: white;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        tbody tr:hover {
-            background-color: #f5f5f5;
-        }
-        .status {
-            padding: 5px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
-            display: inline-block;
-        }
-        .status-agendada {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .status-realizada {
-            background-color: #cce5ff;
-            color: #004085;
-        }
-        .status-cancelada {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .btn-cancelar {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-            color: white;
-            background-color: #dc3545;
-        }
-        .btn-cancelar:hover {
-            background-color: #c82333;
-        }
-        .empty-message {
-            padding: 30px;
-            text-align: center;
-            color: #666;
-            background-color: #f9f9f9;
-            border-radius: 4px;
-        }
-        .alert {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-        }
-        .alert-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .info-contato {
-            font-size: 13px;
-            color: #666;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Palestras | Portal da Instituição</title>
+    <link class="css-theme" rel="stylesheet" href="{{ url_for('static', filename='css/style_historico_palestras_inst.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+   
 </head>
 <body>
-    <a href="{{ url_for('login_instituicao.painel_instituicao') }}" class="btn-voltar">← Voltar ao Painel</a>
+    <canvas id="canvas-bg"></canvas>
 
+    <a href="{{ url_for('login_instituicao.painel_instituicao') }}" class="btn-voltar">
+        <i data-lucide="arrow-left"></i> Voltar ao Painel
+    </a>
+
+    {# Modal de Notificações Flash #}
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">
-                    {{ message }}
+            <div id="modalFeedback" class="modal-overlay">
+                <div class="modal-content-glass" style="max-width: 420px; text-align:center;">
+                    {% if category == 'warning' %}
+                        <div style="font-size: 60px; color: #ffc107; margin-bottom: 10px;">
+                            <i data-lucide="alert-circle"></i>
+                        </div>
+                    {% else %}
+                        <div style="font-size: 60px; color: #00d2ff; margin-bottom: 10px;">
+                            <i data-lucide="badge-check"></i>
+                        </div>
+                    {% endif %}
+
+                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 25px; font-size: 1rem;">
+                        {{ message }}
+                    </p>
+
+                    <button onclick="fecharModalSucesso()" class="btn-modal-sucesso">
+                        OK!
+                    </button>
                 </div>
+            </div>
             {% endfor %}
         {% endif %}
     {% endwith %}
 
-    <h1>Minhas Palestras Confirmadas</h1>
+    <div class="container">
+        <h1>Minhas Palestras</h1>
 
-    <!-- Palestras Agendadas -->
-    <div class="section">
-        <h2>📅 Palestras Agendadas</h2>
-        {% if palestras_agendadas %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Título</th>
-                        <th>Palestrante</th>
-                        <th>Contato</th>
-                        <th>Data</th>
-                        <th>Horário</th>
-                        <th>Status</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for palestra in palestras_agendadas %}
+        <div class="section">
+            <h2><i data-lucide="calendar-check"></i> Palestras Agendadas</h2>
+            
+            {% if palestras_agendadas %}
+            <div style="overflow-x: auto;">
+                <table class="tabela-agendadas" style="width: 100%; table-layout: fixed; border-collapse: collapse;">
+                    <thead>
                         <tr>
-                            <td>
+                            <th style="width: 20%;">Título</th>
+                            <th style="width: 15%;">Palestrante</th>
+                            <th style="width: 22%;">Contato</th>
+                            <th style="width: 16%;">Data/Horário</th>
+                            <th style="width: 12%; text-align: center;">Status</th>
+                            <th style="width: 15%; text-align: right;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for palestra in palestras_agendadas %}
+                        <tr>
+                            <td style="word-wrap: break-word; white-space: normal;">
                                 <strong>{{ palestra.titulo }}</strong>
-                                {% if palestra.descricao %}
-                                    <br><small style="color: #666;">{{ palestra.descricao[:50] }}...</small>
-                                {% endif %}
                             </td>
                             <td>{{ palestra.nome_completo }}</td>
-                            <td class="info-contato">
-                                📧 {{ palestra.email }}<br>
-                                📞 {{ palestra.telefone }}
+                            <td class="info-contato" style="word-break: break-all;">
+                                <small style="display: block; color: #aaa;">{{ palestra.email }}</small>
+                                <small style="color: #888;">{{ palestra.telefone | ms_telefone }}</small>
                             </td>
-                            <td>{{ palestra.data }}</td>
-                            <td>{{ palestra.horario if palestra.horario else '-' }}</td>
-                            <td>
-                                <span class="status status-{{ palestra.status }}">
+                            <td style="font-size: 13px;">
+                                {{ palestra.data }}<br>
+                                <span style="color: #00d2ff;">
+                                    {% if palestra.horario %}
+                                        às {{ palestra.horario }}
+                                    {% else %}
+                                        (Pendente)
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td style="text-align: center; vertical-align: middle;">
+                                <span class="status status-{{ palestra.status }}" style="font-size: 11px; padding: 4px 8px;">
                                     {{ palestra.status|upper }}
                                 </span>
                             </td>
-                            <td>
-                                <form method="POST" action="{{ url_for('gerenciar_palestras.cancelar_palestra_instituicao', palestra_id=palestra.id) }}" style="display:inline;">
-                                    <button type="submit" class="btn-cancelar" onclick="return confirm('Tem certeza que deseja cancelar esta palestra?');">
-                                        ✗ Cancelar
-                                    </button>
-                                    <a href="{{ url_for('chat.chat', palestra_id=palestra.id) }}" class="btn-acao" style="background-color:#007bff; text-decoration:none;">
-        💬 Chat
-    </a>
-    <a href="{{ url_for('chamados.abrir_chamado', palestra_id=palestra.id) }}" 
-   class="btn-acao" style="background-color:#dc3545; text-decoration:none; padding:6px 12px; border-radius:4px; color:white; font-size:13px;">
-    🚨 Chamado
-</a>
-                                </form>
+                            <td style="vertical-align: middle; text-align: right;">
+                                <div class="acoes" style="justify-content: flex-end; gap: 6px;">
+                                    <a href="{{ url_for('chat.chat', palestra_id=palestra.id) }}" class="btn-acao" style="background-color:#007bff; padding: 6px 10px; font-size: 11px;" title="Chat">
+                                        <i data-lucide="message-square" style="width: 13px; height: 13px;"></i> Chat
+                                        <span id="badge-chat" class="contador-numero" style="display: none;">0</span>
+                                    </a>
+
+                                    <a href="{{ url_for('chamados.abrir_chamado', palestra_id=palestra.id) }}" class="btn-acao" style="background-color:#dc3545; padding: 6px 6px;" title="Reportar Problema">
+                                         <i data-lucide="alert-triangle" style="width: 13px; height: 13px;"></i>
+                                    </a>
+
+                                    <form method="POST" action="{{ url_for('gerenciar_palestras.cancelar_palestra_instituicao', palestra_id=palestra.id) }}" style="display:inline; margin: 0;">
+                                        <button type="submit" class="btn-acao" style="background-color:#6c757d; padding: 6px 6px;" title="Cancelar palestra" onclick="return confirm('Deseja realmente cancelar esta palestra?');">
+                                            <i data-lucide="x-circle" style="width: 13px; height: 13px;"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
             <div class="empty-message">
                 <p>Você não tem palestras agendadas no momento.</p>
-                <p><a href="{{ url_for('gerenciar_solicitacoes.listar_palestrantes') }}" style="color: #4CAF50; text-decoration: underline;">Buscar palestrantes para solicitar palestras</a></p>
+                <p><a href="{{ url_for('gerenciar_solicitacoes.listar_palestrantes') }}" style="color: #00d2ff; text-decoration: underline;">Buscar palestrantes</a></p>
             </div>
-        {% endif %}
-    </div>
+            {% endif %}
+        </div>
 
-    <!-- Histórico -->
-    <div class="section">
-        <h2>📚 Histórico de Palestras</h2>
-        {% if historico %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Título</th>
-                        <th>Palestrante</th>
-                        <th>Data</th>
-                        <th>Horário</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for palestra in historico %}
+        <div class="section">
+            <h2><i data-lucide="history"></i> Histórico de Palestras</h2>
+            
+            {% if historico %}
+            <div style="overflow-x: auto;">
+                <table class="tabela-historico" style="width: 100%; table-layout: fixed; border-collapse: collapse;">
+                    <thead>
                         <tr>
-                            <td>
+                            <th style="width: 30%;">Título</th>
+                            <th style="width: 25%;">Palestrante</th>
+                            <th style="width: 15%;">Data</th>
+                            <th style="width: 15%; text-align: center;">Status</th>
+                            <th style="width: 15%; text-align: right;">Ações</th> </tr>
+                    </thead>
+                    <tbody>
+                        {% for palestra in historico %}
+                        <tr>
+                            <td style="word-wrap: break-word; white-space: normal;">
                                 <strong>{{ palestra.titulo }}</strong>
-                                {% if palestra.descricao %}
-                                    <br><small style="color: #666;">{{ palestra.descricao[:50] }}...</small>
-                                {% endif %}
                             </td>
                             <td>{{ palestra.nome_completo }}</td>
                             <td>{{ palestra.data }}</td>
-                            <td>{{ palestra.horario if palestra.horario else '-' }}</td>
-                            <td>
-                                <span class="status status-{{ palestra.status }}">
+                            <td style="text-align: center; vertical-align: middle;">
+                                <span class="status status-{{ palestra.status }}" style="font-size: 11px; padding: 4px 8px; font-weight: 700;">
                                     {{ palestra.status|upper }}
                                 </span>
                             </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            <td style="vertical-align: middle; text-align: right;">
+    <div class="acoes" style="justify-content: flex-end;">
+        {% if palestra.status == 'realizada' %}
+            
+            {% if palestra.ja_avaliou == 1 %}
+                <span class="badge" style="background-color: rgba(40, 167, 69, 0.2); color: #28a745; padding: 6px 10px; font-size: 11px; border: 1px solid #28a745; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px;">
+                    <i data-lucide="check-circle" style="width: 13px; height: 13px;"></i> Avaliado
+                </span>
+            {% else %}
+                <a href="{{ url_for('gerenciar_palestras.avaliar_solicitacao', solicitacao_id=palestra.id) }}" 
+                   class="btn-acao" 
+                   style="background: linear-gradient(135deg, #ffc107, #ff9800); color: #000; padding: 6px 10px; font-size: 11px; font-weight: bold; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px;" 
+                   title="Avaliar Palestrante">
+                    <i data-lucide="star" style="width: 13px; height: 13px;"></i> Avaliar
+                </a>
+            {% endif %}
+
         {% else %}
-            <div class="empty-message">
-                <p>Você ainda não tem histórico de palestras.</p>
-            </div>
+            <span class="text-muted" style="font-size: 11px;">Sem ações</span>
         {% endif %}
     </div>
+</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-message">
+                <p>Nenhum histórico de palestras encontrado.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div> 
+
+    <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
+    <script>
+        lucide.createIcons();
+
+        // Lógica do contador de chat permanecida intacta
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch('/chat/mensagens/count')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('badge-chat');
+                    if (data.count > 0) {
+                        badge.innerText = data.count;
+                        badge.style.display = 'inline-block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(err => console.error("Erro ao buscar contador do chat:", err));
+        }); 
+
+        function fecharModalSucesso() {
+            const modal = document.getElementById('modalFeedback');
+            if(modal){
+                modal.style.display = 'none';
+            }
+        }
+
+        // Fecha automaticamente após 3 segundos
+        setTimeout(() => {
+            fecharModalSucesso();
+        }, 3000);
+    </script>
 </body>
 </html>

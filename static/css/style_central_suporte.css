@@ -1,0 +1,205 @@
+
+
+        /* 1. Reset e Layout Centralizado */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #00d2ff;
+            --bg-dark: #0b0f1a;
+            --card-bg: rgba(13, 20, 36, 0.85); /* Fundo marinho escuro sem névoa */
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --input-bg: rgba(0, 0, 0, 0.3);
+            --status-pendente: #f59e0b;
+            --status-resolvido: #10b981;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Permite rolar a página se houver muitos chamados */
+            padding: 60px 20px;
+            overflow-x: hidden;
+        }
+
+        #canvas-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 750px; /* Largura ideal para leitura de mensagens */
+            z-index: 10;
+            margin-top: 40px;
+            margin-bottom: 35px;
+        }
+
+.btn-voltar {
+    color: #888;
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 20px;
+}
+
+
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.5px;
+            text-align: center;
+        }
+
+        /* 2. Cards dos Chamados */
+        .chamado-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .chamado-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .chamado-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 12px;
+        }
+
+        .user-info {
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .user-tag {
+            font-size: 0.7rem;
+            background: rgba(0, 210, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        /* Status Badges */
+        .badge-status {
+            font-size: 0.75rem;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-Pendente { 
+            background: rgba(245, 158, 11, 0.1); 
+            color: var(--status-pendente); 
+            border: 1px solid rgba(245, 158, 11, 0.2); 
+        }
+        .status-Resolvido { 
+            background: rgba(16, 185, 129, 0.1); 
+            color: var(--status-resolvido); 
+            border: 1px solid rgba(16, 185, 129, 0.2); 
+        }
+
+        .chamado-body {
+            font-size: 0.95rem;
+            color: #e2e8f0;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.15);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        /* 3. Caixa de Resposta Rápida */
+        .reply-box {
+            display: flex;
+            gap: 12px;
+        }
+
+        input {
+            flex: 1;
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 14px;
+            color: white;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        button {
+            background: var(--primary);
+            color: #0b0f1a;
+            border: none;
+            padding: 0 24px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+
+        button:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        /* Bloco de Resposta Pronta */
+        .resposta-concluida {
+            color: var(--status-resolvido);
+            font-size: 0.9rem;
+            background: rgba(16, 185, 129, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 3px solid var(--status-resolvido);
+        }
+
+        /* Sistema de Alertas */
+        .alert {
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+            text-align: center;
+            border: 1px solid transparent;
+        }
+        .alert-error, .alert-danger { background: rgba(244, 67, 54, 0.1); color: #f87171; border-color: rgba(244, 67, 54, 0.2); }
+        .alert-success { background: rgba(74, 222, 128, 0.1); color: #4ade80; border-color: rgba(74, 222, 128, 0.2); }
+

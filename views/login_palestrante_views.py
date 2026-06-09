@@ -3,22 +3,20 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import re
 from models.instituicao import conectar_bd
 import mysql.connector
-import os # Para manipulação de arquivos
-import secrets # Para gerar tokens seguros
+import os 
+import secrets 
 from datetime import datetime, timedelta
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import urllib.parse # Para codificar o token na URL
+import urllib.parse
 from utils.security import login_required
 from utils.mail import send_notification_email
-#from utils.auth import login_required, logout_user
 
-# Criação do Blueprint para as rotas de login e cadastro de palestrante
+
+
 login_palestrante_bp = Blueprint('login_palestrante', __name__)
 
-
-# --- Funções de Validação ---
 
 def cpf_valido(cpf):
     """Verifica se um CPF é válido, incluindo o cálculo dos dígitos verificadores."""
@@ -26,7 +24,7 @@ def cpf_valido(cpf):
     if len(cpf) != 11 or cpf == cpf[0] * 11:
         return False
     
-    # Cálculo do primeiro dígito verificador
+
     soma = 0
     for i in range(9):
         soma += int(cpf[i]) * (10 - i)
@@ -34,8 +32,6 @@ def cpf_valido(cpf):
     digito1_esperado = str(resto) if resto < 10 else '0'
     if cpf[9] != digito1_esperado:
         return False
-        
-    # Cálculo do segundo dígito verificador
     soma = 0
     for i in range(10):
         soma += int(cpf[i]) * (11 - i)
@@ -68,12 +64,11 @@ def validar_senha(senha):
     return True, ""
 
 
-# --- Funções de Serviço ---
+
 
 def enviar_email_recuperacao(email, token):
     """Envia um e-mail com o link de recuperação de senha."""
     try:
-        # Lendo credenciais das configurações do Flask (MAIL_USERNAME e MAIL_PASSWORD)
         remetente_email = current_app.config.get('MAIL_USERNAME')
         remetente_senha = current_app.config.get('MAIL_PASSWORD')
         
@@ -81,59 +76,123 @@ def enviar_email_recuperacao(email, token):
             print("Erro de configuração: Credenciais de e-mail não definidas em current_app.config.")
             return False
 
-        # Criando a mensagem
         mensagem = MIMEMultipart()
         mensagem['From'] = remetente_email
         mensagem['To'] = email
         from email.header import Header
         mensagem['Subject'] =Header ( "Recuperação de Senha - Sistema de Palestras","utf-8")
-        
-        # Link com o token para redefinir a senha
+
         link_recuperacao = url_for('login_palestrante.reset_senha_palestrante', 
                                    token=token, 
                                    _external=True)
         
         corpo_email = f"""
-        <html>
-        <head>
-            <style>
-                body {{ font-family: Arial, sans-serif; }}
-                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                .header {{ background-color: #4CAF50; color: white; padding: 10px; text-align: center; }}
-                .content {{ padding: 20px; }}
-                .button {{ background-color: #4CAF50; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; display: inline-block; }}
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <h2>Recuperação de Senha</h2>
-                </div>
-                <div class="content">
-                    <p>Olá,</p>
-                    <p>Recebemos uma solicitacao para redefinir sua senha. Se você não fez esta solicitacao, ignore este e-mail.</p>
-                    <p>Para redefinir sua senha, clique no botao abaixo:</p>
-                    <p style="text-align: center;">
-                        <a href="{link_recuperacao}" class="button">Redefinir Senha</a>
-                    </p>
-                    <p>Ou copie e cole o seguinte link no seu navegador:</p>
-                    <p>{link_recuperacao}</p>
-                    <p>Este link é válido por 1 hora.</p>
-                    <p>Atenciosamente,<br>Equipe de Suporte</p>
-                </div>
-            </div>
-        </body>
-        </html>
-        """
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0; padding:0; background-color:#0b0f1a; font-family:Arial, sans-serif;">
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0b0f1a; padding: 40px 20px;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%;">
+
+                    <!-- Header -->
+                    <tr>
+                        <td align="center" style="padding-bottom: 30px;">
+                            <h1 style="margin:0; font-size:1.6rem; color:#00d2ff; letter-spacing:-0.5px;">✦ PalestraApp</h1>
+                            <p style="margin:6px 0 0; color:#94a3b8; font-size:0.85rem;">Sistema de Agendamento de Palestras</p>
+                        </td>
+                    </tr>
+
+                    <!-- Card -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #0f172a, #1e293b); border: 1px solid rgba(0,210,255,0.15); border-radius: 16px; padding: 35px;">
+                            <table width="100%" cellpadding="0" cellspacing="0">
+
+                   
+                                <tr>
+                                    <td align="center" style="padding-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.07);">
+                                        <div style="background: rgba(0,210,255,0.1); border: 1px solid rgba(0,210,255,0.3); border-radius: 50px; display:inline-block; padding: 10px 22px; margin-bottom: 15px;">
+                                            <span style="color:#00d2ff; font-size:0.85rem; font-weight:600; letter-spacing:1px;">🔐 RECUPERAÇÃO DE SENHA</span>
+                                        </div>
+                                        <h2 style="margin:0; color:#f8fafc; font-size:1.4rem;">Redefinição de Senha</h2>
+                                        <p style="margin:10px 0 0; color:#94a3b8; font-size:0.95rem; line-height:1.6;">
+                                            Recebemos uma solicitação para redefinir sua senha.
+                                        </p>
+                                    </td>
+                                </tr>
+
+        
+                                <tr>
+                                    <td style="padding-top: 25px; padding-bottom: 20px;">
+                                        <p style="margin:0 0 15px; color:#cbd5e1; font-size:0.95rem; line-height:1.7;">
+                                            Olá! Para redefinir sua senha clique no botão abaixo. O link é válido por <strong style="color:#f8fafc;">1 hora</strong>.
+                                        </p>
+                                    </td>
+                                </tr>
+
+         
+                                <tr>
+                                    <td align="center" style="padding-bottom: 25px;">
+                                        <a href="{link_recuperacao}"
+                                           style="display:inline-block; background: linear-gradient(135deg, #00d2ff, #0099cc); color:#000000; font-weight:700; font-size:0.95rem; text-decoration:none; padding: 14px 35px; border-radius: 10px;">
+                                            🔐 Redefinir Senha →
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-bottom: 25px;">
+                                        <p style="margin:0 0 8px; color:#94a3b8; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; font-weight:600;">Ou copie o link abaixo</p>
+                                        <div style="background: rgba(0,0,0,0.25); border-left: 3px solid #475569; border-radius: 8px; padding: 12px 18px; word-break: break-all;">
+                                            <p style="margin:0; color:#94a3b8; font-size:0.8rem; line-height:1.6;">
+                                                {link_recuperacao}
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div style="background: rgba(245,158,11,0.06); border-left: 3px solid #f59e0b; border-radius: 8px; padding: 12px 18px;">
+                                            <p style="margin:0; color:#94a3b8; font-size:0.85rem; line-height:1.6;">
+                                                ⚠️ Se você não solicitou a redefinição de senha, ignore este e-mail. Sua senha permanecerá a mesma.
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            </table>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="center" style="padding-top: 25px;">
+                            <p style="margin:0; color:#475569; font-size:0.8rem; line-height:1.6;">
+                                Este e-mail foi enviado automaticamente pelo sistema PalestraApp — TCC.<br>
+                                Por favor, não responda diretamente a este e-mail.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
+"""
         
         mensagem.attach(MIMEText(corpo_email, 'html','utf-8'))
         
-        # Conectando ao servidor de e-mail (Configuração para Gmail)
         servidor = smtplib.SMTP('smtp.gmail.com', 587)
         servidor.starttls()
         servidor.login(remetente_email, remetente_senha)
         
-        # Enviando e-mail
+
         
         servidor.sendmail(remetente_email, email,  mensagem.as_bytes())
         servidor.quit()
@@ -143,15 +202,12 @@ def enviar_email_recuperacao(email, token):
         print(f"Erro ao enviar e-mail: {e}")
         return False
 
-# --- Configuração de Upload ---
-
-# Pasta para salvar os currículos
 UPLOAD_FOLDER = 'uploads_curriculos'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 
-# --- Rotas (Views) ---
+
 
 @login_palestrante_bp.route('/login_palestrante', methods=['GET', 'POST'])
 def login_palestrante():
@@ -172,12 +228,12 @@ def login_palestrante():
             conexao = conectar_bd()
             cursor = conexao.cursor(dictionary=True)
             
-            # ✅ Adicionado 'status' no SELECT
+       
             cursor.execute("SELECT id, nome_completo, senha, status FROM palestrantes WHERE email = %s", (email,))
             usuario = cursor.fetchone()
             
             if usuario and check_password_hash(usuario['senha'], senha):
-                # ✅ Verificar se está suspenso ou banido
+               
                 if usuario.get('status') == 'suspenso':
                     mensagem_erro = "Sua conta está suspensa. Entre em contato com a administração."
                 elif usuario.get('status') == 'banido':
@@ -218,7 +274,7 @@ def cadastro_palestrante():
 
     if request.method == 'POST':
         senha = request.form['senha']
-        # Captura todos os dados do formulário
+
         dados_form['nome_completo'] = request.form.get('nome', '')
         dados_form['cpf'] = request.form.get('cpf', '')
         dados_form['email'] = request.form.get('email', '')
@@ -227,30 +283,28 @@ def cadastro_palestrante():
         dados_form['ramo_atividade'] = request.form.get('ramo_atividade', '')
         curriculo = request.files.get('curriculo')
 
-        # --- Etapa 1: Validação de Dados ---
+
         
-        # Validação do nome
         if not dados_form['nome_completo'].strip():
             mensagem_erro_nome = "Erro: O nome completo é obrigatório."
 
-        # Validação da senha
+
         valida, mensagem = validar_senha(senha)
         if not valida:
             mensagem_erro_senha = f"Erro: {mensagem}"
 
-        # Validação do CPF
+
         if not cpf_valido(dados_form['cpf']):
             mensagem_erro_cpf = "Erro: CPF inválido."
 
-        # Validação do telefone
+
         if not validar_telefone(dados_form['telefone']):
             mensagem_erro_telefone = "Erro: Telefone inválido. Deve ter 10 ou 11 dígitos."
 
-        # Validação do e-mail
+
         if not validar_email(dados_form['email']):
             mensagem_erro_email = "Erro: E-mail inválido."
 
-        # Validação e salvamento do currículo
         curriculo_filename = None
         if curriculo:
             if curriculo.filename == '':
@@ -258,23 +312,23 @@ def cadastro_palestrante():
             elif not curriculo.filename.lower().endswith('.pdf'):
                 mensagem_erro_curriculo = "Erro: Por favor, envie um arquivo PDF."
             else:
-                # Salvar o currículo com um nome seguro (usando o CPF limpo)
+           
                 filename_base = re.sub(r'\D', '', dados_form['cpf'])
                 curriculo_filename = os.path.join(UPLOAD_FOLDER, f"{filename_base}.pdf")
                 try:
                     curriculo.save(curriculo_filename)
                 except Exception as e:
                     mensagem_erro_curriculo = f"Erro ao salvar o currículo: {e}"
-                    curriculo_filename = None # Garante que não tenta salvar no DB se o arquivo falhou
+                    curriculo_filename = None 
         else:
             mensagem_erro_curriculo = "Erro: O currículo é obrigatório."
             
         
-        # Se houver algum erro de validação (de formulário ou arquivo), retorna a página com mensagens
+  
         if (mensagem_erro_senha or mensagem_erro_email or mensagem_erro_cpf or
             mensagem_erro_telefone or mensagem_erro_nome or mensagem_erro_curriculo):
             
-            # Remove o arquivo salvo se houve erro de DB na etapa de pré-validação (apenas para o curriculo_filename)
+           
             if curriculo_filename and os.path.exists(curriculo_filename):
                  os.remove(curriculo_filename)
                  
@@ -286,31 +340,30 @@ def cadastro_palestrante():
                                    mensagem_erro_curriculo=mensagem_erro_curriculo,
                                    dados_form=dados_form)
         
-        # --- Etapa 2: Validação de Unicidade no Banco de Dados e Inserção ---
+      
         else:
             try:
                 conexao = conectar_bd()
                 cursor = conexao.cursor()
 
-                # Verifica unicidade do E-mail
+           
                 cursor.execute("SELECT id FROM palestrantes WHERE email = %s", (dados_form['email'],))
                 if cursor.fetchone():
                     mensagem_erro_email = "Erro: Este e-mail já está cadastrado."
                     
-                # Verifica unicidade do CPF
+
                 cursor.execute("SELECT id FROM palestrantes WHERE cpf = %s", (re.sub(r'\D', '', dados_form['cpf']),))
                 if cursor.fetchone():
                     mensagem_erro_cpf = "Erro: Este CPF já está cadastrado."
                 
-                # Verifica unicidade do Telefone
+          
                 cursor.execute("SELECT id FROM palestrantes WHERE telefone = %s", (re.sub(r'\D', '', dados_form['telefone']),))
                 if cursor.fetchone():
                     mensagem_erro_telefone = "Erro: Este telefone já está cadastrado."
 
-                # Se houver erros de unicidade, retorna a página com mensagens
                 if mensagem_erro_email or mensagem_erro_cpf or mensagem_erro_telefone:
                     
-                    # Remove o arquivo salvo, pois o cadastro falhou
+            
                     if curriculo_filename and os.path.exists(curriculo_filename):
                         os.remove(curriculo_filename)
                         
@@ -322,7 +375,6 @@ def cadastro_palestrante():
                                            mensagem_erro_curriculo=mensagem_erro_curriculo,
                                            dados_form=dados_form)
                 
-                # Se tudo estiver ok, cadastra o palestrante
                 dados = (
                     dados_form['nome_completo'],
                     re.sub(r'\D', '', dados_form['cpf']), # CPF limpo
@@ -355,7 +407,7 @@ def cadastro_palestrante():
                     cursor.close()
                     conexao.close()
 
-    # Rota GET
+
     return render_template('cadastro_palestrante.html',
                            mensagem_erro_senha=mensagem_erro_senha,
                            mensagem_erro_email=mensagem_erro_email,
@@ -422,7 +474,7 @@ def reset_senha_palestrante(token):
         conexao = conectar_bd()
         cursor = conexao.cursor(dictionary=True)
         
-        # Verificar se o token é válido e não expirou
+      
         cursor.execute("""
             SELECT tr.palestrante_id, p.email 
             FROM tokens_recuperacao_palestrantes tr
@@ -440,23 +492,23 @@ def reset_senha_palestrante(token):
                 senha = request.form['senha']
                 confirmar_senha = request.form['confirmar_senha']
                 
-                # Verificar se as senhas coincidem
+   
                 if senha != confirmar_senha:
                     mensagem_erro = "As senhas não coincidem."
                 else:
-                    # Validar a nova senha
+              
                     valida, mensagem = validar_senha(senha)
                     if not valida:
                         mensagem_erro = mensagem
                     else:
-                        # Atualizar a senha no banco de dados
+                
                         cursor.execute("""
                             UPDATE palestrantes 
                             SET senha = %s 
                             WHERE id = %s
                         """, (generate_password_hash(senha), palestrante_id))
                         
-                        # Invalidar/Deletar o token usado
+           
                         cursor.execute("""
                             DELETE FROM tokens_recuperacao_palestrantes
                             WHERE token = %s
@@ -464,11 +516,11 @@ def reset_senha_palestrante(token):
                         
                         conexao.commit()
                         
-                        # Redirecionar para a página de login com mensagem de sucesso
+              
                         return redirect(url_for('login_palestrante.login_palestrante', mensagem_sucesso="Senha redefinida com sucesso!"))
 
         else:
-            token_valido = False # O token não foi encontrado ou expirou
+            token_valido = False 
     
     except Exception as e:
         print(f"Erro ao processar redefinição de senha: {e}")
@@ -483,13 +535,16 @@ def reset_senha_palestrante(token):
                            token_valido=token_valido,
                            mensagem_erro=mensagem_erro)
 
+from flask import Blueprint, render_template, session, redirect, url_for, g
+
+
 @login_palestrante_bp.route('/painel_palestrante')
 @login_required("palestrante")
 def painel_palestrante():
     """Rota do painel de controle do  administrador (requer login)."""
-    # Para o painel funcionar, ele precisa da informação do usuário logado
+
     if 'user_id' in session:
-        # Busca os dados completos do usuário
+
         try:
             conexao = conectar_bd()
             cursor = conexao.cursor(dictionary=True)
@@ -499,7 +554,7 @@ def painel_palestrante():
             if usuario:
                 return render_template("painel_palestrante.html", usuario=usuario)
             else:
-                # Se o ID na sessão for inválido, limpa a sessão e redireciona para o login
+     
                 session.clear()
                 if usuario:
                  return render_template("painel_palestrante.html", usuario=usuario)
@@ -507,19 +562,18 @@ def painel_palestrante():
                  print("DEBUG: PERDI A SESSÃO PORQUE NÃO ACHEI O USUÁRIO NO BANCO!") # <--- ADICIONE ISSO
                 session.clear()
                 return redirect(url_for('login_palestrante.login_palestrante'))
-                flash("Sessão inválida. Por favor, faça login novamente.", "erro")
-                return redirect(url_for('login_palestrante.login_palestrante'))
+            
 
         except Exception as e:
             print(f"Erro ao carregar dados do palestrante: {e}")
             flash("Erro ao carregar dados do painel.", "erro")
-            # Em caso de erro de DB, apenas retorna o template sem os dados, ou redireciona
+   
             return redirect(url_for('login_palestrante.login_palestrante'))
         finally:
             if 'conexao' in locals() and conexao.is_connected():
                 cursor.close()
                 conexao.close()
-    # Se 'user_id' não estiver na sessão (o que não deve acontecer por causa do @login_required), redireciona.
+    
     return redirect(url_for('login_palestrante.login_palestrante'))
 
 
@@ -528,7 +582,53 @@ def logout_palestrante():
     """Rota para fazer logout do palestrante."""
     from utils.security import logout_user
     
-    logout_user()  # Limpa a sessão
+    logout_user()  
     flash('Logout realizado com sucesso.', 'success')
     
     return redirect(url_for('login_palestrante.login_palestrante'))
+
+@login_palestrante_bp.route("/excluir_conta", methods=["POST"])
+@login_required("user_id")
+def excluir_conta_palestrante():
+    palestrante_id = session.get('user_id')
+
+    try:
+        conexao = conectar_bd()
+        cursor = conexao.cursor(dictionary=True)
+        id_limpo = int(palestrante_id)
+
+        cursor.execute("DELETE FROM chamados_suporte WHERE palestrante_id = %s", [id_limpo])
+
+        cursor.execute(""" 
+            UPDATE palestras_confirmadas
+            SET status='cancelada'
+            WHERE palestrante_id = %s AND status = 'agendada'
+        """, (id_limpo,))
+        
+   
+        cursor.execute("DELETE FROM palestrantes WHERE id = %s", [id_limpo])
+        
+
+        conexao.commit()
+        
+        cursor.close()
+        conexao.close()
+
+        session.clear()
+        flash("Sua conta foi excluída permanentemente. Sentiremos sua falta!", "warning")
+        return redirect(url_for("login_palestrante.login_palestrante")) 
+        
+    except Exception as e:
+      
+        if 'conexao' in locals() and conexao:
+            conexao.rollback()
+            cursor.close()
+            conexao.close()
+            
+   
+        print("\n" + "#"*60)
+        print(f"❌ ERRO REAL DO BANCO DE DADOS: {e}")
+        print("#"*60 + "\n")
+    
+        flash(f"Não foi possível excluir sua conta porque existem dados vinculados a ela. Erro: {e}", "danger")
+        return redirect(url_for("login_palestrante.painel_palestrante"))

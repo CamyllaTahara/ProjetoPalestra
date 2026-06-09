@@ -1,0 +1,181 @@
+:root {
+    --bg-deep: #06090f;
+    --glass-bg: rgba(22, 27, 34, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --accent-primary: #79c0ff; /* Azul Neon suave */
+    --accent-secondary: #d2a8ff; /* Roxo Neon */
+    --text-bright: #f0f6fc;
+    --text-dim: #8b949e;
+}
+
+body {
+    background: radial-gradient(circle at top right, #161b22, #06090f);
+    color: var(--text-bright);
+    font-family: 'Inter', -apple-system, sans-serif;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: transparent; 
+}
+
+/* Container principal com leve brilho */
+.login-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 100px;
+    position: relative;
+    
+}
+
+.card-login {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 40px 20px;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.card-login:hover .card-icon {
+    opacity: 1;
+    filter: drop-shadow(0 0 25px rgba(121, 192, 255, 1));
+    transform: scale(1.1);
+}
+
+/* Brilho no Hover */
+.card-login:hover {
+    transform: translateY(-12px);
+    border-color: var(--accent-primary);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
+                0 0 20px rgba(121, 192, 255, 0.2);
+}
+.card-icon i {
+    width: 50px;
+    height: 50px;
+    stroke: var(--accent-primary);
+    filter: drop-shadow(0 0 15px var(--accent-primary));
+    margin-bottom: 20px;
+}
+
+.header-intro {
+    text-align: center;
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.header-intro h1 {
+    font-size: 2.5rem;
+    letter-spacing: -1px;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+}
+
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Fica atrás de todos os cards */
+    background: #06090f; /* Cor de fundo principal */
+}
+
+.input-group {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    margin-left: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+input {
+    width: 100%;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: white;
+    box-sizing: border-box;
+    transition: 0.3s;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    background: rgba(121, 192, 255, 0.05);
+    box-shadow: 0 0 15px rgba(121, 192, 255, 0.1);
+}
+.btn-entrar {
+    display: block;
+    width: 100%; /* Garante que ocupe a largura toda no sucesso */
+    margin-top: 20px;
+    padding: 12px 25px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--glass-border);
+    color: var(--text-bright) ; /* Texto claro sempre */
+    font-size: 13px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.btn-entrar:hover {
+    background: var(--text-bright); 
+    color: var(--bg-deep); /* Texto fica preto no hover para dar contraste */
+    transform: translateY(-3px);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+.link-voltar {
+    display: inline-block;
+    margin-top: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.3s;
+    opacity: 0.8;
+    color: var(--text-bright); /* Força a cor clara */
+    background: transparent;    /* Tirei o background cinza que estava sobrando */
+}
+
+.link-voltar:hover {
+    opacity: 1;
+    color: var(--accent-primary);
+    text-shadow: 0 0 10px rgba(121, 192, 255, 0.5);
+}
+
+.sucesso {
+    color: var(--text-bright) ; 
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.message-success-container {
+    padding: 20px 0;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

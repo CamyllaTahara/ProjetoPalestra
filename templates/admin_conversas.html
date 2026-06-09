@@ -2,123 +2,102 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Conversas - Administrador</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; max-width: 1100px; margin: 0 auto; }
-        h1 { color: #333; margin-bottom: 20px; }
-        .btn-voltar {
-            background: #6c757d; color: white; padding: 10px 20px;
-            text-decoration: none; border-radius: 4px; display: inline-block; margin-bottom: 20px;
-        }
-        .filtros {
-            background: #fff; padding: 20px; border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 25px;
-            display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;
-        }
-        .filtros label { font-size: 13px; font-weight: bold; color: #555; display: block; margin-bottom: 5px; }
-        .filtros input {
-            padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px;
-            font-size: 14px; width: 220px;
-        }
-        .btn-filtrar {
-            background: #4CAF50; color: white; padding: 9px 20px;
-            border: none; border-radius: 4px; cursor: pointer; font-size: 14px;
-        }
-        .btn-limpar {
-            background: #6c757d; color: white; padding: 9px 20px;
-            border: none; border-radius: 4px; cursor: pointer; font-size: 14px;
-            text-decoration: none; display: inline-block;
-        }
-        table { width: 100%; border-collapse: collapse; background: #fff;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
-        thead { background: #4CAF50; color: white; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        tbody tr:hover { background: #f5f5f5; }
-        .badge {
-            padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;
-        }
-        .badge-com { background: #d4edda; color: #155724; }
-        .badge-sem { background: #f8d7da; color: #721c24; }
-        .btn-ver {
-            background: #007bff; color: white; padding: 6px 14px;
-            border-radius: 4px; text-decoration: none; font-size: 13px;
-        }
-        .btn-ver:hover { background: #0056b3; }
-        .empty { text-align: center; padding: 40px; color: #666; background: #fff;
-                 border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .status-agendada { color: #155724; font-weight: bold; }
-        .status-realizada { color: #004085; font-weight: bold; }
-        .status-cancelada { color: #721c24; font-weight: bold; }
-    </style>
+    <title>Monitoramento de Conversas | Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_conversas_admin.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-    <a href="{{ url_for('login_administrador.painel_administrador') }}" class="btn-voltar">← Voltar ao Painel</a>
+    <canvas id="canvas-bg"></canvas>
 
-    <h1>💬 Conversas das Palestras</h1>
+    <div class="container-conversas">
+        <a href="{{ url_for('login_administrador.painel_administrador') }}" class="btn-voltar">
+            <i data-lucide="arrow-left"></i> Voltar ao Painel
+        </a>
 
-    <!-- Filtros -->
-    <form method="GET" action="{{ url_for('chat.admin_conversas') }}">
-        <div class="filtros">
-            <div>
-                <label>👤 Filtrar por Palestrante:</label>
-                <input type="text" name="palestrante" value="{{ filtro_palestrante }}" placeholder="Nome do palestrante...">
-            </div>
-            <div>
-                <label>🏢 Filtrar por Instituição:</label>
-                <input type="text" name="instituicao" value="{{ filtro_instituicao }}" placeholder="Nome da instituição...">
-            </div>
-            <button type="submit" class="btn-filtrar">🔍 Filtrar</button>
-            <a href="{{ url_for('chat.admin_conversas') }}" class="btn-limpar">✕ Limpar</a>
+        <h1><i data-lucide="messages-square"></i> Monitoramento de Conversas</h1>
+
+        <div class="glass-panel filters-section">
+            <form method="GET" action="{{ url_for('chat.admin_conversas') }}" class="filters-grid">
+                <div class="filter-group">
+                    <label><i data-lucide="user"></i> Palestrante</label>
+                    <input type="text" name="palestrante" value="{{ filtro_palestrante }}" placeholder="Buscar por nome...">
+                </div>
+                
+                <div class="filter-group">
+                    <label><i data-lucide="building-2"></i> Instituição</label>
+                    <input type="text" name="instituicao" value="{{ filtro_instituicao }}" placeholder="Buscar por nome...">
+                </div>
+
+                <div class="filter-buttons">
+                    <button type="submit" class="btn-filtrar">🔍 Filtrar</button>
+                    <a href="{{ url_for('chat.admin_conversas') }}" class="btn-limpar">✕ Limpar</a>
+                </div>
+            </form>
         </div>
-    </form>
 
-    {% if conversas %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Palestra</th>
-                    <th>Palestrante</th>
-                    <th>Instituição</th>
-                    <th>Data</th>
-                    <th>Status</th>
-                    <th>Mensagens</th>
-                    <th>Última Mensagem</th>
-                    <th>Ação</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for c in conversas %}
-                <tr>
-                    <td><strong>{{ c.titulo }}</strong></td>
-                    <td>{{ c.nome_palestrante }}</td>
-                    <td>{{ c.nome_instituicao }}</td>
-                    <td>{{ c.data }}</td>
-                    <td class="status-{{ c.status }}">{{ c.status | upper }}</td>
-                    <td>
-                        {% if c.total_mensagens > 0 %}
-                            <span class="badge badge-com">{{ c.total_mensagens }} msg</span>
-                        {% else %}
-                            <span class="badge badge-sem">Sem mensagens</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if c.ultima_mensagem %}
-                            {{ c.ultima_mensagem.strftime('%d/%m/%Y %H:%M') }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{{ url_for('chat.chat', palestra_id=c.id) }}" class="btn-ver">👁️ Visualizar</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <div class="empty">
-            <p>Nenhuma conversa encontrada com os filtros aplicados.</p>
+        {% if conversas %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Palestra</th>
+                        <th>Envolvidos</th>
+                        <th>Status</th>
+                        <th>Atividade</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in conversas %}
+                    <tr>
+                        <td>
+                            <div class="info-main">
+                                <strong>{{ c.titulo }}</strong>
+                                <span class="subtext"><i data-lucide="calendar"></i> {{ c.data }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="involved-info">
+                                <span><i data-lucide="mic"></i> {{ c.nome_palestrante }}</span>
+                                <span><i data-lucide="home"></i> {{ c.nome_instituicao }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge-status status-{{ c.status }}">
+                                {{ c.status | upper }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="activity-info">
+                                {% if c.total_mensagens > 0 %}
+                                    <span class="msg-count"><i data-lucide="message-circle"></i> {{ c.total_mensagens }} mensagens</span>
+                                    <small class="last-msg">Última: {{ c.ultima_mensagem.strftime('%d/%m/%Y %H:%M') }}</small>
+                                {% else %}
+                                    <span class="msg-none">Sem interações</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('chat.chat', palestra_id=c.id) }}" class="btn-visualizar">
+                                <i data-lucide="eye"></i> Visualizar
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-    {% endif %}
+        {% else %}
+        <div class="glass-panel empty-state">
+            <i data-lucide="message-square-off" style="width: 48px; height: 48px; opacity: 0.3;"></i>
+            <p>Nenhuma conversa encontrada com estes filtros.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>lucide.createIcons();</script>
+
+    <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
+
 </body>
 </html>

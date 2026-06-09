@@ -3,18 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <title>Painel Palestrante</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_painel.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <canvas id="canvas-bg"></canvas>
 </head>
-<body>
-    <h2>Bem-vindo, Palestrante {{ usuario['nome_completo'] }}</h2>
 
-    <a href="{{ url_for('login_palestrante.logout_palestrante') }}">Sair</a>
-    <li><a href="{{ url_for('gerenciar_disponibilidades.listar_disponibilidades') }}">Minhas Disponibilidades</a></li>
-    <li><a href="{{ url_for('gerenciar_solicitacoes.solicitacoes_recebidas') }}">Solicitações Recebidas</a></li>
-    <li><a href="{{ url_for('gerenciar_palestras.minhas_palestras') }}">Minhas Palestras</a></li>
-    <li><a href="{{ url_for('palestrante.editar_perfil_palestrante') }}">Editar Perfil</a></li>
-    <a href="{{ url_for('feed.feed') }}">📸 Feed</a>
-    <a href="{{ url_for('feed.explorar') }}">🔍 Explorar Instituições</a>
-    <a href="{{ url_for('chamados.meus_chamados') }}">🚨 Meus Chamados</a>
-    <a href="{{ url_for('feed.meu_perfil_pal') }}">👤 Meu Perfil</a>
+<body class="dashboard-body">
+    <div class="login-container dashboard-wide">
+    <div class="header-intro">
+        <h1>Bem-vindo(a), {{ usuario['nome_completo'] }}</h1>
+        <p>Gerencie suas atividades e conexões em um só lugar.</p>
+    </div>
+
+    <!-- Container dos Cards -->
+    <div class="card-grid">
+        
+        <a href="{{ url_for('gerenciar_disponibilidades.listar_disponibilidades') }}" class="dash-card">
+            <i data-lucide="calendar-range"></i>
+            <span>Minhas Disponibilidades</span>
+        </a>
+
+        <a href="{{ url_for('gerenciar_solicitacoes.solicitacoes_recebidas') }}" class="dash-card highlight">
+            <i data-lucide="mail-plus"></i>
+            <span>Solicitações Recebidas</span>
+        </a>
+
+        <a href="{{ url_for('gerenciar_palestras.minhas_palestras') }}" class="dash-card">
+            <i data-lucide="presentation"></i>
+            <span>Minhas Palestras</span>
+             <span id="badge-chat" class="contador-numero"  style="display: none;">0</span>
+        </a>
+
+        <a href="{{ url_for('feed.meu_perfil_pal') }}" class="dash-card">
+            <i data-lucide="user"></i>
+            <span>Meu Perfil</span>
+        </a>
+
+
+        <a href="{{ url_for('feed.feed') }}" class="dash-card">
+            <i data-lucide="layout-dashboard"></i>
+            <span>📸 Feed</span>
+        </a>
+
+        <a href="{{ url_for('feed.explorar') }}" class="dash-card">
+            <i data-lucide="search"></i>
+            <span>Explorar Instituições</span>
+        </a>
+
+        <a href="{{ url_for('chamados.meus_chamados') }}" class="dash-card">
+            <i data-lucide="alert-circle"></i>
+            <span>🚨 Meus Chamados</span>
+        </a>
+
+        <a href="{{ url_for('palestrante.editar_perfil_palestrante') }}" class="dash-card">
+            <i data-lucide="user-cog"></i>
+            <span>Configurar Conta</span>
+        </a>
+
+        <a href="{{ url_for('login_palestrante.logout_palestrante') }}" class="dash-card logout">
+            <i data-lucide="log-out"></i>
+            <span>Sair do Sistema</span>
+        </a>
+
+    </div>
+</div>
+<script src="{{ url_for('static', filename='js/particles.js') }}"></script>
+
+<script>lucide.createIcons();</script>
+
+
+    <script> document.addEventListener("DOMContentLoaded", function() {
+    // Busca a contagem de mensagens do chat
+    fetch('/chat/mensagens/count')
+        .then(response => response.json())
+        .then(data => {
+            const badge = document.getElementById('badge-chat');
+            if (data.count > 0) {
+                badge.innerText = data.count;
+                badge.style.display = 'inline-block'; // Mostra o número se for maior que 0
+            } else {
+                badge.style.display = 'none'; // Esconde se não tiver mensagens novas
+            }
+        })
+        .catch(err => console.error("Erro ao buscar contador do chat:", err));
+});
+</script>
 </body>
 </html>

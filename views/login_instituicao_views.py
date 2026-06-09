@@ -12,17 +12,15 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import urllib.parse
 from utils.security import  login_required, logout_user
-#from utils.auth import login_required, logout_user
 
 
-# CORREÇÃO CRÍTICA: Removendo o url_prefix que estava causando o erro 404
-# A rota agora será acessada diretamente pelo nome.
+
 login_instituicao_bp = Blueprint('login_instituicao', __name__) 
 
 def cnpj_valido(cnpj):
     """Verifica a validade básica do CNPJ (14 dígitos)."""
     cnpj = ''.join(filter(str.isdigit, cnpj))
-    # CNPJ tem 14 dígitos.
+
     if len(cnpj) != 14 or cnpj == cnpj[0] * 14:
         return False
     return True
@@ -53,45 +51,114 @@ def enviar_email_recuperacao(email, token):
     try:
         remetente_email = "camytahara@gmail.com"
         remetente_senha = "miqr fggg v unn iwnl"
-        
-        # O link agora usa o endpoint completo: 'login_instituicao.reset_senha'
+     
         link_recuperacao = url_for('login_instituicao.reset_senha_instituicao', 
                                    token=token, 
                                    _external=True)
         
-        # Corpo do email HTML
+     
         corpo_email = f"""
-        <html>
-        <head>
-            <style>
-                body {{ font-family: Arial, sans-serif; }}
-                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                .header {{ background-color: #4CAF50; color: white; padding: 10px; text-align: center; }}
-                .content {{ padding: 20px; }}
-                .button {{ background-color: #4CAF50; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; }}
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <h2>Recuperação de Senha</h2>
-                </div>
-                <div class="content">
-                    <p>Olá,</p>
-                    <p>Recebemos uma solicitação para redefinir sua senha. Se você não fez esta solicitação, ignore este e-mail.</p>
-                    <p>Para redefinir sua senha, clique no botão abaixo:</p>
-                    <p style="text-align: center;">
-                        <a href="{link_recuperacao}" class="button">Redefinir Senha</a>
-                    </p>
-                    <p>Ou copie e cole o seguinte link no seu navegador:</p>
-                    <p>{link_recuperacao}</p>
-                    <p>Este link é válido por 1 hora.</p>
-                    <p>Atenciosamente,<br>Equipe de Suporte</p>
-                </div>
-            </div>
-        </body>
-        </html>
-        """
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0; padding:0; background-color:#0b0f1a; font-family:Arial, sans-serif;">
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0b0f1a; padding: 40px 20px;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%;">
+
+                
+                    <tr>
+                        <td align="center" style="padding-bottom: 30px;">
+                            <h1 style="margin:0; font-size:1.6rem; color:#00d2ff; letter-spacing:-0.5px;">✦ PalestraApp</h1>
+                            <p style="margin:6px 0 0; color:#94a3b8; font-size:0.85rem;">Sistema de Agendamento de Palestras</p>
+                        </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #0f172a, #1e293b); border: 1px solid rgba(0,210,255,0.15); border-radius: 16px; padding: 35px;">
+                            <table width="100%" cellpadding="0" cellspacing="0">
+
+                        
+                                <tr>
+                                    <td align="center" style="padding-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.07);">
+                                        <div style="background: rgba(0,210,255,0.1); border: 1px solid rgba(0,210,255,0.3); border-radius: 50px; display:inline-block; padding: 10px 22px; margin-bottom: 15px;">
+                                            <span style="color:#00d2ff; font-size:0.85rem; font-weight:600; letter-spacing:1px;">🔐 RECUPERAÇÃO DE SENHA</span>
+                                        </div>
+                                        <h2 style="margin:0; color:#f8fafc; font-size:1.4rem;">Redefinição de Senha</h2>
+                                        <p style="margin:10px 0 0; color:#94a3b8; font-size:0.95rem; line-height:1.6;">
+                                            Recebemos uma solicitação para redefinir sua senha.
+                                        </p>
+                                    </td>
+                                </tr>
+
+                
+                                <tr>
+                                    <td style="padding-top: 25px; padding-bottom: 20px;">
+                                        <p style="margin:0 0 15px; color:#cbd5e1; font-size:0.95rem; line-height:1.7;">
+                                            Olá! Para redefinir sua senha clique no botão abaixo. O link é válido por <strong style="color:#f8fafc;">1 hora</strong>.
+                                        </p>
+                                    </td>
+                                </tr>
+
+                   
+                                <tr>
+                                    <td align="center" style="padding-bottom: 25px;">
+                                        <a href="{link_recuperacao}"
+                                           style="display:inline-block; background: linear-gradient(135deg, #00d2ff, #0099cc); color:#000000; font-weight:700; font-size:0.95rem; text-decoration:none; padding: 14px 35px; border-radius: 10px;">
+                                            🔐 Redefinir Senha →
+                                        </a>
+                                    </td>
+                                </tr>
+
+                        
+                                <tr>
+                                    <td style="padding-bottom: 25px;">
+                                        <p style="margin:0 0 8px; color:#94a3b8; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; font-weight:600;">Ou copie o link abaixo</p>
+                                        <div style="background: rgba(0,0,0,0.25); border-left: 3px solid #475569; border-radius: 8px; padding: 12px 18px; word-break: break-all;">
+                                            <p style="margin:0; color:#94a3b8; font-size:0.8rem; line-height:1.6;">
+                                                {link_recuperacao}
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        <div style="background: rgba(245,158,11,0.06); border-left: 3px solid #f59e0b; border-radius: 8px; padding: 12px 18px;">
+                                            <p style="margin:0; color:#94a3b8; font-size:0.85rem; line-height:1.6;">
+                                                ⚠️ Se você não solicitou a redefinição de senha, ignore este e-mail. Sua senha permanecerá a mesma.
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            </table>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="center" style="padding-top: 25px;">
+                            <p style="margin:0; color:#475569; font-size:0.8rem; line-height:1.6;">
+                                Este e-mail foi enviado automaticamente pelo sistema PalestraApp — TCC.<br>
+                                Por favor, não responda diretamente a este e-mail.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
+"""
         
         mensagem = MIMEMultipart()
         mensagem['From'] = remetente_email
@@ -132,12 +199,12 @@ def login_instituicao():
             conexao = conectar_bd()
             cursor = conexao.cursor(dictionary=True)
             
-            # ✅ Adicionado 'status' no SELECT
+      
             cursor.execute("SELECT id, nome, senha, status FROM instituicoes WHERE cnpj = %s", (cnpj,))
             usuario = cursor.fetchone()
             
             if usuario and check_password_hash(usuario['senha'], senha):
-                # ✅ Verificar se está suspenso ou banido
+         
                 if usuario.get('status') == 'suspenso':
                     mensagem_erro = "Sua conta está suspensa. Entre em contato com a administração."
                 elif usuario.get('status') == 'banido':
@@ -163,7 +230,7 @@ def login_instituicao():
     return render_template('login_instituicao.html', 
                            mensagem_erro=mensagem_erro,
                            mensagem_sucesso=mensagem_sucesso)
-# ROTA DE CADASTRO
+
 @login_instituicao_bp.route('/cadastro_instituicao', methods=['GET', 'POST'])
 def cadastro_instituicao():
     mensagem_erro_senha = None
@@ -235,7 +302,7 @@ def cadastro_instituicao():
                                            mensagem_erro_telefone=mensagem_erro_telefone,
                                            dados_form=dados_form)
 
-                # Cadastro
+       
                 dados = (
                     dados_form['nome'],
                     cnpj_limpo, 
@@ -275,7 +342,7 @@ def cadastro_instituicao():
                             mensagem_erro_telefone=mensagem_erro_telefone,
                             dados_form=dados_form)
 
-# ROTA DE ESQUECI SENHA
+
 @login_instituicao_bp.route('/esqueci_senha_instituicao', methods=['GET', 'POST'])
 def esqueci_senha_instituicao():
     mensagem_erro = None
@@ -324,7 +391,6 @@ def esqueci_senha_instituicao():
                             mensagem_erro=mensagem_erro,
                             mensagem_sucesso=mensagem_sucesso)
 
-# ROTA DE RESET DE SENHA
 @login_instituicao_bp.route('/reset_senha_instituicao/<token>', methods=['GET', 'POST'])
 def reset_senha_instituicao(token):
     mensagem_erro = None
@@ -389,7 +455,6 @@ def reset_senha_instituicao(token):
                             token_valido=token_valido,
                             mensagem_erro=mensagem_erro)
 
-# ROTA DO PAINEL
 @login_instituicao_bp.route('/painel_instituicao')
 @login_required("instituicao")
 def painel_instituicao():
@@ -419,7 +484,7 @@ def painel_instituicao():
     
     return redirect(url_for('login_instituicao.login_instituicao'))
 
-# ROTA DE LOGOUT
+
 @login_instituicao_bp.route("/logout/instituicao")
 def logout_instituicao():
     """Rota para fazer logout da instituição."""
@@ -428,5 +493,61 @@ def logout_instituicao():
     
     flash('Logout da instituição realizado com sucesso.', 'success')
     
-    # Redireciona para a rota de login da instituição
+
     return redirect(url_for('login_instituicao.login_instituicao'))
+
+
+@login_instituicao_bp.route("/excluir_conta_instituicao", methods=["POST"])
+@login_required("instituição")
+def excluir_conta_instituicao():
+    instituicao_id = session.get('user_id')
+
+    try: 
+        conexao = conectar_bd()
+        cursor = conexao.cursor(dictionary=True)
+        
+     
+        id_limpo = int(instituicao_id)
+
+ 
+        cursor.execute("DELETE FROM chamados_suporte WHERE instituicao_id = %s", [id_limpo])
+        
+     
+        cursor.execute("""
+            UPDATE palestras_confirmadas
+            SET status = 'cancelada'
+            WHERE instituicao_id = %s AND status = 'agendada'
+        """, (id_limpo,))
+        
+
+        cursor.execute("DELETE FROM instituicoes WHERE id = %s", [id_limpo])
+
+
+        conexao.commit()
+
+        cursor.close()
+        conexao.close()
+
+
+        session.clear()
+
+        flash("A conta da instituição foi excluída permanentemente.", "warning")
+
+        return redirect(url_for("login_instituicao.login_instituicao"))
+    
+    except Exception as e:
+
+        if 'conexao' in locals() and conexao:
+            conexao.rollback()
+            cursor.close()
+            conexao.close()
+
+
+        print("\n" + "#"*60)
+        print(f"❌ ERRO REAL NA EXCLUSÃO DA INSTITUIÇÃO: {e}")
+        print("#"*60 + "\n")
+
+        flash(f"Erro ao excluir a conta da instituição. Verifique dependências. Detalhes: {e}", "danger")
+
+        return redirect(url_for("login_instituicao.painel_instituicao"))
+

@@ -2,18 +2,92 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Painel instituição</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Instituição</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_painel.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <canvas id="canvas-bg"></canvas>
 </head>
-<body>
-    <h2>Bem-vindo, Instituição {{ usuario['nome'] }}</h2>
 
-    <a href="{{ url_for('login_instituicao.logout_instituicao') }}">Sair</a>
-    <li><a href="{{ url_for('gerenciar_solicitacoes.listar_palestrantes') }}">Buscar Palestrantes</a></li>
-    <li><a href="{{ url_for('gerenciar_solicitacoes.minhas_solicitacoes') }}">Minhas Solicitações</a></li>
-    <li><a href="{{ url_for('gerenciar_palestras.palestras_instituicao') }}">Minhas Palestras</a></li>
-    <li><a href="{{ url_for('instituicao.editar_perfil') }}">Editar Perfil</a></li>
-    <a href="{{ url_for('feed.feed') }}">📸 Feed</a>
-    <a href="{{ url_for('chamados.meus_chamados') }}">🚨 Meus Chamados</a>
-    <a href="{{ url_for('feed.meu_perfil_inst') }}">👤 Meu Perfil</a>
+<body class="dashboard-body">
+    <div class="login-container dashboard-wide">
+    <div class="header-intro">
+            <h2>Bem-vindo, Instituição {{ usuario['nome'] }}</h2>
+            <p>Gerencie suas atividades e conexões em um só lugar.</p>
+        </div>
+
+        <div class="card-grid">
+            <!-- 1. Buscar Palestrantes -->
+            <a href="{{ url_for('gerenciar_solicitacoes.listar_palestrantes') }}" class="dash-card">
+                <i data-lucide="search"></i>
+                <span>Buscar Palestrantes</span>
+            </a>
+
+            <!-- 2. Minhas Solicitações -->
+            <a href="{{ url_for('gerenciar_solicitacoes.minhas_solicitacoes') }}" class="dash-card">
+                <i data-lucide="send"></i>
+                <span>Minhas Solicitações</span>
+            </a>
+
+            <!-- 3. Minhas Palestras -->
+            <a href="{{ url_for('gerenciar_palestras.palestras_instituicao') }}" class="dash-card highlight">
+                <i data-lucide="presentation"></i>
+                <span>Minhas Palestras</span>
+                <span id="badge-chat" class="contador-numero" style="display: none;">0</span>
+            </a>
+
+            <!-- 4. Meu Perfil -->
+            <a href="{{ url_for('feed.meu_perfil_inst') }}" class="dash-card">
+                <i data-lucide="user"></i>
+                <span>Meu Perfil</span>
+            </a>
+
+            <!-- 5. Feed -->
+            <a href="{{ url_for('feed.feed') }}" class="dash-card">
+                <i data-lucide="layout-dashboard"></i>
+                <span>Feed Social</span>
+            </a>
+            <!-- 6. Chamados -->
+            <a href="{{ url_for('chamados.meus_chamados') }}" class="dash-card">
+                <i data-lucide="alert-circle"></i>
+                <span>Meus Chamados</span>
+            </a>
+
+            <!-- 7. Configurar Conta -->
+            <a href="{{ url_for('instituicao.editar_perfil') }}" class="dash-card">
+                <i data-lucide="user-cog"></i>
+                <span>Configurar Conta</span>
+            </a>
+
+            <!-- 8. Sair -->
+            <a href="{{ url_for('login_instituicao.logout_instituicao') }}" class="dash-card logout">
+                <i data-lucide="log-out"></i>
+                <span>Sair do Sistema</span>
+            </a>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+
+    <script> document.addEventListener("DOMContentLoaded", function() {
+    // Busca a contagem de mensagens do chat
+    fetch('/chat/mensagens/count')
+        .then(response => response.json())
+        .then(data => {
+            const badge = document.getElementById('badge-chat');
+            if (data.count > 0) {
+                badge.innerText = data.count;
+                badge.style.display = 'inline-block'; // Mostra o número se for maior que 0
+            } else {
+                badge.style.display = 'none'; // Esconde se não tiver mensagens novas
+            }
+        })
+        .catch(err => console.error("Erro ao buscar contador do chat:", err));
+});
+</script>
+
 </body>
 </html>

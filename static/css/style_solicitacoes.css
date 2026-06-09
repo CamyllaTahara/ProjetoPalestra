@@ -1,0 +1,261 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+body {
+    background-color: #0a0a0a;
+    background-image: url('caminho/do/seu/fundo-conexoes.png');
+    background-attachment: fixed;
+    background-size: cover;
+    color: #e0e0e0;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+h1 {
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: #ffffff;
+    text-align: center;
+    margin: 40px 0;
+}
+
+h2 {
+    color: #00d2ff;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.container {
+    backdrop-filter: blur(12px); 
+    -webkit-backdrop-filter: blur(12px); 
+    background: rgba(15, 15, 15, 0.75) !important; 
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 25px;
+    position: relative;
+    z-index: 1;
+    max-width: 1250px; /* Largura perfeita para acomodar as 8 colunas da tabela */
+    margin: 40px auto;
+}
+
+.section {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 40px;
+}
+
+/* --- ESTRUTURA GLOBAL DAS TABELAS --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Força o navegador a respeitar rigidamente as % das colunas */
+}
+
+th {
+    text-align: left;
+    padding: 12px 15px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+td {
+    padding: 18px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+    font-size: 0.9rem;
+    word-wrap: break-word; /* Impede textos compridos de estourarem */
+}
+
+/* --- 🟢 EXCLUSIVO: REDISTRIBUIÇÃO DAS 8 COLUNAS DE SOLICITAÇÃO (Total = 100%) --- */
+.tabela-solicitacoes th:nth-child(1), .tabela-solicitacoes td:nth-child(1) { width: 14%; } /* Instituição */
+.tabela-solicitacoes th:nth-child(2), .tabela-solicitacoes td:nth-child(2) { width: 15%; } /* Título */
+.tabela-solicitacoes th:nth-child(3), .tabela-solicitacoes td:nth-child(3) { width: 18%; } /* Descrição */
+.tabela-solicitacoes th:nth-child(4), .tabela-solicitacoes td:nth-child(4) { width: 13%; } /* Data/Hora */
+.tabela-solicitacoes th:nth-child(5), .tabela-solicitacoes td:nth-child(5) { width: 13%; } /* Local */
+.tabela-solicitacoes th:nth-child(6), .tabela-solicitacoes td:nth-child(6) { width: 9%; text-align: center; }  /* Status */
+.tabela-solicitacoes th:nth-child(7), .tabela-solicitacoes td:nth-child(7) { width: 9%; text-align: center; }  /* Prazo */
+.tabela-solicitacoes th:nth-child(8), .tabela-solicitacoes td:nth-child(8) { width: 11%; text-align: right; } /* Ações */
+
+table td strong {
+    display: block;
+    line-height: 1.3;
+    color: #fff;
+}
+
+.descricao-cell {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.4;
+}
+
+/* --- BADGES DE STATUS --- */
+.status {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: inline-block;
+}
+.status-aceita, .status-realizada, .status-confirmada { background: rgba(40, 167, 69, 0.15); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3); }
+.status-pendente { background: rgba(241, 196, 15, 0.15); color: #f1c40f; border: 1px solid rgba(241, 196, 15, 0.3); }
+.status-cancelada, .status-recusada { background: rgba(247, 7, 7, 0.15); color: #f10909; border: 1px solid rgba(247, 7, 7, 0.3); }
+
+/* --- BOTÕES DE AÇÃO --- */
+.acoes {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.btn-acao {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    white-space: nowrap;
+    transition: transform 0.2s, filter 0.2s;
+}
+
+.btn-acao svg {
+    width: 13px !important;
+    height: 13px !important;
+    stroke: #ffffff !important;
+    stroke-width: 2.5px !important;
+}
+
+/* BOTÃO ACEITAR (PADRÃO CONCLUIR VERDE) */
+.btn-concluir {
+    background-color: #28a745;
+    color: white;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.7rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    transition: transform 0.2s, filter 0.2s;
+}
+
+.btn-concluir svg {
+    width: 13px !important;
+    height: 13px !important;
+    stroke: #ffffff !important;
+    stroke-width: 2.5px !important;
+}
+
+.btn-acao:hover, .btn-concluir:hover {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+}
+
+/* --- MODAL COM EFEITO DE VIDRO (FUMÊ) --- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal-content-glass {
+    background: rgba(20, 20, 20, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 480px;
+    width: 90%;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+
+.modal-content-glass textarea {
+    width: 100%;
+    border-radius: 8px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+    resize: vertical;
+    margin-bottom: 5px;
+}
+
+.modal-content-glass textarea:focus {
+    border-color: #ff4b2b;
+    outline: none;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* --- BOTÃO VOLTAR E ALERTAS --- */
+.btn-voltar {
+    display: flex;
+    align-items: center;
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
+    max-width: 1250px;
+    margin: 20px auto;
+    font-size: 0.85rem;
+    gap: 8px;
+    transition: color 0.2s;
+}
+.btn-voltar:hover { color: #fff; }
+
+.alert {
+    padding: 12px;
+    border-radius: 8px;
+    max-width: 1250px;
+    margin: 15px auto;
+    font-size: 0.9rem;
+    text-align: center;
+}
+.alert-success { background: rgba(40, 167, 69, 0.2); color: #2ecc71; border: 1px solid rgba(40, 167, 69, 0.4); }
+.alert-danger { background: rgba(220, 53, 69, 0.2); color: #e74c3c; border: 1px solid rgba(220, 53, 69, 0.4); }
+
+.empty-message {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 40px 0;
+}

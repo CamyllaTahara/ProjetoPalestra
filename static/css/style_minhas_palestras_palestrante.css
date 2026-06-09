@@ -1,0 +1,331 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+body {
+    background-color: #0a0a0a;
+    background-image: url('caminho/do/seu/fundo-conexoes.png');
+    background-attachment: fixed;
+    background-size: cover;
+    color: #e0e0e0;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+h1 {
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: #ffffff;
+    text-align: center;
+    margin: 40px 0;
+}
+
+h2 {
+    color: #00d2ff;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.container {
+    backdrop-filter: blur(12px); 
+    -webkit-backdrop-filter: blur(12px); 
+    background: rgba(15, 15, 15, 0.75) !important; 
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 25px;
+    position: relative;
+    z-index: 1;
+    max-width: 1200px; /* Mantém largura ampla ideal para as 7 colunas */
+    margin: 40px auto;
+}
+
+/* Duas seções (cards) perfeitamente separadas */
+.section {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 40px;
+}
+
+/* --- ESTRUTURA GLOBAL DAS TABELAS --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Obriga o navegador a respeitar rigidamente as % abaixo */
+}
+
+th {
+    text-align: left;
+    padding: 12px 15px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+td {
+    padding: 18px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+    font-size: 0.9rem;
+    word-wrap: break-word; /* Força quebra de linha de títulos longos */
+}
+
+/* --- 🟢 DISTRIBUIÇÃO DAS 7 COLUNAS DA TABELA AGENDADAS (Total = 100%) --- */
+.tabela-agendadas th:nth-child(1), .tabela-agendadas td:nth-child(1) { width: 18%; } /* Título */
+.tabela-agendadas th:nth-child(2), .tabela-agendadas td:nth-child(2) { width: 12%; } /* Instituição */
+.tabela-agendadas th:nth-child(3), .tabela-agendadas td:nth-child(3) { width: 18%; } /* Contato */
+.tabela-agendadas th:nth-child(4), .tabela-agendadas td:nth-child(4) { width: 15%; } /* Data/Hora */
+.tabela-agendadas th:nth-child(5), .tabela-agendadas td:nth-child(5) { width: 10%; text-align: center; } /* Status */
+.tabela-agendadas th:nth-child(6), .tabela-agendadas td:nth-child(6) { width: 12%; text-align: center; } /* Já Concluiu? */
+.tabela-agendadas th:nth-child(7), .tabela-agendadas td:nth-child(7) { width: 15%; text-align: right; } /* Ações */
+
+/* --- 🕒 DISTRIBUIÇÃO DAS 4 COLUNAS DA TABELA HISTÓRICO (Total = 100%) --- */
+.tabela-historico th:nth-child(1), .tabela-historico td:nth-child(1) { width: 40%; } /* Título */
+.tabela-historico th:nth-child(2), .tabela-historico td:nth-child(2) { width: 25%; } /* Instituição */
+.tabela-historico th:nth-child(3), .tabela-historico td:nth-child(3) { width: 20%; } /* Data */
+.tabela-historico th:nth-child(4), .tabela-historico td:nth-child(4) { width: 15%; text-align: right; } /* Status */
+
+/* Ajustes de tipografia internos */
+table td strong {
+    display: block;
+    line-height: 1.3;
+    color: #fff;
+}
+
+.info-contato {
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+/* --- CHIPS DE STATUS --- */
+.status {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: inline-block;
+}
+.status-aceita, .status-realizada, .status-confirmada { background: rgba(40, 167, 69, 0.15); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3); }
+.status-pendente { background: rgba(241, 196, 15, 0.15); color: #f1c40f; border: 1px solid rgba(241, 196, 15, 0.3); }
+.status-cancelada, .status-recusada { background: rgba(247, 7, 7, 0.15); color: #f10909; border: 1px solid rgba(247, 7, 7, 0.3); }
+
+/* --- CONTÊINER DE BOTÕES DE AÇÃO --- */
+.acoes {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    flex-wrap: nowrap; /* Trava para nunca jogar botões para a linha de baixo */
+}
+
+.btn-acao {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    transition: transform 0.2s, filter 0.2s;
+}
+
+/* Tamanho padronizado e limpo para os SVGs de ação */
+.btn-acao svg {
+    width: 13px !important;
+    height: 13px !important;
+    stroke: #ffffff !important;
+    stroke-width: 2.5px !important;
+    fill: none !important;
+}
+
+.btn-acao:hover, .btn-concluir:hover {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+}
+
+/* --- BOTÃO CONCLUIR PALESTRA --- */
+.btn-concluir {
+    background-color: #28a745;
+    color: white;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.7rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    transition: transform 0.2s, filter 0.2s;
+}
+
+.btn-concluir svg {
+    width: 13px !important;
+    height: 13px !important;
+    stroke: #ffffff !important;
+    stroke-width: 2.5px !important;
+}
+
+/* --- VOLTAR E ALERTAS --- */
+.btn-voltar {
+    display: flex;
+    align-items: center;
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
+    max-width: 1200px;
+    margin: 20px auto;
+    font-size: 0.85rem;
+    gap: 8px;
+    transition: color 0.2s;
+}
+.btn-voltar:hover { color: #fff; }
+
+.alert {
+    padding: 12px;
+    border-radius: 8px;
+    max-width: 1200px;
+    margin: 15px auto;
+    font-size: 0.9rem;
+}
+.alert-success { background: rgba(40, 167, 69, 0.2); color: #2ecc71; border: 1px solid rgba(40, 167, 69, 0.4); }
+.alert-danger { background: rgba(220, 53, 69, 0.2); color: #e74c3c; border: 1px solid rgba(220, 53, 69, 0.4); }
+
+.empty-message {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 20px 0;
+}
+
+     /* CSS rápido para garantir o visual do modal estilo vidro igual ao anterior */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-content-glass {
+            background: rgba(20, 20, 20, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        .modal-content-glass textarea {
+            width: 100%;
+            border-radius: 8px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        .modal-content-glass select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-modal-sucesso{
+            margin-top: 22px;
+            padding: 12px 22px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0, 210, 255, 0.25);
+            transition: all 0.25s ease;
+        }
+
+        .btn-modal-sucesso:hover{
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 12px 30px rgba(0, 210, 255, 0.35);
+            filter: brightness(1.05);
+        }
+
+        .btn-modal-sucesso:active{
+            transform: scale(0.98);
+        }
+
+        /* Estilização combinando com os botões originais do seu portal */
+        .btn-concluir-evento {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+            transition: all 0.2s ease;
+        }
+        .btn-concluir-evento:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35);
+            filter: brightness(1.1);
+        }
+
+        .btn-avaliar-evento {
+            background: linear-gradient(135deg, #ff9f43, #ff5252);
+            color: white;
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 15px rgba(255, 159, 67, 0.2);
+            transition: all 0.2s ease;
+        }
+        .btn-avaliar-evento:hover {
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(255, 159, 67, 0.35);
+        }

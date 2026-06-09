@@ -1,0 +1,248 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+body {
+    background-color: #0a0a0a;
+    background-image: url('../img/fundo-conexoes.png'); /* Certifique-se que o caminho está correto */
+    background-attachment: fixed;
+    background-size: cover;
+    color: #e0e0e0;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+body {
+    /* Remova qualquer background-image ou cor sólida pesada */
+    background-color: #0a0a0a !important; 
+    margin: 0;
+    overflow-x: hidden;
+}
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+
+
+/* O segredo: a sua caixa principal precisa ser um pouco transparente */
+.container {
+    position: relative;
+    z-index: 1; /* Garante que o conteúdo fique na frente */
+    background: rgba(10, 10, 10, 0.7); /* Preto com 70% de opacidade */
+    backdrop-filter: blur(8px); /* Efeito de vidro para ficar moderno */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 30px;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* --- CABEÇALHO DO PERFIL --- */
+.header-perfil {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    margin-bottom: 40px;
+}
+
+.foto-perfil {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #00d2ff;
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+}
+
+.perfil-info h2 {
+    font-size: 2rem;
+    margin: 0;
+    color: #fff;
+}
+
+.ramo-texto {
+    color: #00d2ff;
+    font-weight: 500;
+    margin: 10px 0;
+}
+
+.stats {
+    display: flex;
+    gap: 30px;
+    margin: 20px 0;
+}
+
+.stat-item {
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.stat-item:hover {
+    color: #00d2ff;
+}
+
+.stat-item strong {
+    font-size: 1.2rem;
+    color: #fff;
+}
+
+/* --- BOTÕES --- */
+.btn-editar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: 0.3s;
+}
+
+.btn-editar:hover {
+    background: #fff;
+    color: #000;
+}
+
+.btn-postar {
+    background: linear-gradient(135deg, #007bff, #00d2ff);
+    color: white;
+    padding: 15px 30px;
+    text-decoration: none;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    transition: 0.3s;
+}
+
+.btn-postar:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+}
+
+/* --- GRID DE POSTS --- */
+.grid-posts {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 25px;
+}
+
+.card-post {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 15px;
+    padding: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.post-fotos img {
+    border-radius: 10px;
+    margin-top: 15px;
+    width: 100%;
+    max-height: 500px;
+    object-fit: cover;
+}
+
+/* --- MODAIS --- */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #1a1a1a;
+    border-radius: 15px;
+    padding: 30px;
+    width: 400px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.item-seguidor {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    color: #fff;
+    transition: 0.2s;
+}
+
+.item-seguidor:hover {
+    background: rgba(0, 210, 255, 0.1);
+}
+
+.nav-links a {
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: 0.2s;
+}
+
+.nav-links a:hover {
+    color: #00d2ff;
+}
+/* Definições gerais para ambos os botões */
+.btn-primary, .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    text-decoration: none; /* Remove o sublinhado padrão */
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+/* Estilo específico do botão Voltar (Secondary) */
+.btn-secondary {
+    background-color: rgba(255, 255, 255, 0.05); /* Fundo levemente visível */
+    color: #ffffff !important; /* !important garante que vença a cor padrão do navegador */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary-color); /* Realça com a cor do seu sistema no hover */
+    transform: translateY(-2px);
+    color: var(--primary-color) !important;
+}
+
+/* Estilo do botão Principal */
+.btn-primary {
+    background-color: var(--primary-color);
+    color: #ffffff !important;
+    border: none;
+}
+
+.footer-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--glass-border);
+}

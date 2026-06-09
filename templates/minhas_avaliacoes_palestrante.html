@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Avaliações | Portal do Palestrante</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_minhas_avaliacoes_palestrante.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+  
+</head>
+<body>
+    <canvas id="canvas-bg"></canvas>
+
+    <a href="{{ url_for('login_palestrante.painel_palestrante') }}" class="btn-voltar">
+        <i data-lucide="arrow-left"></i> Voltar ao Painel
+    </a>
+
+    <div class="container">
+        <h1>Minha Reputação</h1>
+
+        <div class="section">
+            <h2><i data-lucide="star"></i> Suas Médias Gerais</h2>
+            <div class="grid-reputacao">
+                <div class="card-nota">
+                    <h3>Conduta & Postura</h3>
+                    <div class="numero-nota">{{ "%.1f"|format(medias.conduta) if medias.conduta else '---' }}</div>
+                    <span style="color: #ffc107;">⭐</span>
+                </div>
+                <div class="card-nota">
+                    <h3>Domínio de Conteúdo</h3>
+                    <div class="numero-nota">{{ "%.1f"|format(medias.conteudo) if medias.conteudo else '---' }}</div>
+                    <span style="color: #ffc107;">⭐</span>
+                </div>
+                <div class="card-nota">
+                    <h3>Cumprimento do Combinado</h3>
+                    <div class="numero-nota">{{ "%.1f"|format(medias.combinado) if medias.combinado else '---' }}</div>
+                    <span style="color: #ffc107;">⭐</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><i data-lucide="message-square-quote"></i> Depoimentos das Instituições</h2>
+            {% if feedbacks %}
+                {% for fb in feedbacks %}
+                <div class="card-feedback">
+                    <div class="feedback-header">
+                        <strong>{{ fb.nome_instituicao }}</strong>
+                        <span>{{ fb.data_palestra }}</span>
+                    </div>
+                    <p style="margin: 0; color: rgba(255,255,255,0.85); font-style: italic;">
+                        "{{ fb.comentario if fb.comentario else 'A instituição não deixou um comentário em texto, apenas notas.' }}"
+                    </p>
+                    <div style="margin-top: 8px; font-size: 0.8rem; color: rgba(255,255,255,0.4);">
+                        Média desta palestra: ⭐{{ "%.1f"|format((fb.nota_conduta|int + fb.nota_conteudo|int + fb.nota_combinado|int) / 3) }}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-message">
+                    <p>Você ainda não recebeu avaliações em texto.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

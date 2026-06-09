@@ -17,18 +17,15 @@ def get_db_connection():
 @login_required("palestrante")
 def listar_disponibilidades():
     try:
-        print(f"DEBUG 1 - Entrou na função listar_disponibilidades")
-        print(f"DEBUG 2 - Session: {dict(session)}")
-        
-        palestrante_id = session['user_id']
-        print(f"DEBUG 3 - palestrante_id: {palestrante_id}")
-        
-        conn = get_db_connection()
-        print(f"DEBUG 4 - Conexão com BD estabelecida")
-        
+        palestrante_id = session['user_id']  
+        conn = get_db_connection() 
         cursor = conn.cursor(dictionary=True)
-        print(f"DEBUG 5 - Cursor criado")
         
+        hoje = datetime.now().date()
+        sql_limpeza = "DELETE FROM disponibilidade_palestrantes WHERE data < %s AND palestrante_id = %s"
+        cursor.execute(sql_limpeza, (hoje, palestrante_id))
+        conn.commit()
+
         cursor.execute("""
             SELECT id, data, horario_inicio, horario_fim, criado_em
             FROM disponibilidade_palestrantes
@@ -39,7 +36,7 @@ def listar_disponibilidades():
         print(f"DEBUG 6 - Query executada")
         
         disponibilidades = cursor.fetchall()
-        print(f"DEBUG 7 - Disponibilidades recuperadas: {len(disponibilidades)} registros")
+
 
         for disp in disponibilidades:
             if disp['horario_inicio']:
@@ -53,10 +50,7 @@ def listar_disponibilidades():
         
         cursor.close()
         conn.close()
-        print(f"DEBUG 8 - Cursor e conexão fechados")
-        
-        print(f"DEBUG 9 - Renderizando template...")
-        return render_template("listar_disponibilidades.html", disponibilidades=disponibilidades)
+        return render_template("listar_disponibilidades.html", disponibilidades=disponibilidades,hoje=datetime.now().date())
     
     except Exception as e:
         print(f"DEBUG - ERRO na função: {type(e).__name__}: {e}")

@@ -1,0 +1,153 @@
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { 
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+    background-color: #0a0a0a !important; 
+    color: #fff; 
+    padding: 20px;
+}
+
+.container-chamados { 
+    max-width: 1100px; 
+    margin: 40px auto; 
+    position: relative;
+    z-index: 1;
+     background: rgba(10, 10, 10, 0.7);
+}
+
+/* Botão Voltar */
+.btn-voltar { 
+    color: rgba(255, 255, 255, 0.6) !important; 
+    text-decoration: none; 
+    font-size: 14px;
+    display: inline-block;
+    margin-bottom: 20px;
+    transition: 0.3s;
+}
+.btn-voltar:hover { color: #fff !important; transform: translateX(-3px); }
+
+h1 { 
+    color: #fff; 
+    font-size: 26px; 
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* TABLE GLASS CONTAINER */
+.table-responsive {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    overflow: hidden; /* Garante que as bordas da tabela sigam o arredondado */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    background: transparent; 
+}
+
+/* Cabeçalho da Tabela */
+thead { 
+    background: rgba(220, 53, 69, 0.2); /* Vermelho translúcido para alertas */
+}
+
+th { 
+    padding: 18px 15px; 
+    text-align: left; 
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #ff4757; /* Tom de vermelho mais vivo */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Linhas da Tabela */
+td { 
+    padding: 16px 15px; 
+    font-size: 14px;
+    color: #ccc;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+}
+
+tbody tr { transition: 0.3s; }
+tbody tr:hover { 
+    background: rgba(255, 255, 255, 0.05); 
+}
+
+/* Badges de Status */
+.badge { 
+    padding: 5px 12px; 
+    border-radius: 20px; 
+    font-size: 10px; 
+    font-weight: 800; 
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.badge-aberto { 
+    background: rgba(255, 193, 7, 0.1); 
+    color: #ffc107; 
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.badge-em_andamento { 
+    background: rgba(0, 210, 255, 0.1); 
+    color: #00d2ff; 
+    border: 1px solid rgba(0, 210, 255, 0.3);
+}
+
+.badge-resolvido { 
+    background: rgba(40, 167, 69, 0.1); 
+    color: #28a745; 
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+/* Botão Ver */
+.btn-ver { 
+    background: #fff; 
+    color: #000 !important; 
+    padding: 8px 16px; 
+    border-radius: 10px; 
+    text-decoration: none; 
+    font-size: 12px; 
+    font-weight: 700;
+    transition: 0.3s;
+    display: inline-block;
+}
+
+.btn-ver:hover { 
+    background: #00d2ff; 
+    transform: scale(1.05);
+}
+
+/* Empty State */
+.empty { 
+    text-align: center; 
+    padding: 60px; 
+    color: #888; 
+    background: rgba(255, 255, 255, 0.02); 
+    border-radius: 20px; 
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+/* Alertas */
+.alert { 
+    padding: 15px; 
+    border-radius: 15px; 
+    margin-bottom: 25px; 
+    font-size: 14px;
+}
+.alert-danger { background: rgba(220, 53, 69, 0.1); color: #ff4757; border: 1px solid rgba(220, 53, 69, 0.2); }
+.alert-success { background: rgba(40, 167, 69, 0.1); color: #28a745; border: 1px solid rgba(40, 167, 69, 0.2); }

@@ -2,271 +2,194 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Chamado #{{ chamado.id }}</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: Arial, sans-serif; background: #f4f4f9; min-height: 100vh; }
-        .header { background: #dc3545; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .header h2 { font-size: 18px; }
-        .btn-voltar { color: white; text-decoration: none; background: rgba(0,0,0,0.2); padding: 6px 12px; border-radius: 4px; font-size: 13px; }
-        .info { background: #fff; padding: 12px 20px; border-bottom: 1px solid #ddd; font-size: 13px; color: #555; display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
-        .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
-        .badge-aberto { background: #fff3cd; color: #856404; }
-        .badge-em_andamento { background: #cce5ff; color: #004085; }
-        .badge-resolvido { background: #d4edda; color: #155724; }
-        .descricao { background: #fff8e1; border-left: 4px solid #ffc107; padding: 15px 20px; margin: 15px; border-radius: 4px; font-size: 14px; }
-        .descricao strong { display: block; margin-bottom: 5px; color: #856404; }
-        .layout { display: flex; gap: 0; }
-        .col-chat { flex: 1; display: flex; flex-direction: column; min-height: 500px; border-right: 1px solid #ddd; }
-        .col-acoes { width: 340px; background: #fff; padding: 20px; overflow-y: auto; }
-        .mensagens { flex: 1; padding: 15px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; max-height: 450px; }
-        .msg { max-width: 70%; padding: 10px 14px; border-radius: 12px; font-size: 14px; }
-        .msg .meta { font-size: 11px; font-weight: bold; margin-bottom: 4px; }
-        .msg .hora { font-size: 11px; opacity: 0.6; margin-top: 4px; text-align: right; }
-        .msg-minha { background: #dcf8c6; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .msg-minha .meta { color: #075e54; }
-        .msg-outro { background: #fff; align-self: flex-start; border-bottom-left-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .msg-outro .meta { color: #128C7E; }
-        .msg-admin { background: #e8eaf6; align-self: flex-start; border-bottom-left-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .msg-admin .meta { color: #3949ab; }
-        .input-chat { background: #fff; padding: 15px; border-top: 1px solid #ddd; }
-        .input-chat textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; resize: none; margin-bottom: 8px; }
-        .input-row { display: flex; gap: 10px; align-items: center; }
-        .input-row select { padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
-        .btn { padding: 9px 18px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; color: white; }
-        .btn-enviar { background: #dc3545; }
-        .btn-notificar { background: #17a2b8; width: 100%; margin-top: 8px; }
-        .btn-aviso { background: #ffc107; color: #333; width: 100%; margin-top: 8px; }
-        .btn-suspender { background: #fd7e14; width: 100%; margin-top: 8px; }
-        .btn-banir { background: #343a40; width: 100%; margin-top: 8px; }
-        .secao-admin { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
-        .secao-admin h3 { font-size: 14px; color: #555; margin-bottom: 10px; }
-        .secao-admin textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; margin-bottom: 6px; resize: none; min-height: 80px; }
-        .resolvido-aviso { background: #d4edda; color: #155724; padding: 15px; text-align: center; font-weight: bold; }
-        .alert { padding: 10px 15px; border-radius: 4px; margin: 10px 15px; }
-        .alert-success { background: #d4edda; color: #155724; }
-        .alert-danger { background: #f8d7da; color: #721c24; }
-        .avisos-lista { margin-top: 15px; }
-        .aviso-item { background: #fff3cd; border-left: 3px solid #ffc107; padding: 10px; border-radius: 4px; margin-bottom: 8px; font-size: 13px; }
-        .aviso-item strong { display: block; color: #856404; margin-bottom: 3px; }
-        .respostas-rapidas { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
-        .btn-resposta { background: #f0f0f0; border: 1px solid #ddd; border-radius: 12px; padding: 4px 10px; font-size: 11px; cursor: pointer; color: #555; }
-        .btn-resposta:hover { background: #e0e0e0; color: #333; }
-        .aviso-acusado { background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px 15px; border-radius: 4px; margin-bottom: 20px; font-size: 13px; }
-    </style>
+    <title>Chamado #{{ chamado.id }} | Suporte Admin</title>
+    
+    <!-- Ícones e Estilos -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_chamados_detalhes.css') }}">
 </head>
 <body>
+    <!-- Background Animado -->
+    <canvas id="canvas-bg"></canvas>
 
-<div class="header">
-    <h2>🚨 Chamado #{{ chamado.id }} — {{ categorias[chamado.categoria] }}</h2>
-    <a href="javascript:history.back()" class="btn-voltar">← Voltar</a>
-</div>
+    <div class="container-ticket">
+        <!-- Cabeçalho -->
+        <div class="ticket-header">
+            <div class="header-main">
+                <a href="javascript:history.back()" class="btn-voltar">
+                    <i data-lucide="arrow-left"></i> Voltar
+                </a>
+                <h1>🚨 Chamado #{{ chamado.id }}</h1>
+            </div>
+            <div class="status-top">
+                <span class="badge badge-{{ chamado.status }}">
+                    {{ chamado.status|upper|replace('_',' ') }}
+                </span>
+            </div>
+        </div>
 
-<div class="info">
-    <span>📋 <strong>{{ chamado.titulo }}</strong></span>
-    <span>📅 {{ chamado.data }}</span>
-    <span>👤 {{ chamado.nome_palestrante }}</span>
-    <span>🏢 {{ chamado.nome_instituicao }}</span>
-    <span>Aberto por: <strong>{{ chamado.aberto_por_tipo | capitalize }}</strong></span>
-    <span>Status: <span class="badge badge-{{ chamado.status }}">{{ chamado.status|upper|replace('_',' ') }}</span></span>
-</div>
+        <!-- Grid de Informações Superiores -->
+        <div class="info-grid">
+            <div class="info-card glass-card">
+                <i data-lucide="tag"></i>
+                <div>
+                    <label>Categoria</label>
+                    <strong>{{ categorias[chamado.categoria] }}</strong>
+                </div>
+            </div>
+            <div class="info-card glass-card">
+                <i data-lucide="calendar"></i>
+                <div>
+                    <label>Data da Palestra</label>
+                    <strong>{{ chamado.data }}</strong>
+                </div>
+            </div>
+            <div class="info-card glass-card">
+                <i data-lucide="users"></i>
+                <div>
+                    <label>Envolvidos</label>
+                    <strong>{{ chamado.nome_palestrante }} ↔ {{ chamado.nome_instituicao }}</strong>
+                </div>
+            </div>
+        </div>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
-{% endwith %}
+        <!-- Mensagens de Alerta (Flash) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
-<div class="descricao">
-    <strong>📝 Descrição do Problema:</strong>
-    {{ chamado.descricao }}
-</div>
+        <!-- Layout Principal: Chat e Sidebar -->
+        <div class="ticket-layout">
+            
+            <!-- Coluna da Esquerda: Descrição e Chat -->
+            <div class="col-main">
+                <div class="glass-card problem-description">
+                    <h3><i data-lucide="file-text"></i> Descrição do Problema</h3>
+                    <p>{{ chamado.descricao }}</p>
+                    <small>Aberto por: <strong>{{ chamado.aberto_por_tipo | capitalize }}</strong></small>
+                </div>
 
-<div class="layout">
-    <!-- COLUNA CHAT -->
-    <div class="col-chat">
-        <div class="mensagens" id="mensagens">
-            {% if mensagens %}
-                {% for msg in mensagens %}
-                    {% if msg.remetente_tipo == user_type %}
-                        <div class="msg msg-minha">
-                    {% elif msg.remetente_tipo == 'administrador' %}
-                        <div class="msg msg-admin">
-                    {% else %}
-                        <div class="msg msg-outro">
-                    {% endif %}
-                        <div class="meta">{{ msg.remetente_nome }}</div>
-                        {{ msg.mensagem }}
-                        <div class="hora">{{ msg.enviada_em.strftime('%d/%m/%Y %H:%M') }}</div>
+                <div class="glass-card chat-section">
+                    <h3><i data-lucide="messages-square"></i> Histórico de Mensagens</h3>
+                    
+                    <div class="messages-container" id="mensagens">
+                        {% if mensagens %}
+                            {% for msg in mensagens %}
+                                <div class="msg {% if msg.remetente_tipo == user_type %}msg-minha{% elif msg.remetente_tipo == 'administrador' %}msg-admin{% else %}msg-outro{% endif %}">
+                                    <div class="msg-bubble">
+                                        <div class="meta">{{ msg.remetente_nome }}</div>
+                                        <div class="text">{{ msg.mensagem }}</div>
+                                        <div class="hora">{{ msg.enviada_em.strftime('%H:%M') }}</div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-chat">Nenhuma mensagem ainda neste chamado.</div>
+                        {% endif %}
                     </div>
-                {% endfor %}
-            {% else %}
-                <p style="text-align:center;color:#999;margin:auto;">Nenhuma mensagem ainda.</p>
-            {% endif %}
-        </div>
 
-        {% if chamado.status != 'resolvido' %}
-        <div class="input-chat">
-            <form method="POST">
-                <input type="hidden" name="acao" value="mensagem">
-                {% if user_type == 'administrador' %}
-                    <div class="respostas-rapidas" id="botoes-normal"></div>
-                {% endif %}
-                <textarea id="msg-normal" name="mensagem" rows="3" placeholder="Digite sua mensagem..." required></textarea>
-                <div class="input-row">
-                    {% if user_type == 'administrador' %}
-                        <select name="status">
-                            <option value="aberto" {{ 'selected' if chamado.status == 'aberto' }}>🔴 Aberto</option>
-                            <option value="em_andamento" {{ 'selected' if chamado.status == 'em_andamento' }}>🔵 Em Andamento</option>
-                            <option value="resolvido" {{ 'selected' if chamado.status == 'resolvido' }}>🟢 Resolvido</option>
-                        </select>
+                    <!-- LÓGICA DE INTERAÇÃO / AVALIAÇÃO -->
+                    {% if chamado.status != 'resolvido' %}
+                        <div class="chat-input-area">
+                            <form method="POST">
+                                <input type="hidden" name="acao" value="mensagem">
+                                <textarea name="mensagem" placeholder="Digite sua resposta..." required></textarea>
+                                
+                                <div class="input-actions">
+                                    {% if user_type == 'administrador' %}
+                                    <div class="status-selector">
+                                        <label>Alterar Status:</label>
+                                        <select name="status">
+                                            <option value="aberto" {{ 'selected' if chamado.status == 'aberto' }}>🔴 Aberto</option>
+                                            <option value="em_andamento" {{ 'selected' if chamado.status == 'em_andamento' }}>🔵 Em Andamento</option>
+                                            <option value="resolvido" {{ 'selected' if chamado.status == 'resolvido' }}>🟢 Resolvido</option>
+                                        </select>
+                                    </div>
+                                    {% endif %}
+                                    <button type="submit" class="btn-enviar">Enviar Mensagem <i data-lucide="send"></i></button>
+                                </div>
+                            </form>
+                        </div>
+                    {% else %}
+                        <!-- Banner de Resolvido e Botão de Avaliação -->
+                        <div class="resolved-banner glass-card" style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px; padding: 25px; border: 1px solid #28a745; background: rgba(40, 167, 69, 0.05);">
+                            <div style="display: flex; align-items: center; gap: 12px; color: #28a745; font-size: 1.1rem; font-weight: bold;">
+                                <i data-lucide="check-circle" style="width: 24px; height: 24px;"></i> 
+                                <span>Chamado Resolvido e Encerrado</span>
+                            </div>
+                            
+                            {% if user_type != 'administrador' %}
+                                {% if not ja_avaliou %}
+                                    <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-top: 10px; width: 100%;">
+                                        <p style="color: #ccc; margin-bottom: 15px; font-size: 0.9rem;">Sua opinião é importante! Como foi o suporte?</p>
+                                        <a href="{{ url_for('chamados.avaliar_chamado', chamado_id=chamado.id) }}" class="btn-enviar" style="text-decoration: none; background: #ffc107; color: #000; display: block; text-align: center; font-weight: bold; padding: 12px; border-radius: 8px;">
+                                            ⭐ AVALIAR ATENDIMENTO
+                                        </a>
+                                    </div>
+                                {% else %}
+                                    <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; text-align: center;">
+                                        <span style="color: #5cb85c; font-weight: 500;">✅ Você já avaliou este chamado.</span>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        </div>
                     {% endif %}
-                    <button type="submit" class="btn btn-enviar">Enviar</button>
                 </div>
-            </form>
-        </div>
-        {% else %}
-        <div class="resolvido-aviso">✅ Este chamado foi resolvido.</div>
-        {% endif %}
-    </div>
+            </div>
 
-    <!-- COLUNA AÇÕES DO ADMIN -->
-    {% if user_type == 'administrador' and chamado.status != 'resolvido' %}
-    <div class="col-acoes">
-
-        <div class="aviso-acusado">
-            ⚠️ <strong>Chamado aberto referente ao(a):</strong>
-            {% if chamado.aberto_por_tipo == 'instituicao' %}
-                👤 {{ chamado.nome_palestrante }}
-            {% else %}
-                🏢 {{ chamado.nome_instituicao }}
-            {% endif %}
-        </div>
-
-        <!-- 1. NOTIFICAR -->
-        <div class="secao-admin">
-            <h3>📧 Notificar por E-mail</h3>
-            <form method="POST">
-                <input type="hidden" name="acao" value="notificar">
-                <input type="hidden" name="destinatario" value="{{ 'palestrante' if chamado.aberto_por_tipo == 'instituicao' else 'instituicao' }}">
-                <div class="respostas-rapidas" id="botoes-notif"></div>
-                <textarea id="msg-notif" name="msg_notificacao" placeholder="Mensagem da notificação..." required></textarea>
-                <button type="submit" class="btn btn-notificar">📧 Enviar Notificação</button>
-            </form>
-        </div>
-
-        <!-- 2. AVISO FORMAL -->
-        <div class="secao-admin">
-            <h3>⚠️ Emitir Aviso Formal</h3>
-            <form method="POST">
-                <input type="hidden" name="acao" value="aviso_formal">
-                <input type="hidden" name="destinatario_tipo" value="{{ 'palestrante' if chamado.aberto_por_tipo == 'instituicao' else 'instituicao' }}">
-                <div class="respostas-rapidas" id="botoes-aviso"></div>
-                <textarea id="msg-aviso" name="msg_aviso" placeholder="Texto do aviso formal..." required></textarea>
-                <button type="submit" class="btn btn-aviso" onclick="return confirm('Emitir aviso formal? Ele ficará registrado no histórico.');">⚠️ Emitir Aviso</button>
-            </form>
-            {% if avisos %}
-            <div class="avisos-lista">
-                <strong style="font-size:13px;color:#555;">Avisos emitidos neste chamado:</strong>
-                {% for aviso in avisos %}
-                <div class="aviso-item">
-                    <strong>Para: {{ aviso.destinatario_nome }} — {{ aviso.criado_em.strftime('%d/%m/%Y %H:%M') }}</strong>
-                    {{ aviso.mensagem }}
+            <!-- Coluna da Direita: Ferramentas do Admin -->
+            {% if user_type == 'administrador' and chamado.status != 'resolvido' %}
+            <div class="col-sidebar">
+                <div class="moderation-target glass-card">
+                    <i data-lucide="shield-alert"></i>
+                    <div>
+                        <label>Alvo da Ocorrência:</label>
+                        <strong>
+                            {% if chamado.aberto_por_tipo == 'instituicao' %}
+                                {{ chamado.nome_palestrante }} (Palestrante)
+                            {% else %}
+                                {{ chamado.nome_instituicao }} (Instituição)
+                            {% endif %}
+                        </strong>
+                    </div>
                 </div>
-                {% endfor %}
+
+                <div class="admin-tool-card glass-card">
+                    <h4><i data-lucide="mail"></i> Notificar por E-mail</h4>
+                    <form method="POST">
+                        <input type="hidden" name="acao" value="notificar">
+                        <input type="hidden" name="destinatario" value="{{ 'palestrante' if chamado.aberto_por_tipo == 'instituicao' else 'instituicao' }}">
+                        <textarea name="msg_notificacao" placeholder="Aviso por e-mail..." required></textarea>
+                        <button type="submit" class="btn-tool btn-notificar">Enviar E-mail</button>
+                    </form>
+                </div>
+
+                <div class="admin-tool-card glass-card danger">
+                    <h4><i data-lucide="slash"></i> Punições Críticas</h4>
+                    <form method="POST">
+                        <input type="hidden" name="acao" value="suspender">
+                        <textarea name="motivo_punicao" placeholder="Motivo da suspensão..." required></textarea>
+                        <button type="submit" class="btn-tool btn-suspender">Suspender Conta</button>
+                    </form>
+                </div>
             </div>
             {% endif %}
         </div>
-
-        <!-- 3. SUSPENDER / BANIR -->
-        <div class="secao-admin">
-            <h3>🚫 Punir Usuário</h3>
-            <form method="POST">
-                <input type="hidden" name="acao" value="suspender">
-                <input type="hidden" name="alvo_tipo" value="{{ 'palestrante' if chamado.aberto_por_tipo == 'instituicao' else 'instituicao' }}">
-                <div class="respostas-rapidas" id="botoes-suspensao"></div>
-                <textarea id="motivo-suspensao" name="motivo_punicao" placeholder="Motivo da suspensão..." required></textarea>
-                <button type="submit" class="btn btn-suspender" onclick="return confirm('Suspender este usuário?');">⏸️ Suspender</button>
-            </form>
-            <form method="POST" style="margin-top:10px;">
-                <input type="hidden" name="acao" value="banir">
-                <input type="hidden" name="alvo_tipo" value="{{ 'palestrante' if chamado.aberto_por_tipo == 'instituicao' else 'instituicao' }}">
-                <div class="respostas-rapidas" id="botoes-banimento"></div>
-                <textarea id="motivo-banimento" name="motivo_punicao" placeholder="Motivo do banimento..." required></textarea>
-                <button type="submit" class="btn btn-banir" onclick="return confirm('BANIR permanentemente? Esta ação não pode ser desfeita.');">🚫 Banir</button>
-            </form>
-        </div>
-
     </div>
-    {% endif %}
-</div>
 
-<script>
-    const msgs = document.getElementById('mensagens');
-    if (msgs) msgs.scrollTop = msgs.scrollHeight;
+    <!-- Scripts -->
+    <script>
+        // Ícones Lucide
+        lucide.createIcons();
 
-    function preencherResposta(targetId, texto) {
-        document.getElementById(targetId).value = texto;
-    }
-
-    const categoria = "{{ chamado.categoria }}";
-
-    const respostas = {
-        conduta_inadequada: {
-            notificacao: [{ label: "📋 Notificar", texto: "Prezado(a), informamos que recebemos uma ocorrência formal relacionada à sua conduta durante a realização da palestra. Nossa equipe está conduzindo uma análise criteriosa do caso. Solicitamos que aguarde o contato da administração e, caso deseje, utilize este canal para apresentar sua versão dos fatos." }],
-            aviso: [{ label: "⚠️ Aviso", texto: "Prezado(a), após análise da ocorrência registrada, a administração da plataforma emite o presente aviso formal em razão de conduta considerada inadequada no exercício de suas atividades. Ressaltamos que este registro integrará seu histórico na plataforma e que reincidências poderão resultar em medidas mais severas, incluindo suspensão ou desligamento definitivo." }],
-            suspensao: [{ label: "⏸️ Suspensão", texto: "Prezado(a), em razão da gravidade da conduta relatada e após análise criteriosa pela equipe administrativa, sua conta foi temporariamente suspensa. Durante este período, o acesso à plataforma estará restrito. Para esclarecimentos ou contestação, entre em contato com a administração." }],
-            banimento: [{ label: "🚫 Banimento", texto: "Prezado(a), após análise detalhada do histórico de ocorrências e da gravidade dos fatos relatados, a administração da plataforma decidiu pelo encerramento definitivo de sua conta. Esta decisão foi tomada com base em reincidência de infrações e/ou gravidade da conduta, sendo irreversível." }]
-        },
-        nao_comparecimento: {
-            notificacao: [{ label: "📋 Notificar", texto: "Prezado(a), registramos em nosso sistema uma ocorrência de não comparecimento à palestra previamente agendada e confirmada. Solicitamos que apresente sua justificativa através deste canal no prazo de 48 horas, a fim de que a administração possa conduzir a análise adequada do caso." }],
-            aviso: [{ label: "⚠️ Aviso", texto: "Prezado(a), a administração da plataforma emite o presente aviso formal em decorrência do não comparecimento à palestra agendada, sem comunicação prévia à parte envolvida. Tal conduta causa prejuízo direto à instituição parceira e compromete a credibilidade da plataforma. Este registro constará em seu histórico." }],
-            suspensao: [{ label: "⏸️ Suspensão", texto: "Prezado(a), em virtude do não comparecimento reincidente a compromissos agendados através da plataforma, e considerando o impacto negativo causado às instituições parceiras, sua conta foi temporariamente suspensa. Para regularização da situação, entre em contato com a administração." }],
-            banimento: [{ label: "🚫 Banimento", texto: "Prezado(a), após análise detalhada do histórico de ocorrências e da gravidade dos fatos relatados, a administração da plataforma decidiu pelo encerramento definitivo de sua conta. Esta decisão foi tomada com base em reincidência de infrações e/ou gravidade da conduta, sendo irreversível." }]
-        },
-        cancelamento_sem_aviso: {
-            notificacao: [{ label: "📋 Notificar", texto: "Prezado(a), nossa equipe recebeu uma ocorrência referente ao cancelamento de palestra agendada sem a devida comunicação prévia à parte envolvida. Solicitamos que apresente sua justificativa através deste canal para que possamos analisar o caso de forma justa e transparente." }],
-            aviso: [{ label: "⚠️ Aviso", texto: "Prezado(a), a administração da plataforma emite o presente aviso formal em razão do cancelamento de compromisso agendado sem aviso prévio. Este tipo de conduta causa transtornos diretos à instituição parceira e vai de encontro às diretrizes de conduta da plataforma. O presente aviso ficará registrado em seu histórico." }],
-            suspensao: [{ label: "⏸️ Suspensão", texto: "Prezado(a), em razão de cancelamentos reincidentes sem comunicação prévia, comprometendo o funcionamento da plataforma e prejudicando as instituições parceiras, a administração decidiu pela suspensão temporária de sua conta até regularização da situação." }],
-            banimento: [{ label: "🚫 Banimento", texto: "Prezado(a), após análise detalhada do histórico de ocorrências e da gravidade dos fatos relatados, a administração da plataforma decidiu pelo encerramento definitivo de sua conta. Esta decisão foi tomada com base em reincidência de infrações e/ou gravidade da conduta, sendo irreversível." }]
-        }
-    };
-
-    const genericasNormal = [
-        { label: "📋 Em análise", texto: "Sua solicitação foi recebida e está em análise. Em breve retornaremos com uma resposta." },
-        { label: "⏱️ 48 horas", texto: "Por favor, entre em contato novamente em até 48 horas caso não receba retorno." },
-        { label: "🔍 Investigando", texto: "A conduta relatada está sendo investigada e as devidas medidas serão tomadas." },
-        { label: "🔄 Não resolvido", texto: "Caso o problema não seja resolvido, entre em contato novamente para que possamos tomar novas providências." }
-    ];
-
-    function renderBotoes(containerId, targetId, lista) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        container.innerHTML = '<span style="font-size:11px;color:#888;width:100%;">⚡ Respostas rápidas:</span>';
-        lista.forEach(item => {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'btn-resposta';
-            btn.textContent = item.label;
-            btn.onclick = () => preencherResposta(targetId, item.texto);
-            container.appendChild(btn);
-        });
-    }
-
-    window.addEventListener('load', () => {
-        const cat = respostas[categoria];
-
-        renderBotoes('botoes-normal', 'msg-normal', genericasNormal);
-
-        if (cat) {
-           renderBotoes('botoes-notif', 'msg-notif', cat.notificacao);
-renderBotoes('botoes-aviso', 'msg-aviso', cat.aviso);
-            renderBotoes('botoes-suspensao', 'motivo-suspensao', cat.suspensao);
-            renderBotoes('botoes-banimento', 'motivo-banimento', cat.banimento);
-        }
-    });
-</script>
+        // Auto scroll do chat ao carregar
+        const msgs = document.getElementById('mensagens');
+        if (msgs) msgs.scrollTop = msgs.scrollHeight;
+    </script>
+    <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
 </body>
 </html>

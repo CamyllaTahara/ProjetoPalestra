@@ -1,56 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Perfil | {{ palestrante.display_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_editar_perfil.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
 <body>
-    
-<h1>Editar Perfil</h1>
-{{ palestrante}}
-<form method="POST" enctype="multipart/form-data">
+    <canvas id="canvas-bg"></canvas>
+    <div id="particles-js" style="position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -1;"></div>
 
-<label>Foto de Perfil</label>
-<img id="preview-foto"
-    src="{{url_for('static', filename='fotos_palestrantes/'+ palestrante.foto)}}?v={{ range(1,100000)|random }}"
-    width="150">
-<input type="file" name="foto_perfil" id="foto_perfil">
+    <div class="container-edit">
+        <a href="javascript:history.back()" class="btn-voltar">
+            <i data-lucide="arrow-left" style="width:16px"></i> Voltar
+        </a>
 
-<label>Descrição</label>
-<textarea name="descricao">{{ palestrante.descricao }}</textarea>
+        <h1><i data-lucide="user-cog"></i> Editar Perfil</h1>
 
-<label>Ramo de atividade</label>
-<textarea name="ramo_atividade">{{palestrante.ramo_atividade}}</textarea>
+        <form method="POST" enctype="multipart/form-data" class="form-grid">
+            
+            <div class="foto-upload-container full-width">
+                <label>Foto de Perfil</label>
+                <div class="profile-image-wrapper">
+                    <img id="preview-foto" 
+                    src="{{ url_for('static', filename='fotos_palestrantes/' + (palestrante.foto or 'perfil.png')) }}?v={{ range(1,100000)|random }}">
+                    
+                    <input type="file" name="foto_perfil" id="foto_perfil" accept="image/*" class="input-file-hidden">
+                    <label for="foto_perfil" class="btn-upload-custom">
+                        <i data-lucide="camera" style="width:16px"></i> Alterar Foto
+                    </label>
+                </div>
+            </div>
 
-<label> Anos de experiência</label>
-<textarea name="anos_experiencia">{{palestrante.anos_experiencia}}</textarea>
+            <div class="form-group full-width">
+                <label>Descrição Profissional</label>
+                <textarea name="descricao">{{ palestrante.descricao }}</textarea>
+            </div>
 
-<label> Email</label>
-<textarea name="email">{{palestrante.email}}</textarea>
+            <div class="form-group">
+                <label>Ramo de Atividade</label>
+                <input type="text" name="ramo_atividade" value="{{palestrante.ramo_atividade}}">
+            </div>
 
-<label>Telefone</label>
-<textarea name="telefone">{{palestrante.telefone}}</textarea>
+            <div class="form-group">
+                <label>Anos de Experiência</label>
+                <input type="number" name="anos_experiencia" value="{{palestrante.anos_experiencia}}">
+            </div>
 
-<label>Novo currículo (PDF)</label>
-<input type="file" name="curriculo_pdf" accept=".pdf">
+            <div class="form-group">
+                <label>Email de Contato</label>
+                <input type="email" name="email" value="{{palestrante.email}}">
+            </div>
 
+            <div class="form-group">
+                <label>Telefone / WhatsApp</label>
+                <input type="text" name="telefone" id="telefone" value="{{palestrante.telefone}}">
+            </div>
 
-<br><br>
+            <div class="form-group full-width">
+                <label>Novo Currículo (PDF)</label>
+                <input type="file" name="curriculo_pdf" id="curriculo_pdf" accept=".pdf" class="input-file-hidden">
+                <label for="curriculo_pdf" class="btn-pdf-custom">
+                    <i data-lucide="file-text" style="width:16px; vertical-align: middle;"></i> Selecionar Arquivo PDF
+                </label>
+            </div>
 
-<button type="submit">Salvar</button>
+            <button type="submit" class="btn-salvar">Salvar Alterações</button>
+        </form>
 
-</form>
+        <div style="margin-top: 40px; padding: 20px; border: 1px solid rgba(220, 53, 69, 0.3); background: rgba(220, 53, 69, 0.05); border-radius: 12px;">
+            <h3 style="color: #dc3545; margin-top: 0; display: flex; align-items: center; gap: 8px; font-size: 1.15rem;">
+                <i data-lucide="alert-triangle" style="width: 20px; height: 20px;"></i> Zona de Perigo
+            </h3>
+            <p style="color: rgba(255,255,255,0.65); font-size: 0.88rem; line-height: 1.5; margin-bottom: 15px;">
+                Ao excluir sua conta, seu perfil profissional, histórico de palestras e arquivos enviados serão apagados permanentemente. Esta ação não poderá ser desfeita.
+            </p>
+            
+            <form method="POST" action="{{ url_for('login_palestrante.excluir_conta_palestrante') }}" style="margin: 0;">
+                <button type="submit" 
+                        style="background-color: #dc3545; color: white; border: none; padding: 10px 16px; font-size: 0.88rem; font-weight: 600; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s;"
+                        onmouseover="this.style.backgroundColor='#bd2130'"
+                        onmouseout="this.style.backgroundColor='#dc3545'"
+                        onclick="return confirm('ATENÇÃO: Você tem certeza absoluta de que deseja EXCLUIR sua conta permanentemente? Todos os seus dados serão apagados.');">
+                    <i data-lucide="user-x" style="width: 16px; height: 16px;"></i> Excluir Minha Conta Permanentemente
+                </button>
+            </form>
+        </div>
 
-<script>
-document.getElementById("foto_perfil").addEventListener("change", function(event){
+    </div> <div class="btn-suporte-flutuante" onclick="abrirModalSuporte()" title="Precisa de ajuda do Admin?">
+        <i data-lucide="help-circle" style="width: 28px; height: 28px; color: #0b0f1a;"></i>
+    </div>
 
-    const arquivo = event.target.files[0];
+    <div id="modalSuporte" class="modal-suporte-wrapper">
+        <div class="modal-suporte-content">
+            <div class="modal-suporte-header">
+                <h2>
+                    <i data-lucide="message-square" style="vertical-align: middle; margin-right: 8px; color: #00d2ff; width: 22px; height: 22px;"></i>
+                    Central de Suporte
+                </h2>
+                <button class="btn-fechar-modal" onclick="fecharModalSuporte()">&times;</button>
+            </div>
 
-    if(arquivo){
-        const leitor = new FileReader();
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+                <button id="aba-novo" onclick="mudarAba('novo')" style="background: none; border: none; color: #00d2ff; padding: 5px 10px; font-size: 0.9rem; cursor: pointer;">Novo Chamado</button>
+                <button id="aba-respostas" onclick="mudarAba('respostas')" style="background: none; border: none; color: #94a3b8; padding: 5px 10px; font-size: 0.9rem; cursor: pointer;">Respostas do Admin</button>
+            </div>
 
-        leitor.onload = function(e){
-            document.getElementById("preview-foto").src = e.target.result;
+            <div id="conteudo-novo">
+                <form id="formSuporte" method="POST" action="{{ url_for('gerenciar_suporte.criar_chamado') }}">
+                    <div class="form-group-suporte">
+                        <label for="mensagem_suporte">Como podemos te ajudar?</label>
+                        <textarea id="mensagem_suporte" name="mensagem" placeholder="Descreva o problem ou a ajuda que precisa..." required></textarea>
+                    </div>
+                    <div class="modal-suporte-footer">
+                        <button type="submit" class="btn-enviar-suporte">Enviar Solicitação</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="conteudo-respostas" style="display: none; max-height: 280px; overflow-y: auto; padding-right: 5px;">
+                <div id="lista-historico"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalSucessoSuporte" class="modal-suporte-wrapper">
+        <div class="modal-suporte-content" style="text-align: center; max-width: 400px;">
+            <div style="margin-bottom: 20px;">
+                <i data-lucide="check-circle-2" style="width: 60px; height: 60px; color: #10b981; margin: 0 auto;"></i>
+            </div>
+            <h2 style="font-size: 1.4rem; color: #f8fafc; margin-bottom: 12px;">Solicitação Enviada!</h2>
+            <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.6; margin-bottom: 25px;">
+                Sua mensagem foi entregue com sucesso ao administrador. Em breve retornaremos!
+            </p>
+            <button onclick="fecharModalSucesso()" class="btn-enviar-suporte" style="background: #10b981; color: #ffffff;">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        function abrirModalSuporte() {
+            document.getElementById('modalSuporte').style.display = 'flex';
+            mudarAba('novo');
+            carregarHistorico();
         }
 
-        leitor.readAsDataURL(arquivo);
-    }
+        function fecharModalSuporte() {
+            document.getElementById('modalSuporte').style.display = 'none';
+            document.getElementById('mensagem_suporte').value = '';
+        }
 
-});
-</script>
+        function abrirModalSucesso() {
+            document.getElementById('modalSucessoSuporte').style.display = 'flex';
+        }
 
+        function fecharModalSucesso() {
+            document.getElementById('modalSucessoSuporte').style.display = 'none';
+        }
+
+        function mudarAba(aba) {
+            if (aba === 'novo') {
+                document.getElementById('conteudo-novo').style.display = 'block';
+                document.getElementById('conteudo-respostas').style.display = 'none';
+                document.getElementById('aba-novo').style.color = '#00d2ff';
+                document.getElementById('aba-respostas').style.color = '#94a3b8';
+            } else {
+                document.getElementById('conteudo-novo').style.display = 'none';
+                document.getElementById('conteudo-respostas').style.display = 'block';
+                document.getElementById('aba-novo').style.color = '#94a3b8';
+                document.getElementById('aba-respostas').style.color = '#00d2ff';
+            }
+        }
+
+        function carregarHistorico() {
+            fetch('/suporte/historico')
+            .then(res => res.json())
+            .then(data => {
+                const lista = document.getElementById('lista-historico');
+                lista.innerHTML = '';
+
+                if (data.chamados.length === 0) {
+                    lista.innerHTML = `<p style="color: #94a3b8; text-align: center; font-size: 0.9rem; padding: 20px;">Você ainda não possui chamados criados.</p>`;
+                    return;
+                }
+
+                data.chamados.forEach(c => {
+                    let blocoResposta = c.status === 'Resolvido'
+                        ? `<div style="margin-top: 8px; padding: 10px; background: rgba(16,185,129,0.08); border-left: 2px solid #10b981; border-radius: 4px; font-size: 0.88rem; color: #e2e8f0;">
+                               <strong style="color: #10b981; display: block; margin-bottom: 2px;">Admin respondeu:</strong>${c.resposta}
+                           </div>`
+                        : `<div style="margin-top: 8px; padding: 8px; background: rgba(245,158,11,0.05); border-left: 2px solid #f59e0b; border-radius: 4px; font-size: 0.85rem; color: #94a3b8; font-style: italic;">
+                               Aguardando retorno do administrador...
+                           </div>`;
+
+                    lista.innerHTML += `
+                        <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05)">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #94a3b8; margin-bottom: 6px;">
+                                <span>${c.data}</span>
+                                <span style="color: ${c.status === 'Resolvido' ? '#10b981' : '#f59e0b'}">${c.status}</span>
+                            </div>
+                            <p style="font-size: 0.9rem; color: #f8fafc; word-break: break-word;">${c.mensagem}</p>
+                            ${blocoResposta}
+                        </div>`;
+                });
+            });
+        }
+
+        const formSuporte = document.getElementById('formSuporte');
+        if (formSuporte) {
+            formSuporte.addEventListener('submit', function(event) {
+                event.preventDefault();
+                fetch(this.action, {
+                    method: 'POST',
+                    body: new FormData(this)
+                })
+                .then(() => {
+                    fecharModalSuporte();
+                    abrirModalSucesso();
+                    lucide.createIcons();
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Ocorreu um erro ao enviar. Tente novamente.');
+                });
+            });
+        }
+
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('modalSuporte')) fecharModalSuporte();
+            if (event.target === document.getElementById('modalSucessoSuporte')) fecharModalSucesso();
+        });
+    </script>
+
+    <script>
+        // Script de Preview da Foto
+        document.getElementById("foto_perfil").addEventListener("change", function(event){
+            const arquivo = event.target.files[0];
+            if(arquivo){
+                const leitor = new FileReader();
+                leitor.onload = function(e){
+                    document.getElementById("preview-foto").src = e.target.result;
+                }
+                leitor.readAsDataURL(arquivo);
+            }
+        });
+
+        // Máscara Dinâmica de Telefone
+        const handlePhone = (event) => {
+            let input = event.target;
+            if (input.value.length > 15) {
+                input.value = input.value.slice(0, 15);
+            }
+            input.value = phoneMask(input.value);
+        }
+
+        const phoneMask = (value) => {
+            if (!value) return "";
+            value = value.replace(/\D/g, '');
+            if (value.length > 11) {
+                value = value.slice(0, 11);
+            }
+            value = value.replace(/(\d{2})(\d)/, "($1) $2");
+            value = value.replace(/(\d{5})(\d)/, "$1-$2");
+            return value;
+        }
+
+        const telInput = document.getElementById('telefone');
+        if (telInput) {
+            telInput.addEventListener('input', handlePhone);
+            telInput.value = phoneMask(telInput.value);
+        }
+    </script>
+    
+    <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
 </body>
+</html>

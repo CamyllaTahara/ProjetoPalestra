@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>Acesso - Portal de Palestras</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_futurista.css') }}">
+</head>
+<body class="github-theme">
+    <canvas id="canvas-bg"></canvas>
+
+    <div class="login-container">
+        <header class="header-intro">
+            
+            <h1>Conectar ao Sistema</h1>
+            <p>Selecione sua credencial de acesso para continuar</p>
+        </header>
+
+        <div class="grid-opcoes">
+            <a href="{{ url_for('login_palestrante.login_palestrante') }}" class="card-acesso">
+                <div class="card-icon"><i data-lucide="user"></i> </div>
+                <div class="card-info">
+                    <h2>Palestrante</h2>
+                    <p>Gerencie seu perfil e agenda de palestras.</p>
+                </div>
+                <span class="btn-entrar">Acessar</span>
+            </a>
+
+            <a href="{{ url_for('login_instituicao.login_instituicao') }}" class="card-acesso">
+                <div class="card-icon"><i data-lucide="building-2"></i></div>
+                <div class="card-info">
+                    <h2>Instituição</h2>
+                    <p>Organize eventos e encontre palestrantes qualificados.</p>
+                </div>
+                <span class="btn-entrar">Acessar</span>
+            </a>
+
+            <a href="{{ url_for('login_administrador.login_administrador') }}" class="card-acesso admin-border">
+                <div class="card-icon"><i data-lucide="settings"></i></div>
+                <div class="card-info">
+                    <h2>Administrador</h2>
+                    <p>Gestão de moderação, denúncias e dados do sistema.</p>
+                </div>
+                <span class="btn-entrar">Gerenciar</span>
+            </a>
+        </div>
+    </div>
+<script src="{{ url_for('static', filename='js/particles.js') }}"></script>
+<script>
+    lucide.createIcons();
+</script>
+</body>
+
+
+</html>

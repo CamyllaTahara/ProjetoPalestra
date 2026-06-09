@@ -1,0 +1,297 @@
+:root {
+    --primary: #00d2ff;
+    --bg-dark: #0b0f1a;
+    --card-bg: rgba(15, 23, 42, 0.7); /* Fundo mais escuro para reduzir o efeito névoa */
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --text-main: #f8fafc;
+    --text-dim: #94a3b8;
+    --input-bg: rgba(0, 0, 0, 0.2);
+}
+
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    /* REMOVE: display flex, align-items, justify-content, width 100vw, height 100vh */
+    /* flex era pra centralizar o form, aqui não faz sentido */
+}
+
+.main-container.wide {
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(4px);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    padding: 30px;
+    margin: 20px auto;        /* ← auto centraliza horizontalmente */
+    max-width: 1200px;
+    box-sizing: border-box;
+}
+
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Isso joga as linhas para trás de tudo */
+    pointer-events: none;
+}
+
+.container {
+    width: 100%;
+    max-width: 500px;  /* limita a largura e centraliza */
+}
+
+.main-container.wide {
+    background: rgba(255, 255, 255, 0.05); /* Fundo branco bem sutil */
+    backdrop-filter: blur(8px); /* Efeito de vidro embaçado */
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    max-width: 1400px; 
+    font-size: 0.85rem;
+}
+
+/* Ajuste das cores das células para melhorar o contraste */
+table th {
+    color: #00d2ff; /* Tom de azul para os ícones/títulos */
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 1px;
+    padding: 8px 10px; /* Reduz o espaço interno das células */
+    white-space: nowrap;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+table td {
+    padding: 15px;
+    color: #ffffff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 8px 10px; /* Reduz o espaço interno das células */
+    white-space: nowrap;
+}
+
+/* Estilização dos Status para combinar com a imagem */
+.status-pendente { border: 1px solid #ffcc00; color: #ffcc00; padding: 2px 8px; border-radius: 4px; }
+.status-aceita { border: 1px solid #28a745; color: #28a745; padding: 2px 8px; border-radius: 4px; }
+.status-recusada { border: 1px solid #dc3545; color: #dc3545; padding: 2px 8px; border-radius: 4px; }
+
+.header-intro {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header-intro h1 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+/* Container Blur (Efeito Vidro) */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* Tabela Estilizada */
+.table-responsive {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th {
+    text-align: left;
+    padding: 15px;
+    border-bottom: 2px solid var(--glass-border);
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+th i {
+    vertical-align: middle;
+    margin-right: 5px;
+    width: 16px;
+}
+
+td {
+    padding: 15px;
+    border-bottom: 1px solid var(--glass-border);
+    font-size: 0.95rem;
+}
+
+tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.text-dim { color: var(--text-dim); font-size: 0.85rem; }
+
+/* Botões de Ação na Tabela */
+.acoes {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.btn-action {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+}
+
+.btn-action.edit:hover { background: var(--primary-color); }
+.btn-action.delete:hover { background: var(--danger-color); }
+
+/* Rodapé e Botões Principais */
+.footer-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--glass-border);
+}
+
+.btn-primary, .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text-bright);
+    border: 1px solid var(--glass-border);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Estado Vazio */
+.empty-state {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--text-dim);
+}
+
+.empty-state i {
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+.alert-success { background: rgba(76, 175, 80, 0.2); color: #81c784; border: 1px solid #4CAF50; }
+.alert-danger { background: rgba(255, 77, 77, 0.2); color: #ff8a8a; border: 1px solid #ff4d4d; }
+
+
+/* Container de Vidro */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Badges de Status */
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+.status-pendente { background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 1px solid #ffc107; }
+.status-aceita { background: rgba(76, 175, 80, 0.2); color: #81c784; border: 1px solid #4CAF50; }
+.status-recusada { background: rgba(244, 67, 54, 0.2); color: #ef9a9a; border: 1px solid #f44336; }
+
+/* Botões de Ação Circulares (Icon Only) */
+.btn-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.3s;
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+.btn-icon.accept:hover { background: #4CAF50; }
+.btn-icon.decline:hover { background: #f44336; }
+
+/* Modal Estilo Glass */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+.modal-content {
+    max-width: 450px;
+    width: 90%;
+}
+
+.back-link-top {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.5); /* Mais clarinho/discreto */
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    transition: color 0.3s;
+}
+
+.back-link-top:hover {
+    color: #00d2ff; /* Ganha cor no hover */
+}

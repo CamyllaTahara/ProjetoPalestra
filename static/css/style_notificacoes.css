@@ -1,0 +1,123 @@
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+}
+
+body { 
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+    background: #0a0a0a; /* Fundo escuro para as partículas aparecerem */
+    color: #fff; 
+    padding: 20px;
+    line-height: 1.6;
+}
+
+.container { 
+    max-width: 800px; /* Largura reduzida para destacar as partículas nas laterais */
+    margin: 0 auto; 
+    position: relative;
+    z-index: 1;
+}
+
+.btn-acao, .btn-voltar { 
+    color: rgba(255, 255, 255, 0.7) !important; 
+    text-decoration: none;
+    font-size: 13px;
+    transition: 0.2s;
+    
+}
+
+.btn-voltar:hover, .btn-acao:hover { 
+    color: #fff !important; 
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+/* Destaque para o link 'Ver post →' especificamente */
+.btn-voltar {
+    font-weight: 500;
+    border-bottom: 1px solid transparent;
+   
+}
+
+.btn-voltar:hover {
+    border-bottom: 1px solid #fff;
+}
+
+.h1 { 
+    font-size: 24px; 
+    color: #ffffff;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+/* Estilo para cada item de notificação */
+.notif {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    margin-bottom: 12px; /* Espaço entre os cards */
+    background: rgba(255, 255, 255, 0.05); /* Fundo semi-transparente */
+    backdrop-filter: blur(10px); /* O efeito de vidro */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 15px;
+    text-decoration: none;
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+/* Diferenciação para notificações não lidas */
+.notif.nao-lida {
+    background: rgba(0, 210, 255, 0.1); /* Um leve tom de azul */
+    border-left: 4px solid #00d2ff; /* Barra lateral de destaque */
+}
+
+/* Efeito de Hover ao passar o mouse */
+.notif:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px); /* Move levemente para a direita ao interagir */
+    border-color: rgba(0, 210, 255, 0.4);
+}
+
+/* Organização interna dos textos */
+.notif-icone {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.notif-texto {
+    flex-grow: 1;
+}
+
+.notif-msg {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.notif-post {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5); /* Texto mais discreto para a descrição */
+    margin-top: 4px;
+}
+
+.notif-hora {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.3);
+    white-space: nowrap;
+}
+
+/* Estilo para o estado vazio */
+.empty {
+    text-align: center;
+    padding: 50px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+}

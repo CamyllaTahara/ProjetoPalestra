@@ -1,0 +1,187 @@
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { 
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+    background: #0a0a0a; /* Fundo escuro obrigatório para as partículas */
+    color: #fff; 
+    padding: 20px;
+    line-height: 1.6;
+}
+
+/* Container Central */
+.container { 
+    max-width: 850px; /* Um pouco maior para acomodar os comentários aninhados */
+    margin: 0 auto; 
+    position: relative;
+    z-index: 1;
+}
+
+/* Botão Voltar Clean */
+.btn-voltar { 
+    color: rgba(255, 255, 255, 0.7) !important; 
+    text-decoration: none;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 25px;
+    transition: 0.3s;
+}
+.btn-voltar:hover { color: #fff !important; transform: translateX(-3px); }
+
+/* ==============================
+   O GRANDE CARD DE VIDRO UNIFICADO
+   ============================== */
+.main-glass-card {
+    background: rgba(20, 20, 20, 0.85); /* Fundo escuro semi-transparente */
+    border-radius: 20px; 
+    overflow: hidden; 
+    border: 1px solid rgba(255, 255, 255, 0.08); 
+    backdrop-filter: blur(12px); /* O efeito blur luxuoso */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    margin-bottom: 30px;
+}
+
+/* ESTILIZAÇÃO DO POST (DENTRO DO CARD) */
+.post {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Separação sutil para a área de comentários */
+}
+
+.post-header { padding: 20px; display: flex; align-items: center; gap: 15px; }
+.avatar { 
+    width: 50px; height: 50px; border-radius: 50%; 
+    background: #00d2ff; color: #111; 
+    display: flex; align-items: center; justify-content: center; 
+    font-weight: bold; font-size: 20px; 
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+}
+.post-autor { font-weight: bold; font-size: 16px; color: #fff; }
+.post-tipo { font-size: 12px; color: #00d2ff; font-weight: 600; }
+.post-data { font-size: 12px; color: #666; margin-left: auto; }
+
+.post-descricao { padding: 0 20px 20px; font-size: 15px; color: #ddd; }
+.post-localizacao { font-size: 13px; color: #00d2ff; margin-top: 10px; opacity: 0.8;}
+
+/* Grade de Fotos do Post */
+.post-fotos img { 
+    width: 100%; max-height: 500px; object-fit: cover; 
+    display: block; border-top: 1px solid rgba(255,255,255,0.05); 
+    cursor: pointer;
+}
+
+/* Ações do Post (Curtir, Comentar) */
+.post-acoes { 
+    padding: 15px 20px; display: flex; gap: 20px; 
+    background: rgba(255, 255, 255, 0.02); align-items: center; 
+}
+.btn-acao { 
+    background: none; border: none; cursor: pointer; 
+    font-size: 14px; color: #aaa; display: flex; 
+    align-items: center; gap: 8px; transition: 0.2s; 
+    text-decoration: none; 
+}
+.btn-acao:hover { color: #00d2ff; }
+.btn-acao.curtido { color: #ff4757; text-shadow: 0 0 10px rgba(255, 71, 87, 0.3); }
+
+/* ==============================
+   ÁREA DE COMENTÁRIOS (AS BOLHAS)
+   ============================== */
+.comentarios-container {
+    padding: 25px 20px;
+}
+
+.comentarios-container h3 { 
+    font-size: 16px; color: #fff; margin-bottom: 20px; 
+    display: flex; align-items: center; gap: 10px;
+}
+
+/* Bolha do Comentário Individual */
+.comentario { 
+    display: flex; gap: 12px; margin-bottom: 18px; 
+    position: relative; /* Para as linhas de resposta */
+}
+
+.avatar-sm { 
+    width: 36px; height: 36px; border-radius: 50%; 
+    background: #00d2ff; color: #111; 
+    display: flex; align-items: center; justify-content: center; 
+    font-size: 14px; font-weight: bold; flex-shrink: 0; 
+    margin-top: 2px; /* Alinhamento com a primeira linha de texto */
+}
+
+/* A Bolha "Horizontal" que você sugeriu */
+.comentario-corpo { 
+    background: rgba(255, 255, 255, 0.03); /* Fundo bem sutil para diferenciar do card principal */
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 18px; /* Bolha arredondada */
+    padding: 12px 18px; 
+    flex: 1; 
+    transition: 0.3s;
+}
+.comentario:hover > .comentario-corpo {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(0, 210, 255, 0.2);
+}
+
+.comentario-autor { font-weight: bold; font-size: 13px; color: #fff; display: flex; align-items: center; gap: 6px; }
+.comentario-texto { font-size: 13px; color: #ccc; margin-top: 5px; line-height: 1.5; }
+.comentario-hora { font-size: 11px; color: #666; margin-top: 6px; }
+
+.btn-responder { cursor: pointer; color: #00d2ff; font-weight: 600; margin-left: 8px;}
+.btn-responder:hover { text-decoration: underline; }
+
+/* Bolhas das Respostas (Aninhadas) */
+.comentario-respostas {
+    margin-top: 15px; 
+    padding-left: 15px; 
+    border-left: 2px solid rgba(255, 255, 255, 0.05); /* Linha sutil de conexão */
+}
+
+/* Formulário de Comentário (na base do grande card) */
+.form-comentario-wrapper {
+    padding: 15px 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.form-comentario { display: flex; gap: 12px; align-items: center; }
+.form-comentario input { 
+    flex: 1; padding: 12px 20px; 
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1); 
+    border-radius: 25px; 
+    font-size: 14px; color: #fff; outline: none; 
+    transition: 0.3s;
+}
+.form-comentario input:focus {
+    border-color: #00d2ff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.form-comentario button { 
+    background: #00d2ff; color: #000; 
+    border: none; padding: 12px 25px; 
+    border-radius: 25px; cursor: pointer; 
+    font-size: 14px; font-weight: bold; 
+    transition: 0.3s;
+}
+.form-comentario button:hover { background: #fff; transform: translateY(-2px); }
+
+.sem-comentarios { text-align: center; color: #666; padding: 30px; font-size: 14px; font-style: italic; }
+.respondendo-info { font-size: 12px; color: #00d2ff; margin-top: 8px; display: none; padding-left: 10px; }
+
+/* MODAIS E ALERTAS (Seguindo o padrão do sistema) */
+.modal-foto { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(10px);}
+.modal-foto.ativo { display: flex; }
+.modal-foto img { max-width: 90%; max-height: 90vh; border-radius: 8px; border: 2px solid rgba(255,255,255,0.1);}
+.modal-fechar { position: fixed; top: 20px; right: 30px; color: white; font-size: 30px; cursor: pointer; transition: 0.3s; }
+.modal-fechar:hover { color: #ff4757; transform: rotate(90deg); }
+
+.alert { padding: 12px 15px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; font-weight: 500; border: 1px solid; }
+.alert-danger { background: rgba(220, 53, 69, 0.1); color: #dc3545; border-color: rgba(220, 53, 69, 0.2); }
+.alert-success { background: rgba(40, 167, 69, 0.1); color: #28a745; border-color: rgba(40, 167, 69, 0.2); }

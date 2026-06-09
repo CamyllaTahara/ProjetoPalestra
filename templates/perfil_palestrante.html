@@ -2,226 +2,220 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Perfil e Disponibilidade de {{ perfil.nome_completo }}</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; max-width: 900px; margin: 0 auto; }
-        .btn-voltar { background-color: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin-bottom: 20px; }
-        .card-perfil { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 30px; }
-        .btn-solicitar { background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin-top: 20px; font-weight: bold; }
-        h1, h2 { color: #333; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background-color: #fff; }
-        thead { background-color: #007bff; color: white; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-        .card-post { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
-        .post-img { max-width: 100%; border-radius: 5px; margin-top: 10px; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de {{ perfil.nome_completo }} | PalestraApp</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_perfil_palestrante.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body>
+<!-- CORREÇÃO 1: adicionada classe perfil-publico -->
+<body class="perfil-publico">
+    <canvas id="canvas-bg"></canvas>
+    <div class="container">
+        <a href="{{ url_for('gerenciar_solicitacoes.listar_palestrantes') }}" class="btn-back">
+            <i data-lucide="chevron-left"></i> Voltar à busca
+        </a>
 
-    <div style="background: yellow; padding: 10px; border: 1px solid black;">
-    ID do Palestrante: {{ perfil.id }} <br>
-    Seu ID (Sessão): {{ user_id }} <br>
-    Seu Tipo (Sessão): {{ user_type }} <br>
-    Contador: {{ total_seguidores }}
-</div>
-    <a href="{{ url_for('gerenciar_solicitacoes.listar_palestrantes') }}" class="btn-voltar">← Voltar à Busca</a>
- 
-    <div class="card-perfil">
-        <div style="display:flex; align-items:center; gap:20px;">
-            {% if perfil.foto %}
-                <img src="{{ url_for('static', filename='fotos_palestrantes/' + perfil.foto) }}" width="120" height="120" style="border-radius:50%; object-fit:cover;">
-            {% else %}
-                <img src="{{ url_for('static', filename='fotos_palestrantes/perfil.png') }}" width="120" height="120" style="border-radius:50%;">
-            {% endif %}
-            <div>
-         <h1>{{ perfil.nome_completo }}</h1>
-
-     <div style="display: flex; gap: 20px; color: #666; font-size: 14px; margin-top: 5px;">
-      <span style="cursor:pointer;" onclick="document.getElementById('modalSeguidores').style.display='flex'">
-            <strong>{{ total_seguidores }}</strong> seguidores
-            </span>
-            <span style="cursor:pointer;" onclick="document.getElementById('modalSeguindo').style.display='flex'">
-            <strong>{{ total_seguindo }}</strong> seguindo
-            </span>
-</div>
-
-   {% if user_type in ('palestrante', 'instituicao') %}
-                     {% if ja_segue %}
-        <form method="POST" action="{{ url_for('feed.seguir', tipo='palestrante', alvo_id=perfil.id) }}" style="display:inline;">
-            <button type="submit" style="background:#6c757d; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer;">
-                ✓ Seguindo
-            </button>
-        </form>
-    {% else %}
-        <form method="POST" action="{{ url_for('feed.seguir', tipo='palestrante', alvo_id=perfil.id) }}" style="display:inline;">
-            <button type="submit" style="background:#4CAF50; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer;">
-                + Seguir
-            </button>
-                    {% endif %}
-                {% endif %}
-            </div>
-        </div>
-
-        <hr>
-        <h2>Sobre o palestrante</h2>
-        <p>{{ perfil.descricao or "Este palestrante ainda não adicionou uma descrição." }}</p>
-        
-        <p><strong>Ramo de Atividade:</strong> {{ perfil.ramo_atividade }}</p>
-        <p><strong>Experiência:</strong> {{ perfil.anos_experiencia }} anos</p>
-        <p><strong>Email:</strong> {{ perfil.email }}</p>
-        <p><strong>Telefone:</strong> {{ perfil.telefone }}</p>
-        
-        <p>
-            <strong>Currículo:</strong>
-            <a href="{{ url_for('gerenciar_solicitacoes.ver_curriculo', palestrante_id=perfil.id) }}" target="_blank">👁 Ver currículo</a> |
-            <a href="{{ url_for('gerenciar_solicitacoes.download_curriculo', palestrante_id=perfil.id) }}">⬇ Baixar PDF</a>
-        </p>
-        
-        {% if user_type == 'instituicao' %}
-    <a href="{{ url_for('gerenciar_solicitacoes.solicitar_palestra', palestrante_id=perfil.id) }}" class="btn-solicitar">
-        Solicitar Palestra para {{ perfil.nome_completo }}
-    </a>
-{% endif %}
-    </div>
-
-    {% if user_type == 'instituicao' %}
-    <hr>
-    <h2>📅 Horários Disponíveis</h2>
-    
-    {% if disponibilidades %}
-        <table>
-            <thead>
-                <tr><th>Data</th><th>Início</th><th>Fim</th></tr>
-            </thead>
-            <tbody>
-                {% for disp in disponibilidades %}
-                    <tr>
-                        <td> 
-                            <a href="{{ url_for('gerenciar_solicitacoes.solicitar_palestra', 
-                                 palestrante_id=perfil.id,
-                                 data=disp.data.strftime('%Y-%m-%d')) }}"
-                                 style="text-decoration: none; font-weight: bold; color: #007bff;">
-                                {{ disp.data.strftime('%d/%m/%Y') }}
-                            </a>
-                        </td>
-                        <td>{{ disp.horario_inicio }}</td>
-                        <td>{{ disp.horario_fim }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>Nenhuma disponibilidade futura registrada.</p>
-    {% endif %}
-{% endif %}
-
-    <hr>
-    <h2>📸 Publicações</h2>
-    <div class="feed-perfil">
-        {% if posts %}
-            {% for post in posts %}
-                <div class="card-post">
-                    <p><strong>{{ perfil.nome_completo }}</strong> - <small>{{ post.criado_em.strftime('%d/%m/%Y') }}</small></p>
-                    <p>{{ post.descricao }}</p>
-                    
-                    {% if post.fotos %}
-                        {% for foto in post.fotos %}
-                            <img src="{{ url_for('static', filename='uploads/' + foto.caminho) }}" class="post-img">
-                        {% endfor %}
+        <header class="card profile-header">
+            <div class="profile-main">
+                <div class="avatar-wrapper">
+                    {% if perfil.foto %}
+                        <img src="{{ url_for('static', filename='fotos_palestrantes/' + perfil.foto) }}" class="profile-avatar">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='fotos_palestrantes/perfil.png') }}" class="profile-avatar">
                     {% endif %}
                 </div>
-            {% endfor %}
-        {% else %}
-            <p>Este palestrante ainda não fez publicações.</p>
-        {% endif %}
-    </div>
-      
-    <!-- Modal Seguindo -->
-<div id="modalSeguindo" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
-    <div style="background:#fff; border-radius:8px; padding:25px; width:350px; max-height:500px; overflow-y:auto;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3 style="margin:0;">Seguindo</h3>
-            <span onclick="document.getElementById('modalSeguindo').style.display='none'" style="cursor:pointer; font-size:20px;">✕</span>
-        </div>
-        {% if lista_seguindo %}
-            {% for s in lista_seguindo %}
-    {# IF para decidir a ROTA: Se sou eu, vai para o painel privado, senão para o perfil público #}
-    {% if s.seguido_id == session.get('user_id') and s.seguido_tipo == session.get('user_type') %}
-        {% set perfil_url = url_for('feed.meu_perfil_pal') if s.seguido_tipo == 'palestrante' else url_for('feed.meu_perfil_inst') %}
-    {% else %}
-        {% set perfil_url = url_for('feed.perfil_palestrante', palestrante_id=s.seguido_id) if s.seguido_tipo == 'palestrante' else url_for('feed.perfil_instituicao', instituicao_id=s.seguido_id) %}
-    {% endif %}
 
-    <a href="{{ perfil_url }}"
-       style="display:flex; align-items:center; gap:10px; padding:10px; border-radius:8px; text-decoration:none; color:#333; margin-bottom:5px; background:#f8f9fa;">
-        <div style="width:36px; height:36px; border-radius:50%; background:#4CAF50; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">
-            {{ s.nome[0] | upper }}
-        </div>
-        <span style="font-size:14px;">
-            {{ s.nome }} 
-            {# Dica: Adicione um (Você) para ficar mais intuitivo #}
-            {% if s.seguido_id == session.get('user_id') and s.seguido_tipo == session.get('user_type') %} <strong>(Você)</strong>{% endif %}
+                <div class="profile-data">
+                    <h1>{{ perfil.nome_completo }}</h1>
+                    <div class="rating-container" style="display: flex; align-items: center; gap: 6px; margin: 5px 0 15px 0;">
+    {% if media is not none and media %}
+        <i data-lucide="star" style="width: 16px; height: 16px; fill: #ff9f43; color: #ff9f43;"></i>
+        <span style="color: #ffffff; font-weight: 600; font-size: 1rem; line-height: 1;">
+            {{ media | float | round(1) }}
         </span>
-        <span style="font-size:12px; color:#888; margin-left:auto;">{{ '👤' if s.seguido_tipo == 'palestrante' else '🏢' }}</span>
-    </a>
-{% endfor %}
-        {% else %}
-            <p style="text-align:center; color:#999; padding:20px;">Não está seguindo ninguém ainda.</p>
-        {% endif %}
-    </div>
-</div>
-
-<!-- Modal Seguidores -->
-<div id="modalSeguidores" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
-    <div style="background:#fff; border-radius:8px; padding:25px; width:350px; max-height:500px; overflow-y:auto;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3 style="margin:0;">Seguidores</h3>
-            <span onclick="document.getElementById('modalSeguidores').style.display='none'" style="cursor:pointer; font-size:20px;">✕</span>
-        </div>
-        {% if lista_seguidores %}
-           {% for s in lista_seguidores %}
-    {# 1. Lógica para definir a URL correta #}
-    {% if s.seguidor_id == session.get('user_id') and s.seguidor_tipo == session.get('user_type') %}
-        {# Se o seguidor da lista for VOCÊ, redireciona para o seu painel de controle #}
-        {% set perfil_url = url_for('feed.meu_perfil_pal') if s.seguidor_tipo == 'palestrante' else url_for('feed.meu_perfil_inst') %}
     {% else %}
-        {# Se for outra pessoa, redireciona para o perfil público dela #}
-        {% set perfil_url = url_for('feed.perfil_palestrante', palestrante_id=s.seguidor_id) if s.seguidor_tipo == 'palestrante' else url_for('feed.perfil_instituicao', instituicao_id=s.seguidor_id) %}
+        <i data-lucide="star" style="width: 16px; height: 16px; color: #666;"></i>
+        <span style="color: #888888; font-size: 0.85rem;">Sem avaliações</span>
     {% endif %}
+</div>
+                    <div class="stats-container">
+                        <div class="stat-box" onclick="document.getElementById('modalSeguidores').style.display='flex'">
+                            <span class="stat-value">{{ total_seguidores }}</span>
+                            <span class="stat-label">seguidores</span>
+                        </div>
+                        <div class="stat-box" onclick="document.getElementById('modalSeguindo').style.display='flex'">
+                            <span class="stat-value">{{ total_seguindo }}</span>
+                            <span class="stat-label">seguindo</span>
+                        </div>
+                    </div>
 
-    {# 2. Renderização do link #}
-    <a href="{{ perfil_url }}"
-       style="display:flex; align-items:center; gap:10px; padding:10px; border-radius:8px; text-decoration:none; color:#333; margin-bottom:5px; background:#f8f9fa; border: 1px solid #eee;">
-        
-        <div style="width:36px; height:36px; border-radius:50%; background:#4CAF50; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">
-            {{ s.nome[0] | upper }}
-        </div>
-
-        <span style="font-size:14px;">
-            {{ s.nome }}
-            {% if s.seguidor_id == session.get('user_id') and s.seguidor_tipo == session.get('user_type') %} 
-                <strong style="color: #4CAF50;">(Você)</strong>
+                {% if session.get('user_id') and not (user_type == 'palestrante' and user_id == perfil.id) %}
+    <form method="POST" action="{{ url_for('feed.seguir', tipo='palestrante', alvo_id=perfil.id) }}">
+        <button type="submit" class="btn-follow {{ 'active' if ja_segue }}">
+            {% if ja_segue %}
+                <i data-lucide="user-check"></i> Seguindo
+            {% else %}
+                <i data-lucide="user-plus"></i> Seguir
             {% endif %}
-        </span>
+        </button>
+    </form>
+{% endif %}
+                </div>
+            </div>
+        </header>
 
-        <span style="font-size:12px; color:#888; margin-left:auto;">
-            {{ '👤 Palestrante' if s.seguidor_tipo == 'palestrante' else '🏢 Instituição' }}
-        </span>
-    </a>
-{% endfor %}
-        {% else %}
-            <p style="text-align:center; color:#999; padding:20px;">Sem seguidores no momento..</p>
-        {% endif %}
+        <div class="profile-grid">
+            <aside class="sidebar-info">
+                <div class="card info-card">
+                    <h3><i data-lucide="info"></i> Sobre</h3>
+
+                    <p class="description">{{ perfil.descricao or "Este palestrante ainda não adicionou uma biografia." }}</p>
+                    
+                    <div class="detail-item">
+                        <i data-lucide="calendar-days"></i>
+                        <span>{{ perfil.anos_experiencia }} anos de experiência</span>
+                    </div>
+                      <div class="detail-item">
+                        <i data-lucide="notebook-pen"></i>
+                        <span>Ramo de atividade: {{ perfil.ramo_atividade }} </span>
+                    </div>
+                    <div class="detail-item">
+                        <i data-lucide="mail"></i>
+                        <span>{{ perfil.email }}</span>
+                    </div>
+                    {% if perfil.telefone %}
+                    <div class="detail-item">
+                        <i data-lucide="phone"></i>
+                        <span>{{ perfil.telefone }}</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="cv-actions">
+                        <a href="{{ url_for('gerenciar_solicitacoes.ver_curriculo', palestrante_id=perfil.id) }}" class="btn-cv secondary" target="_blank">
+                            <i data-lucide="eye"></i> Ver Currículo
+                        </a>
+                        <a href="{{ url_for('gerenciar_solicitacoes.download_curriculo', palestrante_id=perfil.id) }}" class="btn-cv primary">
+                            <i data-lucide="download"></i> Baixar Currículo
+                        </a>
+                    </div>
+                </div>
+
+                {% if user_type == 'instituicao' %}
+                    <a href="{{ url_for('gerenciar_solicitacoes.solicitar_palestra', palestrante_id=perfil.id) }}" class="btn-solicitar-large">
+                        Solicitar Palestra
+                    </a>
+                {% endif %}
+            </aside>
+
+            <main class="main-content">
+                {% if user_type == 'instituicao' %}
+                <section class="card">
+                    <h3 class="content-title"><i data-lucide="calendar"></i> Horários Disponíveis</h3>
+                    {% if disponibilidades %}
+                        <div class="schedule-grid">
+                            {% for disp in disponibilidades %}
+                                <div class="schedule-item">
+                                    <div class="schedule-info">
+                                        <span class="date">{{ disp.data.strftime('%d/%m/%Y') }}</span>
+                                        <span class="time">{{ disp.horario_inicio }} às {{ disp.horario_fim }}</span>
+                                    </div>
+                                    <a href="{{ url_for('gerenciar_solicitacoes.solicitar_palestra', palestrante_id=perfil.id, data=disp.data.strftime('%Y-%m-%d')) }}" class="btn-cv primary" style="padding: 8px 15px; font-size: 0.75rem;">
+                                        Agendar
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p style="color: var(--text-dim); text-align: center; padding: 20px;">Nenhuma data disponível no momento.</p>
+                    {% endif %}
+                </section>
+                {% endif %}
+
+                <section class="posts-section">
+                    <h3 class="content-title"><i data-lucide="layout-grid"></i> Publicações</h3>
+                    {% if posts %}
+                        {% for post in posts %}
+                            <div class="card post-card">
+                                <div class="post-header">
+                                    <strong>{{ perfil.nome_completo }}</strong> 
+                                    <span style="color: var(--text-dim); margin-left: 10px;">{{ post.criado_em.strftime('%d/%m/%Y') }}</span>
+                                </div>
+                                <p>{{ post.descricao }}</p>
+                                {% if post.fotos %}
+                                    <div class="post-gallery">
+                                        {% for foto in post.fotos %}
+                                            <img src="{{ url_for('static', filename='uploads/' + foto.caminho) }}" class="post-img">
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="card" style="text-align: center; padding: 50px;">
+                            <i data-lucide="camera-off" style="width: 48px; height: 48px; color: var(--text-dim); opacity: 0.3;"></i>
+                            <p style="color: var(--text-dim); margin-top: 15px;">Ainda não há publicações para exibir.</p>
+                        </div>
+                    {% endif %}
+                </section>
+            </main>
+        </div>
     </div>
-</div>
-<script>
-    // Fecha modal clicando fora
-    document.getElementById('modalSeguidores').addEventListener('click', function(e) {
-        if (e.target === this) this.style.display = 'none';
-    });
-    document.getElementById('modalSeguindo').addEventListener('click', function(e) {
-        if (e.target === this) this.style.display = 'none';
-    });
-</script>
+
+    <!-- Modal Seguidores -->
+    <div id="modalSeguidores" class="modal" onclick="closeModal(event, 'modalSeguidores')">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="margin:0;">Seguidores</h3>
+                <button onclick="document.getElementById('modalSeguidores').style.display='none'" style="background:none; border:none; color:white; cursor:pointer;"><i data-lucide="x"></i></button>
+            </div>
+            {% if lista_seguidores %}
+                {% for s in lista_seguidores %}
+                    <a href="{{ url_for('feed.perfil_palestrante', palestrante_id=s.seguidor_id) if s.seguidor_tipo == 'palestrante' else url_for('feed.perfil_instituicao', instituicao_id=s.seguidor_id) }}" class="user-link">
+                        <div class="avatar-circle">{{ s.nome[0] | upper }}</div>
+                        <div>
+                            <div style="font-weight: 600;">{{ s.nome }}</div>
+                            <div style="font-size: 0.7rem; color: var(--text-dim);">{{ 'Palestrante' if s.seguidor_tipo == 'palestrante' else 'Instituição' }}</div>
+                        </div>
+                    </a>
+                {% endfor %}
+            {% else %}
+                <p style="text-align:center; color: var(--text-dim);">Nenhum seguidor ainda.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Modal Seguindo -->
+    <div id="modalSeguindo" class="modal" onclick="closeModal(event, 'modalSeguindo')">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="margin:0;">Seguindo</h3>
+                <button onclick="document.getElementById('modalSeguindo').style.display='none'" style="background:none; border:none; color:white; cursor:pointer;"><i data-lucide="x"></i></button>
+            </div>
+            {% if lista_seguindo %}
+                {% for s in lista_seguindo %}
+                    <a href="{{ url_for('feed.perfil_palestrante', palestrante_id=s.seguido_id) if s.seguido_tipo == 'palestrante' else url_for('feed.perfil_instituicao', instituicao_id=s.seguido_id) }}" class="user-link">
+                        <div class="avatar-circle" style="background: var(--secondary);">{{ s.nome[0] | upper }}</div>
+                        <div>
+                            <div style="font-weight: 600;">{{ s.nome }}</div>
+                            <div style="font-size: 0.7rem; color: var(--text-dim);">{{ 'Palestrante' if s.seguido_tipo == 'palestrante' else 'Instituição' }}</div>
+                        </div>
+                    </a>
+                {% endfor %}
+            {% else %}
+                <p style="text-align:center; color: var(--text-dim);">Não segue ninguém ainda.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        function closeModal(event, id) {
+            if (event.target.id === id) {
+                document.getElementById(id).style.display = 'none';
+            }
+        }
+    </script>
+    <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
 </body>
 </html>

@@ -1,274 +1,160 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-        
-  
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_solicitacoes.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <title>Solicitações Recebidas</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            padding: 20px;
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .btn-voltar {
-            background-color: #6c757d;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 4px;
-            display: inline-block;
-            margin-bottom: 20px;
-        }
-        .btn-voltar:hover {
-            background-color: #5a6268;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        thead {
-            background-color: #4CAF50;
-            color: white;
-        }
-        th {
-            padding: 12px;
-            text-align: left;
-            font-weight: bold;
-        }
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-        }
-        tbody tr:hover {
-            background-color: #f5f5f5;
-        }
-        .status {
-            padding: 5px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
-            text-align: center;
-        }
-        .status-pendente {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        .status-aceita {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .status-recusada {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .acoes {
-            display: flex;
-            gap: 8px;
-        }
-        .btn-aceitar, .btn-recusar {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            color: white;
-        }
-        .btn-aceitar {
-            background-color: #28a745;
-        }
-        .btn-aceitar:hover {
-            background-color: #218838;
-        }
-        .btn-recusar {
-            background-color: #dc3545;
-        }
-        .btn-recusar:hover {
-            background-color: #c82333;
-        }
-        .empty-message {
-            background-color: #fff;
-            padding: 30px;
-            text-align: center;
-            color: #666;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .alert {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-        }
-        .alert-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .descricao-cell {
-            max-width: 200px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-    </style>
 </head>
 <body>
-    <a href="{{ url_for('login_palestrante.painel_palestrante') }}" class="btn-voltar">← Voltar ao Painel</a>
+    <canvas id="canvas-bg"></canvas>
+
+    <a href="{{ url_for('login_palestrante.painel_palestrante') }}" class="btn-voltar">
+        <i data-lucide="arrow-left"></i> Voltar ao Painel
+    </a>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">
+                <div class="alert alert-{{ category if category != 'error' else 'danger' }}">
                     {{ message }}
                 </div>
             {% endfor %}
         {% endif %}
     {% endwith %}
 
-    <h1>Solicitações de Palestras Recebidas</h1>
+    <div class="container">
+        <h1>Solicitações de Palestras Recebidas</h1>
 
-    {% if solicitacoes %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Instituição</th>
-                    <th>Título</th>
-                    <th>Descrição</th>
-                    <th>Data</th>
-                    <th>Horário</th>
-                    <th>Endereco Palestra</th>
-                    <th>Status</th>
-                    <th>Recebida em</th>
-                    <th>Prazo para resposta</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for solicitacao in solicitacoes %}
-                    <tr> 
-                        <td>{{ solicitacao.nome }}</td>
-                        <td>{{ solicitacao.titulo }}</td>
-                        <td class="descricao-cell" title="{{ solicitacao.descricao if solicitacao.descricao else 'Sem descrição' }}">
-                            {{ solicitacao.descricao if solicitacao.descricao else '-' }}
-                        </td>
-                        <td>{{ solicitacao.data_proposta if solicitacao.data_proposta else '-' }}</td>
-                        <td>{{ solicitacao.horario_proposta if solicitacao.horario_proposta else '-' }}</td>
-                        <td>{{ solicitacao.endereco_palestra if solicitacao.endereco_palestra else '-' }}</td>
-                        <td>
-                            <span class="status status-{{ solicitacao.status }}">
-                                {{ solicitacao.status|upper }}
-                            </span>
-                        </td>
+        <div class="section">
+            <h2><i data-lucide="calendar"></i> Convites Enviados pelas Instituições</h2>
+            
+            {% if solicitacoes %}
+                <div style="overflow-x: auto;">
+                    <table class="tabela-solicitacoes">
+                        <thead>
+                            <tr>
+                                <th>Instituição</th>
+                                <th>Título</th>
+                                <th>Descrição</th>
+                                <th>Data/Horário</th>
+                                <th>Local</th>
+                                <th style="text-align: center;">Status</th>
+                                <th style="text-align: center;">Prazo</th>
                         
-                        <td>{{ solicitacao.criada_em if solicitacao.criada_em else '-' }}</td>
-                        <td>
-                            {% if solicitacao.prazo_expiracao %}
-                            {{ solicitacao.prazo_expiracao.strftime('%d/%m/%Y') }}
-                            {% else %}
-                             -
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if solicitacao.status == 'pendente' %}
-                                <div class="acoes">
-                                    <form method="POST" action="{{ url_for('gerenciar_solicitacoes.responder_solicitacao', solicitacao_id=solicitacao.id, resposta='aceita') }}" style="display:inline;">
-                                        <button type="submit" class="btn-aceitar" onclick="return confirm('Tem certeza que deseja aceitar esta palestra?');">
-                                            ✓ Aceitar
-                                        </button>
-                                    </form>
-                                    <form method="POST" action="{{ url_for('gerenciar_solicitacoes.responder_solicitacao', solicitacao_id=solicitacao.id, resposta='recusada') }}" style="display:inline;">
-                                        <button type="button" class="btn-recusar" onclick="abrirModalRecusa('{{ solicitacao.id }}', '{{ solicitacao.titulo }}')">
-                                            ✗ Recusar
-                                        </button>
-                                    </form>
-                                </div>
-                            {% else %}
-                                <span style="color: #999;">{{ 'Aceita' if solicitacao.status == 'aceita' else 'Recusada' }}</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <div class="empty-message">
-            <p>Você não tem nenhuma solicitação de palestra no momento.</p>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for solicitacao in solicitacoes %}
+                                <tr>
+                                    <td><strong>{{ solicitacao.nome }}</strong></td>
+                                    <td>{{ solicitacao.titulo }}</td>
+                                    <td class="descricao-cell" title="{{ solicitacao.descricao }}">
+                                        {{ solicitacao.descricao if solicitacao.descricao else '-' }}
+                                    </td>
+                                    <td>
+                                        {{ solicitacao.data_proposta if solicitacao.data_proposta else '-' }}<br>
+                                        <span style="color: #00d2ff; font-size: 13px;">
+                                            {% if solicitacao.horario_proposta %}
+                                                às {{ solicitacao.horario_proposta }}
+                                            {% else %}
+                                                (Pendente)
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td>{{ solicitacao.endereco_palestra if solicitacao.endereco_palestra else '-' }}</td>
+
+                                    <td style="text-align: center;">
+                                        {% if solicitacao.prazo_expiracao %}
+                                            {{ solicitacao.prazo_expiracao.strftime('%d/%m/%Y') }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="acoes">
+                                            {% if solicitacao.status == 'pendente' %}
+                                                <form method="POST" action="{{ url_for('gerenciar_solicitacoes.responder_solicitacao', solicitacao_id=solicitacao.id, resposta='aceita') }}" style="display:inline; margin:0;">
+                                                    <button type="submit" class="btn-concluir" title="Aceitar Palestra" onclick="return confirm('Aceitar esta palestra?');">
+                                                        <i data-lucide="check"></i> Aceitar
+                                                    </button>
+                                                </form>
+                                                
+                                                <button type="button" class="btn-acao" style="background-color:#dc3545;" title="Recusar" onclick="abrirModalRecusa('{{ solicitacao.id }}', '{{ solicitacao.titulo }}')">
+                                                    <i data-lucide="x"></i>
+                                                </button>
+                                            {% else %}
+                                                <span class="status-final">
+                                                    {{ 'Aceita ✓' if solicitacao.status == 'aceita' else 'Recusada ✗' }}
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-message">
+                    <i data-lucide="calendar-x" style="width: 40px; height: 40px; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; opacity: 0.5;"></i>
+                    <p>Você não tem nenhuma solicitação de palestra no momento.</p>
+                </div>
+            {% endif %}
         </div>
-    {% endif %}
-
-<!-- Modal de Recusa -->
-<div id="modalRecusa" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
-    <div style="background:#fff; padding:30px; border-radius:8px; max-width:500px; width:90%; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
-        <h2 style="color:#dc3545; margin-top:0;">✗ Recusar Solicitação</h2>
-        <p id="modalTitulo" style="color:#555;"></p>
-        <form id="formRecusa" method="POST">
-            <label style="font-weight:bold; display:block; margin-bottom:8px;">
-                Motivo da recusa: <span style="color:#dc3545;">*</span>
-            </label>
-            <textarea 
-                name="motivo_recusa" 
-                id="motivoRecusa"
-                rows="4" 
-                placeholder="Explique o motivo da recusa para a instituição..."
-                required
-                style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-size:14px; resize:vertical; box-sizing:border-box;">
-            </textarea>
-            <p id="erroMotivo" style="color:#dc3545; font-size:13px; display:none;">Por favor, informe o motivo da recusa.</p>
-            <div style="display:flex; gap:10px; margin-top:15px; justify-content:flex-end;">
-                <button type="button" onclick="fecharModal()" style="padding:10px 20px; border:1px solid #6c757d; background:#fff; color:#6c757d; border-radius:4px; cursor:pointer;">
-                    Cancelar
-                </button>
-                <button type="button" onclick="confirmarRecusa()" class="btn-recusar" style="padding:10px 20px;">
-                    Confirmar Recusa
-                </button>
-            </div>
-        </form>
     </div>
-</div>
 
-<script>
-    function abrirModalRecusa(solicitacaoId, titulo) {
-        document.getElementById('modalTitulo').textContent = 'Palestra: ' + titulo;
-        document.getElementById('formRecusa').action = '/responder_solicitacao/' + solicitacaoId + '/recusada';
-        document.getElementById('motivoRecusa').value = '';
-        document.getElementById('erroMotivo').style.display = 'none';
-        document.getElementById('modalRecusa').style.display = 'flex';
-    }
+    <div id="modalRecusa" class="modal-overlay" style="display:none;">
+        <div class="modal-content-glass">
+            <h2 style="color:#ff4b2b; margin-top: 0;"><i data-lucide="alert-circle"></i> Recusar Solicitação</h2>
+            <p id="modalTitulo" style="color: rgba(255,255,255,0.6); margin-bottom: 20px; font-size: 0.95rem;"></p>
+            
+            <form id="formRecusa" method="POST">
+                <label style="display:block; margin-bottom:10px; font-size: 0.9rem;">Motivo da recusa: <span style="color:#ff4b2b;">*</span></label>
+                <textarea name="motivo_recusa" id="motivoRecusa" rows="4" placeholder="Explique brevemente o motivo para a instituição..." required></textarea>
+                <p id="erroMotivo" style="color:#ff4b2b; display:none; font-size: 12px; margin-top: 5px;">Por favor, informe o motivo.</p>
+                
+                <div class="modal-buttons">
+                    <button type="button" onclick="fecharModal()" class="btn-acao" style="background-color: #6c757d;">Cancelar</button>
+                    <button type="button" onclick="confirmarRecusa()" class="btn-acao" style="background-color: #ff4b2b;">Confirmar Recusa</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    function fecharModal() {
-        document.getElementById('modalRecusa').style.display = 'none';
-    }
+    <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
+    <script>
+        lucide.createIcons();
 
-    function confirmarRecusa() {
-        const motivo = document.getElementById('motivoRecusa').value.trim();
-        if (!motivo) {
-            document.getElementById('erroMotivo').style.display = 'block';
-            return;
+        function abrirModalRecusa(id, titulo) {
+            const modal = document.getElementById('modalRecusa');
+            document.getElementById('modalTitulo').innerText = "Palestra: " + titulo;
+            document.getElementById('formRecusa').action = "/responder_solicitacao/" + id + "/recusada";
+            modal.style.display = 'flex';
         }
-        document.getElementById('formRecusa').submit();
-    }
 
-    // Fecha o modal clicando fora
-    document.getElementById('modalRecusa').addEventListener('click', function(e) {
-        if (e.target === this) fecharModal();
-    });
-</script>
+        function fecharModal() {
+            document.getElementById('modalRecusa').style.display = 'none';
+            document.getElementById('motivoRecusa').value = '';
+            document.getElementById('erroMotivo').style.display = 'none';
+        }
 
+        function confirmarRecusa() {
+            const motivo = document.getElementById('motivoRecusa').value.trim();
+            if (!motivo) {
+                document.getElementById('erroMotivo').style.display = 'block';
+                return;
+            }
+            document.getElementById('formRecusa').submit();
+        }
 
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalRecusa');
+            if (event.target == modal) {
+                fecharModal();
+            }
+        }
+    </script>
 </body>
 </html>

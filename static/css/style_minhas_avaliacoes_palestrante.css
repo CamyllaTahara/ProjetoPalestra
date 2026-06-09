@@ -1,0 +1,328 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #0a0a0a;
+    background-attachment: fixed;
+    background-size: cover;
+    color: #e0e0e0;
+    font-family: 'Inter', sans-serif;
+    padding: 20px;
+    overflow-x: hidden;
+}
+
+/* CANVAS */
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+/* BOTÃO VOLTAR */
+.btn-voltar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    width: fit-content;
+
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    margin: 20px auto;
+    max-width: 1100px;
+
+    transition: 0.25s ease;
+}
+
+.btn-voltar:hover{
+    color: #ffffff;
+    transform: translateX(-3px);
+}
+
+/* CONTAINER */
+.container {
+    max-width: 1100px;
+    margin: 30px auto;
+
+    padding: 30px;
+
+    border-radius: 24px;
+
+    background: rgba(15,15,15,0.78);
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    box-shadow:
+        0 10px 40px rgba(0,0,0,0.35),
+        inset 0 0 0 1px rgba(255,255,255,0.02);
+}
+
+/* TITULO */
+h1{
+    text-align: center;
+
+    font-size: 2.4rem;
+    font-weight: 700;
+
+    color: #ffffff;
+
+    margin-bottom: 40px;
+
+    letter-spacing: -1px;
+}
+
+/* SECTIONS */
+.section{
+    background: rgba(255,255,255,0.02);
+
+    border: 1px solid rgba(255,255,255,0.05);
+
+    border-radius: 18px;
+
+    padding: 28px;
+
+    margin-bottom: 35px;
+}
+
+/* SUBTITULOS */
+.section h2{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    color: #ffc107;
+
+    font-size: 1.1rem;
+    font-weight: 600;
+
+    margin-bottom: 25px;
+}
+
+/* GRID DAS NOTAS */
+.grid-reputacao{
+    display: grid;
+
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+
+    gap: 22px;
+}
+
+/* CARDS DAS NOTAS */
+.card-nota{
+    position: relative;
+
+    overflow: hidden;
+
+    padding: 28px 22px;
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.05),
+            rgba(255,255,255,0.02)
+        );
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    backdrop-filter: blur(8px);
+
+    text-align: center;
+
+    transition: 0.3s ease;
+}
+
+.card-nota::before{
+    content: '';
+
+    position: absolute;
+
+    top: -40%;
+    right: -40%;
+
+    width: 180px;
+    height: 180px;
+
+    background: rgba(255,193,7,0.08);
+
+    border-radius: 50%;
+
+    filter: blur(20px);
+}
+
+.card-nota:hover{
+    transform: translateY(-4px);
+
+    border-color: rgba(255,193,7,0.25);
+
+    box-shadow:
+        0 10px 30px rgba(255,193,7,0.08);
+}
+
+.card-nota h3{
+    color: rgba(255,255,255,0.7);
+
+    font-size: 0.95rem;
+    font-weight: 500;
+
+    margin-bottom: 15px;
+
+    line-height: 1.4;
+}
+
+/* NOTA */
+.numero-nota{
+    font-size: 3rem;
+    font-weight: 700;
+
+    color: #ffc107;
+
+    margin-bottom: 8px;
+
+    text-shadow:
+        0 0 20px rgba(255,193,7,0.25);
+}
+
+/* FEEDBACKS */
+.card-feedback{
+    position: relative;
+
+    padding: 20px 22px;
+
+    margin-bottom: 18px;
+
+    border-radius: 16px;
+
+    background: rgba(255,255,255,0.03);
+
+    border: 1px solid rgba(255,255,255,0.05);
+
+    overflow: hidden;
+
+    transition: 0.25s ease;
+}
+
+.card-feedback::before{
+    content: '';
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 4px;
+    height: 100%;
+
+    background: linear-gradient(
+        180deg,
+        #ffc107,
+        #ff9800
+    );
+}
+
+.card-feedback:hover{
+    transform: translateY(-2px);
+
+    border-color: rgba(255,193,7,0.18);
+
+    background: rgba(255,255,255,0.045);
+}
+
+/* HEADER FEEDBACK */
+.feedback-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin-bottom: 12px;
+}
+
+.feedback-header strong{
+    color: #ffffff;
+
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.feedback-header span{
+    color: rgba(255,255,255,0.45);
+
+    font-size: 0.82rem;
+}
+
+/* TEXTO FEEDBACK */
+.card-feedback p{
+    color: rgba(255,255,255,0.84);
+
+    font-size: 0.94rem;
+
+    line-height: 1.6;
+
+    font-style: italic;
+}
+
+/* MÉDIA EVENTO */
+.media-feedback{
+    margin-top: 14px;
+
+    color: rgba(255,255,255,0.45);
+
+    font-size: 0.82rem;
+}
+
+/* EMPTY */
+.empty-message{
+    text-align: center;
+
+    color: rgba(255,255,255,0.45);
+
+    padding: 30px 10px;
+
+    font-size: 0.95rem;
+}
+
+/* RESPONSIVO */
+@media(max-width: 768px){
+
+    body{
+        padding: 14px;
+    }
+
+    .container{
+        padding: 22px;
+    }
+
+    h1{
+        font-size: 2rem;
+    }
+
+    .section{
+        padding: 22px;
+    }
+
+    .numero-nota{
+        font-size: 2.5rem;
+    }
+
+    .feedback-header{
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

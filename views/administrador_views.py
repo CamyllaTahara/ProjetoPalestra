@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash
 import re
 from models.instituicao import conectar_bd
 import mysql.connector
-import os  # Para manipulação de arquivos
+import os  
 
 administrador_bp = Blueprint('administrador', __name__)
 
@@ -12,7 +12,7 @@ def cpf_valido(cpf):
     cpf = ''.join(filter(str.isdigit, cpf))
     if len(cpf) != 11 or cpf == cpf[0] * 11:
         return False
-    # Cálculo do primeiro dígito verificador
+
     soma = 0
     for i in range(9):
         soma += int(cpf[i]) * (10 - i)
@@ -20,7 +20,7 @@ def cpf_valido(cpf):
     digito1_esperado = str(resto) if resto < 10 else '0'
     if cpf[9] != digito1_esperado:
         return False
-    # Cálculo do segundo dígito verificador
+
     soma = 0
     for i in range(10):
         soma += int(cpf[i]) * (11 - i)
@@ -50,11 +50,11 @@ def cadastro_administrador():
         dados_form['email'] = request.form.get('email', '')
         dados_form['cargo'] = request.form.get('cargo', '')
 
-        # Validação do nome
+
         if not dados_form['nome_completo'].strip():
             mensagem_erro_nome = "Erro: O nome completo é obrigatório."
 
-        # Validação da senha
+
         if len(senha) < 8:
             mensagem_erro_senha = "Erro: A senha deve ter pelo menos 8 caracteres."
         elif not any(c in "!@#$%&*" for c in senha):
@@ -66,11 +66,11 @@ def cadastro_administrador():
         elif not any(c.isdigit() for c in senha):
             mensagem_erro_senha = "Erro: A senha deve conter pelo menos um número."
 
-        # Validação do CPF
+
         if not cpf_valido(dados_form['cpf']):
             mensagem_erro_cpf = "Erro: CPF inválido."
 
-        # Validação do e-mail
+
         if not validar_email(dados_form['email']):
             mensagem_erro_email = "Erro: E-mail inválido."
 
@@ -88,7 +88,7 @@ def cadastro_administrador():
                 print("Conexão bem-sucedida!")
                 cursor = conexao.cursor()
                 
-                # Verificar se o e-mail já existe
+
                 cursor.execute("SELECT id FROM admins WHERE email = %s", (dados_form['email'],))
                 if cursor.fetchone():
                     mensagem_erro_email = "Erro: Este e-mail já está cadastrado."
@@ -98,7 +98,7 @@ def cadastro_administrador():
                                            mensagem_erro_cpf=mensagem_erro_cpf,
                                            dados_form=dados_form)
 
-                # Verificar se o CPF já está cadastrado
+
                 cursor.execute("SELECT id FROM admins WHERE cpf = %s", (re.sub(r'\D', '', dados_form['cpf']),))
                 if cursor.fetchone():
                     mensagem_erro_cpf = "Erro: Este CPF já está cadastrado."
@@ -108,7 +108,7 @@ def cadastro_administrador():
                                            mensagem_erro_cpf=mensagem_erro_cpf,
                                            dados_form=dados_form)
 
-                # Se não houver erros, cadastrar o palestrante
+
                 dados = (
                     dados_form['nome_completo'],
                     dados_form['email'],
@@ -122,8 +122,8 @@ def cadastro_administrador():
                     (nome_completo, email, cpf, cargo, senha)
                     VALUES (%s, %s, %s, %s, %s)
                 """
-                print("Dados a serem inseridos:", dados) # Imprima os dados que você está tentando salvar
-                print("Query SQL:", sql) # Imprima a query SQL
+                print("Dados a serem inseridos:", dados)
+                print("Query SQL:", sql) 
                 cursor.execute(sql, dados)
                 conexao.commit()
                 print("Dados inseridos com sucesso!")

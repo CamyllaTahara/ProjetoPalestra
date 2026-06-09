@@ -1,0 +1,256 @@
+/* Fundo de Partículas */
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+body {
+    background-color: #0a0a0a;
+    color: #e0e0e0;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* --- HEADER CENTRALIZADO COM VOLTAR À ESQUERDA --- */
+.chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+    position: relative;
+    padding: 15px 25px;
+    background: rgba(20, 20, 20, 0.8);
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 10;
+}
+
+.chat-header div:first-child {
+    display: flex;
+    flex-direction: column; /* Coloca um em cima do outro */
+    align-items: flex-start; /* Alinha à esquerda */
+    gap: 4px; /* Cria um espacinho entre o h2 e o span */
+}
+
+.chat-header h2 {
+    margin: 0; /* Remove margens padrão que podem bagunçar o alinhamento */
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chat-header span {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6); /* Deixa o nome um pouco mais discreto */
+    margin-left: 28px; /* Alinha o texto embaixo do título, ignorando o ícone */
+}
+
+.btn-voltar {
+    display: inline-block; /* Muda de block para inline-block para não ocupar a linha toda */
+    width: auto;           /* Largura automática baseada no texto */
+    min-width: 100px;      /* Garante um tamanho mínimo legal */
+    position: absolute;    /* Mantém ele fixo à esquerda no header */
+    left: 25px;
+    padding: 8px 18px;     /* Padding menor para ser mais delicado */
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Substituindo pela borda glass */
+    color: #fff;           /* Texto claro */
+    font-size: 11px;       /* Fonte levemente menor */
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    text-align: center;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.btn-voltar:hover {
+    background: #fff;      /* Fundo branco no hover */
+    color: #0a0a0a;        /* Texto escuro para contraste */
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+/* 1. O contêiner pai do conteúdo (se você tiver um) ou ajuste a box */
+.chat-box {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 40px 20px 40px; /* Removi o padding top para a info encostar */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    
+    /* O NEVOEIRO: Agora ele começa bem do topo */
+    mask-image: linear-gradient(to bottom, 
+        transparent 0%, 
+        black 15%,   /* O texto fica totalmente visível logo após a data */
+        black 90%, 
+        transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(to bottom, 
+        transparent 0%, 
+        black 15%, 
+        black 90%, 
+        transparent 100%
+    );
+}
+
+
+.chat-info {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: 20px 0 10px 0;
+    background: transparent;
+    display: flex;
+    justify-content: center;
+    pointer-events: none; 
+}
+
+.chat-info span {
+    pointer-events: auto; 
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    padding: 6px 16px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    display: flex;
+    gap: 15px;
+    font-size: 0.75rem;
+}
+
+.mensagem {
+    max-width: 70%;
+    padding: 12px 16px;
+    border-radius: 15px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(15px); 
+    -webkit-backdrop-filter: blur(15px);
+}
+.mensagem-minha {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border-bottom-right-radius: 2px;
+}
+
+.mensagem-outro {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.979); 
+    backdrop-filter: blur(35px);
+    color: #000000;
+    border: 1px solid rgba(255, 255, 255, 0);
+    border-bottom-left-radius: 2px;
+}
+.meta {
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.hora {
+    font-size: 0.65rem;
+    margin-top: 8px; /* Espaço garantido dentro do card */
+    text-align: right;
+    opacity: 0.6;
+    display: block;
+    width: 100%;
+}
+
+/* --- INPUT E BOTÕES --- */
+.chat-input {
+    background: rgba(20, 20, 20, 0.95);
+    padding: 20px;
+    display: flex;
+    gap: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+textarea {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 12px;
+    color: white;
+    resize: none;
+    font-family: inherit;
+    outline: none;
+    transition: 0.3s;
+}
+
+textarea:focus {
+    border-color: #007bff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 0 25px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* Scrollbar */
+.chat-box::-webkit-scrollbar {
+    width: 6px;
+}
+.chat-box::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.sem-mensagens, .somente-leitura {
+    text-align: center;
+    color: rgba(255,255,255,0.4);
+    font-size: 0.9rem;
+    margin-top: 20px;
+}
+/* Tamanho padrão para os ícones dentro do cabeçalho e info */
+.lucide {
+    width: 18px;  /* Largura controlada */
+    height: 18px; /* Altura controlada */
+    stroke-width: 2px;
+}
+
+/* Ícones menores para os detalhes de data e hora */
+.chat-info .lucide {
+    width: 14px;
+    height: 14px;
+}
+
+/* Ícone do botão voltar */
+.btn-voltar .lucide {
+    width: 16px;
+    height: 16px;
+}
+.chat-header h2, .btn-voltar, .chat-info span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}

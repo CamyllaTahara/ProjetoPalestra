@@ -4,7 +4,7 @@ import os
 import eventlet
 eventlet.monkey_patch()  
 
-from flask import Flask, redirect, request, session, url_for
+from flask import Flask, redirect, render_template, request, session, url_for
 
 # ============================================================
 # PASSO 1: CRIAR A APLICAÇÃO
@@ -66,6 +66,10 @@ from views.gerenciar_disponibilidades import gerenciar_disponibilidades_bp
 from views.gerenciar_solicitacoes import gerenciar_solicitacoes_bp
 from views.gerenciar_palestras_confirmadas import gerenciar_palestras_bp
 from views.chamados_views import chamados_bp
+
+from views.gerenciar_suporte_view import gerenciar_suporte
+
+
 app.register_blueprint(chamados_bp)
 from views.chat_views import chat_bp, init_socketio
 app.register_blueprint(chat_bp)
@@ -94,6 +98,9 @@ app.register_blueprint(gerenciar_disponibilidades_bp)
 app.register_blueprint(gerenciar_solicitacoes_bp)
 app.register_blueprint(gerenciar_palestras_bp)
 
+app.register_blueprint(gerenciar_suporte)
+
+
 from views.feed_views import feed_bp
 app.register_blueprint(feed_bp)
 
@@ -106,6 +113,16 @@ def uploads_feed(filename):
 from views.feed_views import destacar_mencoes
 app.jinja_env.filters['mencoes'] = destacar_mencoes
 
+@app.template_filter('ms_telefone')
+def ms_telefone(v):
+    v = str(v)
+    # Formato celular: (11) 97558-4440
+    if len(v) == 11:
+        return f"({v[:2]}) {v[2:7]}-{v[7:]}"
+    # Formato fixo: (11) 3456-7890
+    elif len(v) == 10:
+        return f"({v[:2]}) {v[2:6]}-{v[6:]}"
+    return v
 
 print("✅ Todos os Blueprints registrados\n")
 
@@ -170,18 +187,6 @@ Você pode ignorar este e-mail.'''
     
     return html
 
-# ============================================================
-# INICIAR APLICAÇÃO
-# ============================================================
-if __name__ == '__main__':
-    print("\n" + "="*60)
-    print("🚀 INICIANDO SERVIDOR FLASK")
-    print("="*60)
-    print("Acesse: http://127.0.0.1:5000")
-    print("Teste de mail: http://127.0.0.1:5000/teste-mail-debug")
-    print("="*60 + "\n")
-    
-    app.run(debug=True)
 
 def login_required(role):
     def decorator(f):
@@ -206,3 +211,29 @@ def login_required(role):
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Limite de 16MB
+EXTENSOES_PERMITIDAS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def extensao_permitida(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in EXTENSOES_PERMITIDAS
+
+@app.route('/') # Sem o "index.html", apenas a barra
+def index():
+    return render_template('index.html')
+
+
+# ============================================================
+# INICIAR APLICAÇÃO
+# ============================================================
+if __name__ == '__main__':
+    print("\n" + "="*60)
+    print("🚀 INICIANDO SERVIDOR FLASK")
+    print("="*60)
+    print("Acesse: http://127.0.0.1:5000")
+    print("Teste de mail: http://127.0.0.1:5000/teste-mail-debug")
+    print("="*60 + "\n")
+    
+    app.run(debug=True)
+

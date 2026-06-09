@@ -1,0 +1,315 @@
+/* =========================================
+   ESTILO DO FEED - DARK MODE & GLASSMORPHISM
+   ========================================= */
+
+/* Estilos Globais e Reset */
+
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+}
+
+body { 
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+    background: #0a0a0a; /* Fundo escuro para as partículas aparecerem */
+    color: #fff; 
+    padding: 20px;
+    line-height: 1.6;
+}
+
+/* Container Centralizado */
+.container { 
+    max-width: 800px; /* Largura reduzida para destacar as partículas nas laterais */
+    margin: 0 auto; 
+    position: relative;
+    z-index: 1;
+}
+
+/* Topo e Navegação */
+.topo { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 30px; 
+    background: rgba(255, 255, 255, 0.03); 
+    padding: 15px 25px; 
+    border-radius: 20px; 
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.acoes-topo { 
+    display: flex; 
+    align-items: center; 
+    gap: 20px; /* Espaço entre o botão e o sino */
+}
+.sino { 
+    position: relative; 
+    font-size: 20px; 
+    display: flex;
+    align-items: center;
+}
+
+.badge-notif { 
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background: #ff4757; 
+    color: #fff; 
+    font-size: 10px;
+    font-weight: bold;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #111; /* Borda para destacar do fundo */
+}
+
+.topo h1 { 
+    font-size: 24px; 
+    color: #00d2ff; /* Tom ciano para combinar com sua identidade visual */
+    margin: 0;
+}
+
+/* Botões */
+.btn-voltar { 
+    color: #ccc !important; 
+    text-decoration: none; 
+    font-size: 14px; 
+    transition: 0.3s; 
+}
+
+.btn-voltar:hover { 
+    color: #fff !important; 
+    transform: translateX(-3px); 
+}
+
+.btn-novo-post { 
+    background: linear-gradient(45deg, #00d2ff, #3a7bd5); 
+    color: white !important; 
+    padding: 10px 20px; 
+    text-decoration: none; 
+    border-radius: 8px; 
+    font-size: 14px; 
+    font-weight: bold; 
+    box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
+    transition: 0.3s;
+}
+
+.btn-novo-post:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+}
+
+.btn-acao, .ver-post { 
+    color: rgba(255, 255, 255, 0.7) !important; 
+    text-decoration: none;
+    font-size: 13px;
+    transition: 0.2s;
+}
+
+.ver-post:hover, .btn-acao:hover { 
+    color: #fff !important; 
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+/* Destaque para o link 'Ver post →' especificamente */
+.ver-post {
+    font-weight: 500;
+    border-bottom: 1px solid transparent;
+}
+
+.ver-post:hover {
+    border-bottom: 1px solid #fff;
+}
+/* Card do Post */
+.post { 
+    background: rgba(20, 20, 20, 0.85); 
+    border-radius: 20px; 
+    margin-bottom: 30px; 
+    overflow: hidden; 
+    border: 1px solid rgba(255, 255, 255, 0.08); 
+    backdrop-filter: blur(12px); /* Efeito blur para não poluir com as partículas */
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.post:hover { 
+    transform: translateY(-5px); 
+    border-color: rgba(0, 210, 255, 0.4); 
+}
+
+.post-header { 
+    padding: 20px; 
+    display: flex; 
+    align-items: center; 
+    gap: 15px; 
+}
+
+.avatar { 
+    width: 50px; 
+    height: 50px; 
+    border-radius: 50%; 
+    background: #00d2ff; 
+    color: #111; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: bold; 
+    font-size: 20px; 
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+}
+
+.post-autor { 
+    font-weight: bold; 
+    font-size: 16px; 
+    color: #fff; 
+}
+
+.post-tipo { 
+    font-size: 12px; 
+    color: #00d2ff; 
+    font-weight: 600; 
+}
+
+.post-data { 
+    font-size: 12px; 
+    color: #666; 
+    margin-left: auto; 
+}
+
+/* Conteúdo do Post */
+.post-descricao { 
+    padding: 0 20px 20px; 
+    font-size: 15px; 
+    color: #ddd; 
+}
+
+.post-localizacao { 
+    font-size: 13px; 
+    color: #00d2ff; 
+    margin-top: 10px; 
+    opacity: 0.8;
+}
+
+/* Grade de Fotos */
+.post-fotos img { 
+    width: 100%; 
+    max-height: 450px; 
+    object-fit: cover; 
+    display: block; 
+    border-top: 1px solid rgba(255,255,255,0.05); 
+    cursor: pointer;
+}
+
+/* Ações do Post (Curtir, Comentar) */
+.post-acoes { 
+    padding: 15px 20px; 
+    display: flex; 
+    gap: 20px; 
+    background: rgba(255, 255, 255, 0.02); 
+    align-items: center; 
+}
+
+.btn-acao { 
+    background: none; 
+    border: none; 
+    cursor: pointer; 
+    font-size: 14px; 
+    color: #aaa; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    transition: 0.2s; 
+    text-decoration: none; 
+}
+
+.btn-acao:hover { 
+    color: #00d2ff; 
+}
+
+.btn-acao.curtido { 
+    color: #ff4757; 
+    text-shadow: 0 0 10px rgba(255, 71, 87, 0.3); 
+}
+/* Estilização da Lixeirinha */
+.btn-lixeira {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.3); /* Quase invisível por padrão */
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+}
+
+/* Efeito ao passar o mouse */
+.btn-lixeira:hover {
+    color: #ff4757; /* Vermelho vibrante de alerta */
+    background: rgba(255, 71, 87, 0.1); /* Fundo avermelhado bem sutil */
+    transform: scale(1.1); /* Aumenta levemente */
+}
+
+/* Ajuste de posição no card */
+.post-header .btn-lixeira, 
+.post-acoes .btn-lixeira {
+    margin-left: auto; /* Empurra para o canto direito */
+}
+/* Modais */
+/* Container que cobre a tela toda */
+.modal-denuncia-container {
+    display: none; 
+    position: fixed; /* Fixa na janela do navegador */
+    z-index: 9999;   /* Garante que fique acima das partículas e tabelas */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8); /* Fundo escuro atrás do modal */
+    backdrop-filter: blur(5px);    /* Desfoca o feed ao fundo */
+    overflow: hidden;              /* Impede scroll enquanto aberto */
+}
+
+/* O cartãozinho branco/dark que aparece no meio */
+.modal-denuncia-card {
+    background: #1a1a1a;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centralização perfeita */
+    padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.modal-denuncia-card h3 {
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+.modal-denuncia-card select {
+    width: 100%;
+    padding: 12px;
+    margin: 20px 0;
+    background: #222;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 8px;
+}

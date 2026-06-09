@@ -1,0 +1,149 @@
+
+        /* 1. Reset e Alinhamento Central Supremo */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #00d2ff;
+            --bg-dark: #0b0f1a;
+            --card-bg: rgba(13, 20, 36, 0.85); /* Fundo marinho escuro que absorve o blur sem criar névoa */
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --input-bg: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center; /* Centraliza na horizontal */
+            align-items: center;     /* Centraliza na vertical */
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Fundo de Partículas Animadas */
+        #canvas-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+        }
+
+        /* 2. O Card do Formulário */
+        .card-form {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px); /* Transparência limpa e moderna */
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 35px 40px;
+            width: 90%;
+            max-width: 480px; /* Mantém o tamanho perfeito dos outros cards */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+
+        /* 3. Inputs e Rótulos com Distância Correta */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            margin-bottom: 8px; /* Dá o respiro necessário para o label não entrar no input */
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        input {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 14px;
+            color: white;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            background: rgba(0, 0, 0, 0.5);
+            outline: none;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.15);
+        }
+
+        /* 4. Grupo de Botões */
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            background: var(--primary);
+            color: #0b0f1a;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 0.9rem;
+        }
+
+        button:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid var(--glass-border);
+            padding: 14px;
+            border-radius: 12px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Sistema de Alertas */
+        .alert {
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            text-align: center;
+            border: 1px solid transparent;
+        }
+        .alert-error, .alert-danger { background: rgba(244, 67, 54, 0.1); color: #f87171; border-color: rgba(244, 67, 54, 0.2); }
+        .alert-success { background: rgba(74, 222, 128, 0.1); color: #4ade80; border-color: rgba(74, 222, 128, 0.2); }
+    

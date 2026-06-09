@@ -3,33 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <title>Redefinir Senha - Administrador</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_reset_senha.css') }}">
 </head>
 <body>
+    <canvas id="canvas-bg"></canvas>
     <div class="login-container">
+        <div class="header-intro">
         <h2>Redefinir Senha</h2>
+
+            <div class="card-login ">
+            <div class="card-icon">
+                <i data-lucide="key"></i>
+                </div>
+
+    {% if mensagem_sucesso %}
+        <!-- ESTADO DE SUCESSO: O formulário some e aparece só o aviso -->
+        <div class="message-success-container">
+            <p class="success-text">{{ mensagem_sucesso }}</p>
+            <p class="sub-text">Verifique sua caixa de entrada e a pasta de spam.</p>
+            <a href="{{ url_for('login_administrador.login') }}" class="btn-entrar" style="display: block; margin-top: 20px;">Voltar para Recuperação de Senha</a>
+        </div>
+    {% else %}
+    <div class="message-success-container">
     {% if mensagem_erro %}
         <div class="erro">{{ mensagem_erro }}</div>
+        </div>
     {% endif %}
     
     {% if token_valido %}
         <form method="POST">
+            <div class="input-group">
             <input type="hidden" name="token" value="{{ token }}">
-            
+            </div>
+
+            <div class="input-group">
             <label for="senha">Nova Senha:</label>
             <input type="password" name="senha" id="senha" required placeholder="Digite sua nova senha">
-            
+            </div>
+
+            <div class="input-group">
             <label for="confirmar_senha">Confirmar Senha:</label>
             <input type="password" name="confirmar_senha" id="confirmar_senha" required placeholder="Confirme sua senha">
-            
+            </div>
+             
             <button type="submit">Redefinir Senha</button>
         </form>
     {% else %}
         <div class="erro">Link de recuperação inválido ou expirado.</div>
-        <a href="{{ url_for('login_administrador.esqueci_senha_administrador') }}">Solicitar novo link</a>
+        <a href="{{ url_for('login_administrador.esqueci_senha_administrador') }}" class="link-voltar"></a>>Solicitar novo link</a>
     {% endif %}
     
-    <a href="{{ url_for('login_administrador.esqueci_senha_administrador') }}">Voltar para o login</a>
+    <a href="{{ url_for('login_administrador.esqueci_senha_administrador') }}" class="link-voltar"></a>>Voltar para o login</a>
 </div>
 </body>
 </html>

@@ -1,0 +1,147 @@
+:root {
+    --bg-deep: #06090f;
+    --glass-bg: rgba(22, 27, 34, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --accent-primary: #79c0ff; /* Azul Neon suave */
+    --accent-secondary: #d2a8ff; /* Roxo Neon */
+    --text-bright: #f0f6fc;
+    --text-dim: #8b949e;
+}
+
+body {
+    background: radial-gradient(circle at top right, #161b22, #06090f);
+    color: var(--text-bright);
+    font-family: 'Inter', -apple-system, sans-serif;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: transparent; 
+}
+
+/* Container principal com leve brilho */
+.login-container {
+    width: 100%;
+    max-width: 1000px;
+    padding: 40px;
+    position: relative;
+}
+
+.header-intro {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.header-intro h1 {
+    font-size: 2.5rem;
+    letter-spacing: -1px;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+}
+
+.grid-opcoes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+/* Estilo Glassmorphism nos Cards */
+.card-acesso {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(50px); /* Efeito de vidro embaçado */
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    border: 1px solid rgb(255, 255, 255,0.1);
+    padding: 40px 20px;
+    text-decoration: none;
+    text-align: center;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+}
+
+.card-acesso:hover .card-icon {
+    opacity: 1;
+    filter: drop-shadow(0 0 25px rgba(121, 192, 255, 1));
+    transform: scale(1.1);
+}
+
+/* Brilho no Hover */
+.card-acesso:hover {
+    transform: translateY(-12px);
+    border-color: var(--accent-primary);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
+                0 0 20px rgba(121, 192, 255, 0.2);
+}
+
+.card-icon i {
+    font-size: 50px;
+    margin-bottom: 20px;
+    opacity: 0.8;
+    filter: drop-shadow(0 0 15px rgba(121, 192, 255, 0.6))
+            drop-shadow(0 0 20px rgba(121, 192, 255, 0.4));
+    transition: 0.3s;
+}
+
+.card-info h2 {
+    font-size: 23px;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.card-info p {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Botão Estilo Terminal Moderno */
+.btn-entrar {
+    margin-top: auto;
+    padding: 10px 25px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    font-size: 13px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: 0.15s;
+}
+
+.card-acesso:hover .btn-entrar {
+    background: var(--text-bright);
+    color: var(--bg-deep);
+    box-shadow: 0 0 15px var(--text-bright);
+}
+
+/* Estilo especial para o Admin */
+.admin-border:hover i{
+    border-color: var(--accent-secondary);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
+                0 0 20px rgba(210, 168, 255, 0.2);
+}
+
+.admin-border:hover .btn-entrar {
+    background: var(--accent-secondary);
+    box-shadow: 0 0 15px var(--accent-secondary);
+}
+
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Fica atrás de todos os cards */
+    background: #06090f; /* Cor de fundo principal */
+}

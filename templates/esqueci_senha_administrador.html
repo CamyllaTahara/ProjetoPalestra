@@ -3,29 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <title>Recuperação de Senha - Administrador</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_esqueci_senha.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
+    <canvas id="canvas-bg"></canvas>
     <div class="login-container">
-        <h2>Recuperação de Senha</h2>
-    {% if mensagem_sucesso %}
-        <div class="sucesso">{{ mensagem_sucesso }}</div>
-    {% endif %}
-    
-    {% if mensagem_erro %}
-        <div class="erro">{{ mensagem_erro }}</div>
-    {% endif %}
+        <div class="header-intro">
+            <h1>Recuperação de senha</h1>
+            {% if not mensagem_sucesso %}
+                <p>Digite seu e-mail cadastrado para receber o link de recuperação de senha.</p>
+            {% endif %}
+        </div>
+        
+        <div class="card-login">
+            <div class="card-icon">
+                <!-- Ícone dinâmico: chave para formulário, check para sucesso -->
+                <i data-lucide="{{ 'mail-check' if mensagem_sucesso else 'key' }}"></i>
+            </div>
 
-    <p>Digite seu e-mail cadastrado para receber o link de recuperação de senha.</p>
-    
-    <form method="POST">
-        <label for="email">Email:</label>
-        <input type="email" name="email" id="email" required placeholder="Digite seu E-mail">
+            {% if mensagem_sucesso %}
+                <!-- ESTADO DE SUCESSO -->
+                <div class="message-success-container">
+                    <div class="sucesso">{{ mensagem_sucesso }}</div>
+                    <p style="color: var(--text-dim); font-size: 0.9rem; margin: 15px 0;">
+                        Verifique sua caixa de entrada e a pasta de spam.
+                    </p>
+                    <a href="{{ url_for('login_administrador.login_administrador') }}" class="btn-entrar" style="text-decoration: none; display: block;">
+                        Voltar para o Login
+                    </a>
+                </div>
+            {% else %}
+                <!-- ESTADO DE FORMULÁRIO -->
+                {% if mensagem_erro %}
+                    <div class="erro">{{ mensagem_erro }}</div>
+                {% endif %}
 
-        <button type="submit">Enviar Link de Recuperação</button>
-    </form>
-    
-    <a href="{{ url_for('login_administrador.login_administrador') }}">Voltar para Login</a>
-</div>
+                <form method="POST">
+                    <div class="input-group">
+                        <label for="email">Email:</label>
+                        <input type="email" name="email" id="email" required placeholder="Digite seu E-mail">
+                    </div>
+
+                    <button type="submit" class="btn-entrar">Enviar Link de Recuperação</button>
+                </form>
+                
+                <a href="{{ url_for('login_administrador.login_administrador') }}" class="link-voltar">Voltar para Login</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
+    <script>lucide.createIcons();</script>
 </body>
 </html>

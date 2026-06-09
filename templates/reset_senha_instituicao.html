@@ -3,33 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <title>Redefinir Senha - Instituição</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_reset_senha.css') }}">
+    
 </head>
 <body>
+    <canvas id="canvas-bg"></canvas>
     <div class="login-container">
+        <div class="header-intro">
         <h2>Redefinir Senha</h2>
+        </div>
+
+    <div class="card-login ">
+            <div class="card-icon">
+                <i data-lucide="key"></i>
+                </div>
+
+
+    {% if mensagem_sucesso %}
+        <!-- ESTADO DE SUCESSO: O formulário some e aparece só o aviso -->
+        <div class="message-success-container">
+            <p class="success-text">{{ mensagem_sucesso }}</p>
+            <p class="sub-text">Verifique sua caixa de entrada e a pasta de spam.</p>
+            <a href="{{ url_for('login_instituicao.login') }}" class="btn-entrar" style="display: block; margin-top: 20px;">Voltar para o Login</a>
+        </div>
+    {% else %}
+    <div class="message-success-container">
     {% if mensagem_erro %}
         <div class="erro">{{ mensagem_erro }}</div>
+        </div>
     {% endif %}
-    
     {% if token_valido %}
         <form method="POST">
+            <div class="input-group">
             <input type="hidden" name="token" value="{{ token }}">
+            </div>
+
             
+            <div class="input-group">
             <label for="senha">Nova Senha:</label>
             <input type="password" name="senha" id="senha" required placeholder="Digite sua nova senha">
-            
-            <label for="confirmar_senha">Confirmar Senha:</label>
+            </div>
+            <div class="password-checklist">
+                        <div class="check-item" id="rule-length">
+                            <span class="checkmark"></span>
+                            <span class="text">Mínimo de 8 caracteres</span>
+                        </div>
+                        <div class="check-item" id="rule-upper">
+                            <span class="checkmark"></span>
+                            <span class="text">Pelo menos uma letra maiúscula</span>
+                        </div>
+                        <div class="check-item" id="rule-lower">
+                            <span class="checkmark"></span>
+                            <span class="text">Pelo menos uma letra minúscula</span>
+                        </div>
+                        <div class="check-item" id="rule-number">
+                            <span class="checkmark"></span>
+                            <span class="text">Pelo menos um número</span>
+                        </div>
+                        <div class="check-item" id="rule-special">
+                            <span class="checkmark"></span>
+                            <span class="text">Pelo menos um caractere especial (!@#$%&*)</span>
+                        </div>
+                    </div>
+
+            <div class="input-group">
+            <label for="confirmar_senha" class="btn-entrar">Confirmar Senha:</label>
             <input type="password" name="confirmar_senha" id="confirmar_senha" required placeholder="Confirme sua senha">
-            
+            </div>
+
             <button type="submit">Redefinir Senha</button>
         </form>
     {% else %}
         <div class="erro">Link de recuperação inválido ou expirado.</div>
-        <a href="{{ url_for('login_instituicao.esqueci_senha_instituicao') }}">Solicitar novo link</a>
+        <a href="{{ url_for('login_instituicao.esqueci_senha_instituicao') }}" class="link-voltar">Solicitar novo link</a>
     {% endif %}
     
-    <a href="{{ url_for('login_instituicao.esqueci_senha_instituicao') }}">Voltar para o login</a>
+    <a href="{{ url_for('login_instituicao.esqueci_senha_instituicao') }}" class="link-voltar">Voltar para Recuperação de Senha</a>
 </div>
+<script>
+
+ const passwordInput = document.getElementById('senha');
+        const rules = {
+            length: document.getElementById('rule-length'),
+            upper: document.getElementById('rule-upper'),
+            lower: document.getElementById('rule-lower'),
+            number: document.getElementById('rule-number'),
+            special: document.getElementById('rule-special')
+        };
+
+        passwordInput.addEventListener('input', () => {
+            const val = passwordInput.value;
+
+            toggleRule(rules.length, val.length >= 8);
+            toggleRule(rules.upper, /[A-Z]/.test(val));
+            toggleRule(rules.lower, /[a-z]/.test(val));
+            toggleRule(rules.number, /[0-9]/.test(val));
+            toggleRule(rules.special, /[!@#$%&*]/.test(val));
+        });
+
+        function toggleRule(element, isValid) {
+            if (isValid) {
+                element.classList.add('valid');
+            } else {
+                element.classList.remove('valid');
+            }
+        }
+
+
+        {
+function validarSenha(){
+            var senha = document.getElementById("senha").value;
+
+            var comprimento = document.getElementById("comprimento");
+
+            var maiuscula = document.getElementById("maiuscula");
+
+            var minuscula = document.getElementById("minuscula");
+
+            var numeroSenha = document.getElementById("numeroSenha");
+
+            var especial = document.getElementById("especial");
+
+}
+
+            comprimento.classList.toggle("valid", senha.length >= 8);
+
+            comprimento.classList.toggle("invalid", senha.length < 8);
+
+
+
+            maiuscula.classList.toggle("valid", /[A-Z]/.test(senha));
+
+            maiuscula.classList.toggle("invalid", !/[A-Z]/.test(senha));
+
+
+
+            minuscula.classList.toggle("valid", /[a-z]/.test(senha));
+
+            minuscula.classList.toggle("invalid", !/[a-z]/.test(senha));
+
+
+
+            numeroSenha.classList.toggle("valid", /\d/.test(senha));
+
+            numeroSenha.classList.toggle("invalid", !/\d/.test(senha));
+
+
+
+            especial.classList.toggle("valid", /[!@#$%&*]/.test(senha));
+
+            especial.classList.toggle("invalid", !/[!@#$%&*]/.test(senha));
+
+        }
+
+        document.getElementById('curriculo').addEventListener('change', function() {
+    const fileName = this.files[0] ? this.files[0].name : "Selecionar PDF";
+    document.getElementById('file-name').textContent = fileName;
+});
+    </script>
+
+    <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
+    <script>lucide.createIcons();</script>
+
 </body>
 </html>

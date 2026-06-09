@@ -1,0 +1,195 @@
+/* --- FUNDO E BASE (PADRÃO PALESTRA_APP) --- */
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+body {
+    background-color: #0a0a0a;
+    color: #e0e0e0;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* --- TÍTULOS --- */
+h1 {
+    color: #fff;
+    margin-bottom: 5px;
+    text-shadow: 0 0 10px rgba(220, 53, 69, 0.3); /* Brilho vermelho sutil */
+}
+
+.subtitulo {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* --- BOTÃO VOLTAR (MESMO DESIGN DO CHAT) --- */
+.btn-voltar {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    
+    /* A mágica do alinhamento */
+    display: flex;
+    align-items: center;      /* Centraliza verticalmente */
+    justify-content: center;   /* Centraliza horizontalmente */
+    line-height: 1;            /* Remove alturas de linha extras do texto */
+    gap: 8px;
+    
+    width: auto;
+    min-width: 110px;
+    padding: 10px 20px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    z-index: 10;
+}
+
+/* Ajuste específico para o ícone não subir */
+.btn-voltar i, 
+.btn-voltar svg {
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: -1px; /* Pequeno toque manual para o equilíbrio visual perfeito */
+}
+.btn-voltar:hover {
+    background: #fff;
+    color: #0a0a0a;
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+/* --- CARD GLASSMORPHISM --- */
+.card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 600px;
+    width: 100%;
+}
+
+/* --- INFO DA PALESTRA (DESTAQUE) --- */
+.info-palestra {
+    background: rgba(40, 167, 69, 0.1); /* Verde sutil */
+    border-left: 4px solid #28a745;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    font-size: 14px;
+    color: #fff;
+}
+
+/* --- FORMULÁRIO --- */
+label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 10px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+}
+
+select, textarea {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    font-size: 14px;
+    color: #fff;
+    margin-bottom: 25px;
+    box-sizing: border-box;
+    outline: none;
+    transition: 0.3s;
+}
+
+select option {
+    background: #1a1a1a; /* Cor de fundo para as opções no escuro */
+}
+
+textarea:focus, select:focus {
+    border-color: #dc3545; /* Vermelho alerta ao focar */
+    background: rgba(255, 255, 255, 0.08);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* --- BOTÃO ENVIAR ALERTA --- */
+.btn-enviar {
+    background: linear-gradient(135deg, #dc3545, #a71d2a);
+    color: white;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: bold;
+    width: 100%;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: 0.3s;
+    
+    /* Ajuste de Alinhamento */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px; /* Espaço entre ícone e texto */
+    line-height: 1;
+}
+
+/* Ajuste fino para o ícone de envio */
+.btn-enviar i, 
+.btn-enviar svg {
+    display: flex;
+    align-items: center;
+    margin-top: 2px; /* Empurra o aviãozinho um pouco para baixo */
+}
+
+.btn-enviar:hover {
+    background: #c82333;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(220, 53, 69, 0.4);
+}
+/* --- ALERTAS --- */
+.alert {
+    padding: 12px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    width: 100%;
+    max-width: 600px;
+}
+
+.alert-danger {
+    background: rgba(220, 53, 69, 0.2);
+    color: #f8d7da;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.alert-success {
+    background: rgba(40, 167, 69, 0.2);
+    color: #d4edda;
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}

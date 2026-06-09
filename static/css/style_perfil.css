@@ -1,0 +1,121 @@
+/* Substitua as classes correspondentes no seu arquivo .css */
+
+:root {
+    --gold: #ffc107;
+    --glass-bg: rgba(17, 20, 24, 0.85); /* Escurecido para destacar o texto */
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --text-main: #ffffff;
+    --text-dim: #b0b3b8;
+}
+
+/* Card Principal do Perfil */
+.header-perfil {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    margin-bottom: 50px;
+}
+
+/* Foto com anel de destaque */
+.foto-container {
+    position: relative;
+}
+
+.foto-perfil {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid transparent;
+    background: linear-gradient(#111, #111) padding-box, 
+                linear-gradient(135deg, var(--gold), #ff8c00) border-box; /* Borda gradiente */
+}
+
+/* Organização das infos */
+.info-principal h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.stats-container {
+    display: flex;
+    gap: 40px;
+    margin: 20px 0;
+}
+
+.stat-num {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    display: block;
+}
+
+/* Botão de Seguir mais robusto */
+.btn-seguindo {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 12px 25px;
+    font-weight: 600;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.btn-seguindo:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--gold);
+}
+
+/* Rodapé de contatos mais limpo */
+.perfil-info-extra {
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.perfil-info-extra p, .contatos-grid span {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.contatos-grid {
+    display: flex;
+    gap: 30px;
+    margin-top: 15px;
+}
+
+/* Título das Publicações */
+.titulo-sessao {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}

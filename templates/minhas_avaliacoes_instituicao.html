@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nossa Reputação | Portal da Instituição</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_minhas_avaliacoes_instituicao.css') }}">
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+    <canvas id="canvas-bg"></canvas>
+
+    <a href="{{ url_for('login_instituicao.painel_instituicao') }}" class="btn-voltar">
+        <i data-lucide="arrow-left"></i>
+        Voltar ao Painel
+    </a>
+
+    <div class="container">
+
+        <h1>Nossa Reputação</h1>
+
+        <!-- MÉDIAS -->
+        <div class="section">
+
+            <h2>
+                <i data-lucide="line-chart"></i>
+                Avaliação dos Palestrantes
+            </h2>
+
+            <div class="grid-reputacao">
+
+                <div class="card-nota">
+                    <div class="icone-card">
+                        <i data-lucide="sparkles"></i>
+                    </div>
+
+                    <h3>Qualidade da Recepção</h3>
+
+                    <div class="numero-nota">
+                        {{ "%.1f"|format(medias.conduta) if medias.conduta else '---' }}
+                    </div>
+
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                </div>
+
+                <div class="card-nota">
+                    <div class="icone-card">
+                        <i data-lucide="building-2"></i>
+                    </div>
+
+                    <h3>Organização Geral</h3>
+
+                    <div class="numero-nota">
+                        {{ "%.1f"|format(medias.conteudo) if medias.conteudo else '---' }}
+                    </div>
+
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                </div>
+
+                <div class="card-nota">
+                    <div class="icone-card">
+                        <i data-lucide="badge-check"></i>
+                    </div>
+
+                    <h3>Cumprimento do Acordo</h3>
+
+                    <div class="numero-nota">
+                        {{ "%.1f"|format(medias.combinado) if medias.combinado else '---' }}
+                    </div>
+
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- FEEDBACKS -->
+        <div class="section">
+
+            <h2>
+                <i data-lucide="messages-square"></i>
+                Feedbacks Recebidos
+            </h2>
+
+            {% if feedbacks %}
+
+                <div class="feedbacks-container">
+
+                    {% for fb in feedbacks %}
+
+                    <div class="card-feedback">
+
+                        <div class="feedback-topo">
+
+                            <div class="usuario-feedback">
+
+                                <div class="avatar-feedback">
+                                    <i data-lucide="user"></i>
+                                </div>
+
+                                <div>
+                                    <strong>{{ fb.nome_palestrante }}</strong>
+
+                                    <span>
+                                        {{ fb.data_palestra }}
+                                    </span>
+                                </div>
+
+                            </div>
+
+                            <div class="media-feedback">
+                                ⭐ {{ "%.1f"|format((fb.nota_recepcao|int + fb.nota_organizacao|int + fb.nota_combinado|int) / 3) }}
+                            </div>
+
+                        </div>
+
+                        <div class="texto-feedback">
+
+                            {% if fb.comentario %}
+                                "{{ fb.comentario }}"
+                            {% else %}
+                                "O palestrante não deixou um feedback em texto, apenas notas."
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-message">
+                    <i data-lucide="message-circle-off"></i>
+
+                    <p>
+                        Sua instituição ainda não recebeu feedbacks.
+                    </p>
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
+
+    <script>
+        lucide.createIcons();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,145 @@
+
+
+:root {
+    --primary: #00d2ff;
+    --bg-dark: #0b0f1a;
+    --card-bg: rgba(15, 23, 42, 0.7); /* Fundo mais escuro para reduzir o efeito névoa */
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --text-main: #f8fafc;
+    --text-dim: #94a3b8;
+    --input-bg: rgba(0, 0, 0, 0.2);
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    width: 100vw;  /* Força a largura total da janela */
+    height: 100vh;
+}
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;  /* fica atrás de tudo */
+}
+.container {
+    width: 100%;
+    max-width: 500px;  /* limita a largura e centraliza */
+}
+
+.card-form {
+    background: var(--card-bg);
+    backdrop-filter: blur(8px); /* Reduzido de 16px para 8px para tirar a névoa */
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 25px 35px; /* Reduzido para o card não ficar gigante */
+    width: 100%;
+    max-width: 500px; /* Card mais estreito */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+h1 {
+    font-size: 1.6rem;
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--text-main);
+}
+
+.palestrante-info {
+    background: rgba(0, 210, 255, 0.05);
+    border: 1px solid rgba(0, 210, 255, 0.2);
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+/* Espaçamento dos Rótulos */
+.form-group {
+    margin-bottom: 15px; /* Espaço entre cada bloco do formulário */
+}
+
+label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    margin-bottom: 8px; /* Espaço para o label não "entrar" no input */
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+input, textarea {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 12px;
+    color: white;
+    font-size: 0.95rem;
+    transition: 0.3s;
+}
+
+input:focus {
+    border-color: var(--primary);
+    background: rgba(0, 0, 0, 0.5);
+    outline: none;
+}
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.button-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+button[type="submit"] {
+    background: var(--primary);
+    color: #000;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button[type="submit"]:hover {
+    filter: brightness(1.2);
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    border: 1px solid var(--glass-border);
+}
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 480px) {
+            .button-group { grid-template-columns: 1fr; }
+            .card-form { padding: 25px; }
+        }
+    

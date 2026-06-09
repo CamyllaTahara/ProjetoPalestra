@@ -1,0 +1,196 @@
+#canvas-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { 
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+    background: #0a0a0a; /* Fundo para as partículas */
+    color: #fff; 
+    padding: 20px;
+    line-height: 1.6;
+}
+
+/* Container principal */
+.container { 
+    max-width: 1000px; 
+    margin: 0 auto; 
+    position: relative;
+    z-index: 1;
+}
+
+/* Cabeçalho */
+.header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 40px; 
+    background: rgba(255, 255, 255, 0.03);
+    padding: 20px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.header h1 { font-size: 24px; color: #fff; }
+
+.btn-voltar { 
+    color: rgba(255, 255, 255, 0.6) !important; 
+    text-decoration: none; 
+    font-size: 14px;
+    transition: 0.3s;
+}
+.btn-voltar:hover { color: #fff !important; transform: translateX(-3px); }
+
+/* Títulos das Seções */
+h2 { 
+    color: #00d2ff; 
+    font-size: 18px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+h2::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(0, 210, 255, 0.3), transparent);
+}
+
+/* Grid de Usuários */
+.grid-usuarios { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+    gap: 25px; 
+}
+
+/* CARD GLASSMORPHISM */
+.card-usuario { 
+    background: rgba(255, 255, 255, 0.03); 
+    padding: 30px 20px; 
+    border-radius: 20px; 
+    text-align: center; 
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.card-usuario:hover { 
+    transform: translateY(-10px); 
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(0, 210, 255, 0.4);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Avatares */
+.avatar-lg { 
+    width: 80px; 
+    height: 80px; 
+    border-radius: 50%; 
+    background: #4CAF50; /* Verde para Palestrantes */
+    color: #fff; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 32px; 
+    margin: 0 auto 15px; 
+    font-weight: bold; 
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+}
+
+.avatar-inst { 
+    background: #00d2ff; /* Azul para Instituições */
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+}
+
+/* Textos do Card */
+.nome-usuario { 
+    font-size: 18px; 
+    font-weight: bold; 
+    color: #fff; 
+    margin-bottom: 5px; 
+    display: block; 
+}
+
+.tipo-label { 
+    font-size: 11px; 
+    color: #888; 
+    text-transform: uppercase; 
+    letter-spacing: 1px; 
+}
+
+/* Botão Ver Perfil */
+.btn-perfil { 
+    display: inline-block; 
+    margin-top: 20px; 
+    padding: 10px 25px; 
+    background: rgba(255, 255, 255, 0.05); 
+    color: #fff; 
+    text-decoration: none; 
+    border-radius: 12px; 
+    font-size: 13px; 
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: 0.3s; 
+}
+
+.btn-perfil:hover { 
+    background: #fff; 
+    color: #000; 
+    transform: scale(1.05);
+}
+
+.btn-perfil-inst:hover {
+    background: #00d2ff;
+    border-color: #00d2ff;
+    color: #000;
+}
+
+.info-container {
+    margin: 20px 0;
+    text-align: left;
+    display: inline-block; 
+    width: 100%;
+}
+
+.info-item {
+    font-size: 13px;
+    color: #ccc;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    border-left: 3px solid rgba(0, 210, 255, 0.3);
+    display: flex;
+    justify-content: space-between; 
+    transition: 0.3s;
+    flex-wrap: wrap;
+}
+
+.info-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 3px solid #00d2ff; 
+}
+
+.info-item strong {
+    color: #00d2ff; 
+    font-weight: 600;
+    margin-right: 10px;
+}
+
+.info-item span {
+    white-space: nowrap;     
+    max-width: 150px;         
+    display: inline-block;
+    vertical-align: bottom;
+    text-align: right;     
+}
